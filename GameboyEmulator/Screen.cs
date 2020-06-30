@@ -5,7 +5,7 @@ using SFML.Window;
 
 namespace GameboyEmulatorScreen
 {
-    struct Colors
+    readonly struct Colors
     {
         static public Color BLACK = new Color(8, 24, 32);
         static public Color DARK_GRAY = new Color(52, 104, 86);

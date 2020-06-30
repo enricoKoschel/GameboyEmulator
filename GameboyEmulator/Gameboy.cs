@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Reflection.Metadata;
 
 namespace GameboyEmulatorCore
 {
@@ -17,6 +16,15 @@ namespace GameboyEmulatorCore
         byte[] highRam;         //0xFF80-0xFFFE
         byte interuptEnableReg; //0xFFFF
 
-
+        public Gameboy()
+        {
+            cartridgeRom = new byte[0x8000];
+            videoRam = new byte[0x2000];
+            cartridgeRam = new byte[0x2000];
+            workRam = new byte[0x2000];
+            spriteAtributes = new byte[0x100];
+            ioPorts = new byte[0x80];
+            highRam = new byte[0x7F];
+        }
     }
 }
