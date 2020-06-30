@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 
 namespace GameboyEmulatorCore
 {
@@ -16,6 +17,8 @@ namespace GameboyEmulatorCore
         byte[] highRam;         //0xFF80-0xFFFE
         byte interuptEnableReg; //0xFFFF
 
+        string bootRomFilePath = "";
+
         public Gameboy()
         {
             cartridgeRom = new byte[0x8000];
@@ -25,6 +28,11 @@ namespace GameboyEmulatorCore
             spriteAtributes = new byte[0x100];
             ioPorts = new byte[0x80];
             highRam = new byte[0x7F];
+        }
+
+        public void LoadGame()
+        {
+            File.ReadAllBytes("");
         }
     }
 }
