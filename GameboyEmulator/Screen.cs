@@ -22,11 +22,11 @@ namespace GameboyEmulatorScreen
 
         private readonly RectangleShape[,] screen;
         private readonly RenderWindow window;
-
+        
         public Screen()
         {
             screen = new RectangleShape[SCREEN_GAME_WIDTH, SCREEN_GAME_HEIGHT];
-            window = new RenderWindow(new VideoMode(SCREEN_DRAW_WIDTH, SCREEN_DRAW_HEIGHT), "GameBoy Emulator");
+            window = new RenderWindow(new VideoMode(SCREEN_DRAW_WIDTH, SCREEN_DRAW_HEIGHT), "GameBoy Emulator", Styles.Close);
             window.SetActive();
             InitializeScreen();
 

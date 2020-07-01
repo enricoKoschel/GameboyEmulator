@@ -1,6 +1,5 @@
-﻿using System;
-using GameboyEmulatorScreen;
-using GameboyEmulatorCore;
+﻿using GameboyEmulatorScreen;
+using GameboyEmulatorCPU;
 
 namespace GameboyEmulatorMain
 {
@@ -9,13 +8,13 @@ namespace GameboyEmulatorMain
         static void Main(string[] args)
         {
             Screen screen = new Screen();
-            Gameboy emulator = new Gameboy();
+            CPU emulator = new CPU();
 
-            emulator.LoadGame();
+            emulator.Start();
 
             while (screen.IsOpen)
             {
-                emulator.updateCPU();
+                emulator.Update();
                 screen.DrawScreen();
             }            
         }
