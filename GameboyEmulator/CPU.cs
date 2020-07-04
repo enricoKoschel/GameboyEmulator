@@ -4,6 +4,15 @@ using GameboyEmulatorMemory;
 
 namespace GameboyEmulatorCPU
 {
+    enum JumpConditions
+    {
+        NZ,
+        Z,
+        NC,
+        C,
+        NoCondition
+    }
+
     class CPU
     {
         //Modules
@@ -173,6 +182,11 @@ namespace GameboyEmulatorCPU
                  
             switch (opcode)
             {
+                case 0x20:
+                    {
+                        //JR NZ,n
+                        return relativeConditionalJump(JumpConditions.NZ);
+                    }
                 case 0x21:
                     {
                         //LD HL,nn
@@ -323,6 +337,71 @@ namespace GameboyEmulatorCPU
             byte lo = memory.Read(programCounter++);
             byte hi = memory.Read(programCounter++);
             return MakeWord(hi, lo);
+        }
+
+        //Jump funtions
+        private int relativeConditionalJump(JumpConditions condition)
+        {
+            //Signed relative Jump amount
+            sbyte relativeJumpAmount = (sbyte)memory.Read(programCounter++);
+            bool shouldJump = false;
+
+            switch (condition)
+            {
+                case JumpConditions.NZ:
+                    {
+                        //Non-Zero
+                        shouldJump = !ZeroFlag;
+                        break;
+                    }
+                case JumpConditions.Z:
+                    {
+                        //Zero
+                        shouldJump = ZeroFlag;
+                        break;
+                    }
+                case JumpConditions.NC:
+                    {
+                        //No Carry
+                        shouldJump = !CarryFlag;
+                        break;
+                    }
+                case JumpConditions.C:
+                    {
+                        //Carry
+                        shouldJump = CarryFlag;
+                        break;
+                    }
+                case JumpConditions.NoCondition:
+                    {
+                        //Always Jump
+                        shouldJump = true;
+                        break;
+                    }
+            }
+
+            if (shouldJump)
+            {
+                programCounter = AddSignedToUnsigned(programCounter, relativeJumpAmount);
+                return 12;
+            }
+            else
+            {
+                return 8;
+            }
+        }
+
+        //Add functions
+        private ushort AddSignedToUnsigned(ushort unsingedWord, sbyte signedByte)
+        {
+            if(signedByte > 0)
+            {
+                return (ushort)(unsingedWord + (ushort)signedByte);
+            }
+            else
+            {
+                return (ushort)(unsingedWord - (ushort)(signedByte * -1));
+            }
         }
 
         //Bit-wise functions
