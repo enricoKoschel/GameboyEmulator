@@ -1,10 +1,20 @@
 ﻿using System;
+using System.Collections;
 using System.IO;
+using System.Linq;
 
 namespace GameboyEmulatorMemory
 {
     class Memory
     {
+        //Logo Data
+        private static readonly byte[] LOGO_DATA = new byte[]
+        { 
+            0xCE, 0xED, 0x66, 0x66, 0xCC, 0x0D, 0x00, 0x0B, 0x03, 0x73, 0x00, 0x83, 0x00, 0x0C, 0x00, 0x0D,
+            0x00, 0x08, 0x11, 0x1F, 0x88, 0x89, 0x00, 0x0E, 0xDC, 0xCC, 0x6E, 0xE6, 0xDD, 0xDD, 0xD9, 0x99,
+            0xBB, 0xBB, 0x67, 0x63, 0x6E, 0x0E, 0xEC, 0xCC, 0xDD, 0xDC, 0x99, 0x9F, 0xBB, 0xB9, 0x33, 0x3E
+        };
+
         //Memory Map 
         private byte[] cartridgeRomWithBanks;       //Complete cartridge with all banks
 
@@ -17,7 +27,7 @@ namespace GameboyEmulatorMemory
                                                     //0xFEA0-0xFEFF (unused)
         private readonly byte[] ioPorts;            //0xFF00-0xFF7F
         private readonly byte[] highRam;            //0xFF80-0xFFFE
-        private byte interuptEnableReg;             //0xFFFF
+        private byte interruptEnableReg;            //0xFFFF
 
         private const int CARTRIDGE_ROM_BASE_ADDRESS = 0x0000;
         private const int VIDEO_RAM_BASE_ADDRESS = 0x8000;
@@ -28,6 +38,7 @@ namespace GameboyEmulatorMemory
         private const int UNUSED_BASE_ADDRESS = 0xFEA0;
         private const int IO_PORTS_BASE_ADDRESS = 0xFF00;
         private const int HIGH_RAM_BASE_ADDRESS = 0xFF80;
+        private const int INTERRUPT_ENABLE_REG_ADDRESS = 0xFFFF;
 
         //File paths
         private const string BOOT_ROM_FILE_PATH = "../../../roms/boot.gb";
@@ -47,7 +58,16 @@ namespace GameboyEmulatorMemory
         {
             cartridgeRom = File.ReadAllBytes(BOOT_ROM_FILE_PATH);
 
+            //Resize for Cartridge Header
+            Array.Resize(ref cartridgeRom, 0x150);
+
             cartridgeRomWithBanks = File.ReadAllBytes(gameRomFilePath);
+
+            //Copy Cartridge Header
+            for (int i = 0x100; i < 0x150; i++)
+            {
+                cartridgeRom[i] = cartridgeRomWithBanks[i];
+            }
         }
 
         public void DisableBootRom()
@@ -66,8 +86,12 @@ namespace GameboyEmulatorMemory
 
             if (IsBetween(address, CARTRIDGE_ROM_BASE_ADDRESS, VIDEO_RAM_BASE_ADDRESS))
             {
-                //Cartridge ROM
                 return cartridgeRom[address];
+            }
+            else if (IsBetween(address, HIGH_RAM_BASE_ADDRESS, INTERRUPT_ENABLE_REG_ADDRESS))
+            {
+                //High Ram
+                return highRam[address - HIGH_RAM_BASE_ADDRESS];
             }
             throw new NotImplementedException($"Read Memory location: 0x{address:X} not implemented yet!"); //TODO - implement read memory
         }
@@ -90,6 +114,21 @@ namespace GameboyEmulatorMemory
                 //Video RAM
                 videoRam[address - VIDEO_RAM_BASE_ADDRESS] = data;
             }
+            else if (IsBetween(address, IO_PORTS_BASE_ADDRESS, HIGH_RAM_BASE_ADDRESS))
+            {
+                //IO Ports
+                //TODO - Implement IO Ports
+            }
+            else if (IsBetween(address, HIGH_RAM_BASE_ADDRESS, INTERRUPT_ENABLE_REG_ADDRESS))
+            {
+                //High Ram
+                highRam[address - HIGH_RAM_BASE_ADDRESS] = data;
+            }
+            else if (address == 0xFF50)
+            {
+                //Boot Rom done
+                DisableBootRom();
+            }
             else
             {
                 throw new NotImplementedException($"Write Memory location: 0x{address:X} not implemented yet!"); //TODO - implement write memory
@@ -97,6 +136,9 @@ namespace GameboyEmulatorMemory
         }
 
         //Utility functions
+        /// <summary>
+        /// lowerBound is inclusive, upperBound is exclusive
+        /// </summary>
         private bool IsBetween(int number, int lowerBound, int upperBound)
         {
             return (number >= lowerBound && number < upperBound);

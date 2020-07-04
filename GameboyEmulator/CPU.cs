@@ -1,22 +1,21 @@
 ﻿using System;
-using System.Collections.Generic;
 using GameboyEmulatorMemory;
 
 namespace GameboyEmulatorCPU
 {
-    enum JumpConditions
-    {
-        NZ,
-        Z,
-        NC,
-        C,
-        NoCondition
-    }
-
     class CPU
     {
+        enum JumpConditions
+        {
+            NZ,
+            Z,
+            NC,
+            C,
+            NoCondition
+        }
+
         //Modules
-        Memory memory;
+        readonly Memory memory;
 
         //Registers
         private ushort programCounter;
@@ -40,9 +39,8 @@ namespace GameboyEmulatorCPU
             }
             set
             {
-                Tuple<byte, byte> word = BreakWord(value);
-                ARegister = word.Item1;
-                FlagRegister = word.Item2;
+                ARegister = GetHiByte(value);
+                FlagRegister = GetLoByte(value);
             }
         }
         private ushort BCRegister
@@ -53,9 +51,8 @@ namespace GameboyEmulatorCPU
             }
             set
             {
-                Tuple<byte, byte> word = BreakWord(value);
-                BRegister = word.Item1;
-                CRegister = word.Item2;
+                BRegister = GetHiByte(value);
+                CRegister = GetLoByte(value);
             }
         }
         private ushort DERegister
@@ -66,9 +63,8 @@ namespace GameboyEmulatorCPU
             }
             set
             {
-                Tuple<byte, byte> word = BreakWord(value);
-                DRegister = word.Item1;
-                ERegister = word.Item2;
+                DRegister = GetHiByte(value);
+                ERegister = GetLoByte(value);
             }
         }
         private ushort HLRegister
@@ -79,9 +75,8 @@ namespace GameboyEmulatorCPU
             }
             set
             {
-                Tuple<byte, byte> word = BreakWord(value);
-                HRegister = word.Item1;
-                LRegister = word.Item2;
+                HRegister = GetHiByte(value);
+                LRegister = GetLoByte(value);
             }
         }
 
@@ -154,44 +149,86 @@ namespace GameboyEmulatorCPU
             while (cyclesThisFrame < MAX_CPU_CYCLES_PER_FRAME)
             {
                 int cycles = ExecuteOpcode();
-                if (cycles == 0)
-                {
-                    //Boot rom finished, dont update with 0 cycles
-                    //TODO - maybe remove this
-                    continue;
-                }
 
                 cyclesThisFrame += cycles;
             }
         }
-
+        
         private int ExecuteOpcode()
         {
-            byte opcode;
-            try
-            {
-                 opcode = memory.Read(programCounter++);
-            }
-            catch (IndexOutOfRangeException)
-            {
-                //Boot rom finished, disable Boot rom and retry last execution
-                memory.DisableBootRom();
-                programCounter--;
-                return 0;
-            }
-                 
+            byte opcode = memory.Read(programCounter++);
+            
             switch (opcode)
             {
+                case 0x05:
+                    {
+                        //DEC B
+                        BRegister = Decrement(BRegister);
+                        return 4;
+                    }
+                case 0x06:
+                    {
+                        //LD B,n
+                        BRegister = Load8BitImmediate();
+                        return 8;
+                    }
+                case 0x0C:
+                    {
+                        //INC C
+                        CRegister = Increment(CRegister);
+                        return 4;
+                    }
+                case 0x0E:
+                    {
+                        //LD C,n
+                        CRegister = Load8BitImmediate();
+                        return 8;
+                    }
+                case 0x11:
+                    {
+                        //LD DE,nn
+                        DERegister = Load16BitImmediate();
+                        return 12;
+                    }
+                case 0x13:
+                    {
+                        //INC DE
+                        DERegister = Increment(DERegister);
+                        return 8;
+                    }
+                case 0x17:
+                    {
+                        //RLA
+                        ARegister = RotateLeftCarry(ARegister);
+                        return 4;
+                    }
+                case 0x1A:
+                    {
+                        //LD A,(DE)
+                        ARegister = memory.Read(DERegister);
+                        return 8;
+                    }
                 case 0x20:
                     {
                         //JR NZ,n
-                        return relativeConditionalJump(JumpConditions.NZ);
+                        return JumpRelative(JumpConditions.NZ);
                     }
                 case 0x21:
                     {
                         //LD HL,nn
                         HLRegister = Load16BitImmediate();
                         return 12;
+                    }
+                case 0x22:
+                    {
+                        //LD (HL+),A                       
+                        return WriteHLDecrement(ARegister, true);
+                    }
+                case 0x23:
+                    {
+                        //INC HL
+                        HLRegister = Increment(HLRegister);
+                        return 8;
                     }
                 case 0x31:
                     {
@@ -202,9 +239,31 @@ namespace GameboyEmulatorCPU
                 case 0x32:
                     {
                         //LD (HL-),A
-                        memory.Write(HLRegister, ARegister);
-                        HLRegister--;
+                        return WriteHLDecrement(ARegister, false);
+                    }
+                case 0x3E:
+                    {
+                        //LD A,n
+                        ARegister = Load8BitImmediate();
                         return 8;
+                    }
+                case 0x4F:
+                    {
+                        //LD C,A
+                        CRegister = ARegister;
+                        return 4;
+                    }
+                case 0x77:
+                    {
+                        //LD (HL),A
+                        memory.Write(HLRegister, ARegister);
+                        return 8;
+                    }
+                case 0x7B:
+                    {
+                        //LD A,E
+                        ARegister = ERegister;
+                        return 4;
                     }
                 case 0xAF:
                     {
@@ -212,13 +271,51 @@ namespace GameboyEmulatorCPU
                         XORintoA(ARegister);
                         return 4;
                     }
+                case 0xC1:
+                    {
+                        //POP BC
+                        BCRegister = PopStack();
+                        return 12;
+                    }
+                case 0xC5:
+                    {
+                        //PUSH BC
+                        PushStack(BCRegister);
+                        return 16;
+                    }
+                case 0xC9:
+                    {
+                        //RET
+                        return ReturnSubroutine();
+                    }
                 case 0xCB:
                     {
                         //Extended Opcode
                         return ExecuteExtendedOpcode();
-                    }                    
+                    }
+                case 0xCD:
+                    {
+                        //CALL nn
+                        return CallSubroutine();
+                    }
+                case 0xE0:
+                    {
+                        //LD (0xFF00+n),A
+                        return WriteIOPortsImmediateOffset(ARegister);
+                    }
+                case 0xE2:
+                    {
+                        //LD (0xFF00+C),A
+                        return WriteIOPortsCRegisterOffset(ARegister);
+                    }
+                case 0xFE:
+                    {
+                        //CP n
+                        SubtractByteFromAReg(Load8BitImmediate(), true);
+                        return 8;
+                    }
                 default:
-                    throw new NotImplementedException($"Opcode: 0x{opcode:X} not implemented yet!"); //TODO - implement opcodes
+                    throw new NotImplementedException($"Opcode 0x{opcode:X} not implemented yet!"); //TODO - implement opcodes
             }             
         }
         
@@ -228,14 +325,20 @@ namespace GameboyEmulatorCPU
 
             switch (opcode)
             {
+                case 0x11:
+                    {
+                        //RL C
+                        CRegister = RotateLeftCarry(CRegister);
+                        return 8;
+                    }
                 case 0x7C:
                     {
                         //BIT 7,H
-                        Bit(HRegister, 7);
+                        GameboyBit(HRegister, 7);
                         return 8;
                     }
                 default:
-                    throw new NotImplementedException($"Extended Opcode: 0xCB{opcode:X} not implemented yet!"); //TODO - implement extended opcodes
+                    throw new NotImplementedException($"Extended Opcode 0xCB{opcode:X} not implemented yet!"); //TODO - implement extended opcodes
             }
         }
 
@@ -246,15 +349,17 @@ namespace GameboyEmulatorCPU
         {
             return (ushort)((hi << 8) | lo);
         }
-        private Tuple<byte, byte> BreakWord(ushort word)
-        {
-            byte hi = (byte)(word >> 8);
-            byte lo = (byte)(word & 0xFF);
 
-            return new Tuple<byte, byte>(hi, lo);
+        private byte GetLoByte(ushort word)
+        {
+            return (byte)(word & 0xFF);
+        }
+        private byte GetHiByte(ushort word)
+        {
+            return (byte)(word >> 8);
         }
         
-        //Bit functions
+        //Bit-wise functions
         private bool GetBit(byte data, int bit)
         {
             if (bit > 7 || bit < 0) throw new IndexOutOfRangeException($"Cannot access Bit {bit} of a Byte!");
@@ -295,11 +400,37 @@ namespace GameboyEmulatorCPU
                 data &= (byte)~mask;
             }
         }
-        
-        //Gameboy Bit functions
-        private void Bit(byte data, int bit)
+        private void XORintoA(byte data)
+        {
+            ARegister ^= data;
+            SetFlags(ARegister == 0, 0, 0, 0);
+        }
+        private void GameboyBit(byte data, int bit)
         {
             SetFlags(!GetBit(data, bit), 0, 1, "");
+        }
+        private byte RotateLeftCarry(byte data)
+        {
+            bool oldCarryFlag = CarryFlag;
+            CarryFlag = GetBit(data, 7);
+
+            data <<= 1;
+            SetBit(ref data, 0, oldCarryFlag);
+
+            SetFlags(data == 0, 0, 0, "");
+
+            return data;
+        }
+        private byte RotateLeft(byte data)
+        {
+            bool bit7 = GetBit(data, 7);
+
+            data <<= 1;
+            SetBit(ref data, 0, bit7);
+
+            SetFlags(data == 0, 0, 0, bit7);
+
+            return data;
         }
 
         //Bool functions
@@ -338,9 +469,31 @@ namespace GameboyEmulatorCPU
             byte hi = memory.Read(programCounter++);
             return MakeWord(hi, lo);
         }
+        private byte Load8BitImmediate()
+        {
+            return memory.Read(programCounter++);
+        }
+        private int WriteIOPortsCRegisterOffset(byte data)
+        {
+            memory.Write((ushort)(0xFF00 + CRegister), data);
+            return 8;
+        }
+        private int WriteIOPortsImmediateOffset(byte data)
+        {
+            memory.Write((ushort)(0xFF00 + memory.Read(programCounter++)), data);
+            return 12;
+        }
+        private int WriteHLDecrement(byte data, bool increment)
+        {
+            memory.Write(HLRegister, data);
+
+            HLRegister += (ushort)(increment ? 1 : -1);
+
+            return 8;
+        }
 
         //Jump funtions
-        private int relativeConditionalJump(JumpConditions condition)
+        private int JumpRelative(JumpConditions condition)
         {
             //Signed relative Jump amount
             sbyte relativeJumpAmount = (sbyte)memory.Read(programCounter++);
@@ -390,8 +543,19 @@ namespace GameboyEmulatorCPU
                 return 8;
             }
         }
+        private int CallSubroutine()
+        {
+            PushStack((ushort)(programCounter + 2));
+            programCounter = Load16BitImmediate();
+            return 24;
+        }
+        private int ReturnSubroutine()
+        {
+            programCounter = PopStack();
+            return 16;
+        }
 
-        //Add functions
+        //Math functions
         private ushort AddSignedToUnsigned(ushort unsingedWord, sbyte signedByte)
         {
             if(signedByte > 0)
@@ -403,12 +567,58 @@ namespace GameboyEmulatorCPU
                 return (ushort)(unsingedWord - (ushort)(signedByte * -1));
             }
         }
-
-        //Bit-wise functions
-        private void XORintoA(byte data)
+        private byte Increment(byte data)
         {
-            ARegister ^= data;
-            SetFlags(ARegister == 0, 0, 0, 0);
+            bool halfCarry = ToBool(((data & 0xF) + 1) & 0x10);
+
+            data++;
+            SetFlags(data == 0, 0, halfCarry, "");
+            return data;
+        }
+        private ushort Increment(ushort data)
+        {
+            return (ushort)(data + 1);
+        }
+        private byte Decrement(byte data)
+        {
+            bool halfCarry = ToBool(((data & 0xF) - 1) & 0x10);
+
+            data--;
+            SetFlags(data == 0, 1, halfCarry, "");
+            return data;
+        }
+        private ushort Decrement(ushort data)
+        {
+            return (ushort)(data - 1);
+        }
+        private void SubtractByteFromAReg(byte data, bool compare)
+        {
+            bool halfCarry = ToBool(((ARegister & 0xF) - (data & 0xF)) & 0x10);
+            bool carry = ToBool((ARegister - data) < 0);
+
+            if (!compare)
+            {
+                ARegister -= data;
+            }           
+
+            SetFlags(ARegister == 0, 1, halfCarry, carry);
+        }
+
+        //Stack functions
+        private void PushStack(ushort data)
+        {
+            byte lo = GetLoByte(data);
+            byte hi = GetHiByte(data);           
+
+            memory.Write(stackPointer--, lo);
+            memory.Write(stackPointer--, hi);
+        }
+        private ushort PopStack()
+        {
+            byte hi = memory.Read(++stackPointer);
+            byte lo = memory.Read(++stackPointer);
+
+            return MakeWord(hi, lo);
         }
     }
 }
