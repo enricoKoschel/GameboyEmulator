@@ -50,7 +50,7 @@ namespace GameboyEmulatorScreen
                     screen[i, j].Size = new Vector2f(SCREEN_SCALE, SCREEN_SCALE);
                     screen[i, j].Position = new Vector2f(i * SCREEN_SCALE, j * SCREEN_SCALE);
 
-                    //Debug pattern
+                    //TODO - Remove Debug pattern
                     switch ((i % 4) + (j % 4))
                     {
                         case 0:

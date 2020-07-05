@@ -160,6 +160,12 @@ namespace GameboyEmulatorCPU
             
             switch (opcode)
             {
+                case 0x04:
+                    {
+                        //INC B
+                        BRegister = Increment(BRegister);
+                        return 4;
+                    }
                 case 0x05:
                     {
                         //DEC B
@@ -176,6 +182,12 @@ namespace GameboyEmulatorCPU
                     {
                         //INC C
                         CRegister = Increment(CRegister);
+                        return 4;
+                    }
+                case 0x0D:
+                    {
+                        //DEC C
+                        CRegister = Decrement(CRegister);
                         return 4;
                     }
                 case 0x0E:
@@ -196,16 +208,45 @@ namespace GameboyEmulatorCPU
                         DERegister = Increment(DERegister);
                         return 8;
                     }
+                case 0x15:
+                    {
+                        //DEC D
+                        DRegister = Decrement(DRegister);
+                        return 4;
+                    }
+                case 0x16:
+                    {
+                        //LD D,n
+                        DRegister = Load8BitImmediate();
+                        return 8;
+                    }
                 case 0x17:
                     {
                         //RLA
                         ARegister = RotateLeftCarry(ARegister);
                         return 4;
                     }
+                case 0x18:
+                    {
+                        //JR n
+                        return JumpRelative(JumpConditions.NoCondition);
+                    }
                 case 0x1A:
                     {
                         //LD A,(DE)
                         ARegister = memory.Read(DERegister);
+                        return 8;
+                    }
+                case 0x1D:
+                    {
+                        //DEC E
+                        ERegister = Decrement(ERegister);
+                        return 4;
+                    }
+                case 0x1E:
+                    {
+                        //LD E,n
+                        ERegister = Load8BitImmediate();
                         return 8;
                     }
                 case 0x20:
@@ -230,6 +271,23 @@ namespace GameboyEmulatorCPU
                         HLRegister = Increment(HLRegister);
                         return 8;
                     }
+                case 0x24:
+                    {
+                        //INC H
+                        HRegister = Increment(HRegister);
+                        return 4;
+                    }
+                case 0x28:
+                    {
+                        //JR Z,n
+                        return JumpRelative(JumpConditions.Z);
+                    }
+                case 0x2E:
+                    {
+                        //LD L,n
+                        LRegister = Load8BitImmediate();
+                        return 8;
+                    }
                 case 0x31:
                     {
                         //LD SP,nn
@@ -240,6 +298,12 @@ namespace GameboyEmulatorCPU
                     {
                         //LD (HL-),A
                         return WriteHLDecrement(ARegister, false);
+                    }
+                case 0x3D:
+                    {
+                        //DEC A
+                        ARegister = Decrement(ARegister);
+                        return 4;
                     }
                 case 0x3E:
                     {
@@ -253,11 +317,29 @@ namespace GameboyEmulatorCPU
                         CRegister = ARegister;
                         return 4;
                     }
+                case 0x57:
+                    {
+                        //LD D,A
+                        DRegister = ARegister;
+                        return 4;
+                    }
+                case 0x67:
+                    {
+                        //LD H,A
+                        HRegister = ARegister;
+                        return 4;
+                    }
                 case 0x77:
                     {
                         //LD (HL),A
                         memory.Write(HLRegister, ARegister);
                         return 8;
+                    }
+                case 0x78:
+                    {
+                        //LD A,B
+                        ARegister = BRegister;
+                        return 4;
                     }
                 case 0x7B:
                     {
@@ -265,11 +347,41 @@ namespace GameboyEmulatorCPU
                         ARegister = ERegister;
                         return 4;
                     }
+                case 0x7C:
+                    {
+                        //LD A,H
+                        ARegister = HRegister;
+                        return 4;
+                    }
+                case 0x7D:
+                    {
+                        //LD A,L
+                        ARegister = LRegister;
+                        return 4;
+                    }
+                case 0x86:
+                    {
+                        //ADD A,(HL)
+                        AddByteToAReg(memory.Read(HLRegister));
+                        return 8;
+                    }
+                case 0x90:
+                    {
+                        //SUB B
+                        SubtractByteFromAReg(BRegister, false);
+                        return 4;
+                    }
                 case 0xAF:
                     {
                         //XOR A
                         XORintoA(ARegister);
                         return 4;
+                    }
+                case 0xBE:
+                    {
+                        //CP (HL)
+                        SubtractByteFromAReg(memory.Read(HLRegister), true);
+                        return 8;
                     }
                 case 0xC1:
                     {
@@ -307,6 +419,18 @@ namespace GameboyEmulatorCPU
                     {
                         //LD (0xFF00+C),A
                         return WriteIOPortsCRegisterOffset(ARegister);
+                    }
+                case 0xEA:
+                    {
+                        //LD (nn),A
+                        memory.Write(Load16BitImmediate(), ARegister);
+                        return 16;
+                    }
+                case 0xF0:
+                    {
+                        //LD A,(0xFF00+n)
+                        ARegister = memory.Read((ushort)(0xFF00 + Load8BitImmediate()));
+                        return 12;
                     }
                 case 0xFE:
                     {
@@ -595,13 +719,22 @@ namespace GameboyEmulatorCPU
         {
             bool halfCarry = ToBool(((ARegister & 0xF) - (data & 0xF)) & 0x10);
             bool carry = ToBool((ARegister - data) < 0);
+                   
+            SetFlags((ARegister - data) == 0, 1, halfCarry, carry);
 
             if (!compare)
             {
                 ARegister -= data;
-            }           
+            }
+        }
+        private void AddByteToAReg(byte data)
+        {
+            bool halfCarry = ToBool(((ARegister & 0xF) + (data & 0xF)) & 0x10);
+            bool carry = ToBool((ARegister + data) > 255);
 
-            SetFlags(ARegister == 0, 1, halfCarry, carry);
+            ARegister += data;
+
+            SetFlags(ARegister == 0, 0, halfCarry, carry);
         }
 
         //Stack functions
