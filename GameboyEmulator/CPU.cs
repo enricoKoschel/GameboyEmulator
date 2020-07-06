@@ -1,4 +1,5 @@
 ﻿using System;
+using GameboyEmulatorGraphics;
 using GameboyEmulatorMemory;
 
 namespace GameboyEmulatorCPU
@@ -16,6 +17,7 @@ namespace GameboyEmulatorCPU
 
         //Modules
         readonly Memory memory;
+        readonly Graphics graphics;
 
         //Registers
         private ushort programCounter;
@@ -91,7 +93,7 @@ namespace GameboyEmulatorCPU
             }
             set
             {
-                SetBit(ref FlagRegister, 7, value);
+                FlagRegister = SetBit(FlagRegister, 7, value);
             }
         }
         private bool SubtractFlag
@@ -102,7 +104,7 @@ namespace GameboyEmulatorCPU
             }
             set
             {
-                SetBit(ref FlagRegister, 6, value);
+                FlagRegister = SetBit(FlagRegister, 6, value);
             }
         }
         private bool HalfCarryFlag
@@ -113,7 +115,7 @@ namespace GameboyEmulatorCPU
             }
             set
             {
-                SetBit(ref FlagRegister, 5, value);
+                FlagRegister = SetBit(FlagRegister, 5, value);
             }
         }
         private bool CarryFlag
@@ -124,7 +126,7 @@ namespace GameboyEmulatorCPU
             }
             set
             {
-                SetBit(ref FlagRegister, 4, value);
+                FlagRegister = SetBit(FlagRegister, 4, value);
             }
         }
 
@@ -135,6 +137,7 @@ namespace GameboyEmulatorCPU
         {
             //Initialize modules
             memory = new Memory();
+            graphics = new Graphics(memory, this);
         }       
 
         public void Start()
@@ -147,10 +150,11 @@ namespace GameboyEmulatorCPU
             int cyclesThisFrame = 0;
 
             while (cyclesThisFrame < MAX_CPU_CYCLES_PER_FRAME)
-            {
+            {         
                 int cycles = ExecuteOpcode();
-
+                
                 cyclesThisFrame += cycles;
+                graphics.Update(cycles);
             }
         }
         
@@ -484,7 +488,7 @@ namespace GameboyEmulatorCPU
         }
         
         //Bit-wise functions
-        private bool GetBit(byte data, int bit)
+        public bool GetBit(byte data, int bit)
         {
             if (bit > 7 || bit < 0) throw new IndexOutOfRangeException($"Cannot access Bit {bit} of a Byte!");
             return ToBool(((data >> bit) & 1));
@@ -494,7 +498,7 @@ namespace GameboyEmulatorCPU
             if (bit > 15 || bit < 0) throw new IndexOutOfRangeException($"Cannot access Bit {bit} of a Word!");
             return ToBool(((data >> bit) & 1));
         }
-        private void SetBit(ref byte data, int bit, bool state)
+        public byte SetBit(byte data, int bit, bool state)
         {
             if (bit > 7 || bit < 0) throw new IndexOutOfRangeException($"Cannot access Bit {bit} of a Byte!");
             
@@ -508,8 +512,10 @@ namespace GameboyEmulatorCPU
             {
                 data &= (byte)~mask;
             }
+
+            return data;
         }
-        private void SetBit(ref ushort data, int bit, bool state)
+        private ushort SetBit(ushort data, int bit, bool state)
         {
             if (bit > 15 || bit < 0) throw new IndexOutOfRangeException($"Cannot access Bit {bit} of a Word!");
 
@@ -523,6 +529,8 @@ namespace GameboyEmulatorCPU
             {
                 data &= (byte)~mask;
             }
+
+            return data;
         }
         private void XORintoA(byte data)
         {
@@ -539,7 +547,7 @@ namespace GameboyEmulatorCPU
             CarryFlag = GetBit(data, 7);
 
             data <<= 1;
-            SetBit(ref data, 0, oldCarryFlag);
+            data = SetBit(data, 0, oldCarryFlag);
 
             SetFlags(data == 0, 0, 0, "");
 
@@ -550,7 +558,7 @@ namespace GameboyEmulatorCPU
             bool bit7 = GetBit(data, 7);
 
             data <<= 1;
-            SetBit(ref data, 0, bit7);
+            data = SetBit(data, 0, bit7);
 
             SetFlags(data == 0, 0, 0, bit7);
 

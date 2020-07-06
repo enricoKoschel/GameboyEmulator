@@ -84,7 +84,7 @@ namespace GameboyEmulatorMemory
             {
                 //IO Ports
                 //TODO - Implement IO Ports
-                return 0x90;
+                return ioPorts[address - IO_PORTS_BASE_ADDRESS];
             }
             else if (IsBetween(address, HIGH_RAM_BASE_ADDRESS, INTERRUPT_ENABLE_REG_ADDRESS))
             {
@@ -97,7 +97,7 @@ namespace GameboyEmulatorMemory
             }           
         }
 
-        public void Write(ushort address, byte data)
+        public void Write(ushort address, byte data, bool dontReset = false)
         {
             if (address < CARTRIDGE_ROM_BASE_ADDRESS || IsBetween(address, UNUSED_BASE_ADDRESS, IO_PORTS_BASE_ADDRESS))
             {
@@ -125,6 +125,25 @@ namespace GameboyEmulatorMemory
 
                 //IO Ports
                 //TODO - Implement IO Ports
+                if (dontReset)
+                {
+                    ioPorts[address - IO_PORTS_BASE_ADDRESS] = data;
+                }
+
+                switch (address)
+                {
+                    case 0xFF44:
+                        {
+                            //Current Scanline register - Reset when written to
+                            ioPorts[address - IO_PORTS_BASE_ADDRESS] = 0;
+                            break;
+                        }
+                    default:
+                        {
+                            ioPorts[address - IO_PORTS_BASE_ADDRESS] = data;
+                            break;
+                        }
+                }
             }
             else if (IsBetween(address, HIGH_RAM_BASE_ADDRESS, INTERRUPT_ENABLE_REG_ADDRESS))
             {
