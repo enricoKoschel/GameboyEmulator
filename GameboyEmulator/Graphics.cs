@@ -7,8 +7,8 @@ namespace GameboyEmulatorGraphics
     class Graphics
     {
         //Modules
-        Memory memory;
-        LCD lcd;
+        readonly Memory memory;
+        readonly LCD lcd;
 
         public Graphics(Memory memory, CPU cpu)
         {

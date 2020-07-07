@@ -7,8 +7,8 @@ namespace GameboyEmulatorLCD
     class LCD
     {
         //Modules
-        Memory memory;
-        CPU cpu;
+        readonly Memory memory;
+        readonly CPU cpu;
 
         public LCD(Memory memory, CPU cpu)
         {
