@@ -15,7 +15,7 @@ namespace GameboyEmulatorMain
             while (screen.IsOpen)
             {
                 emulator.Update();
-                screen.DrawScreen();
+                screen.Draw();
             }            
         }
     }

@@ -20,6 +20,11 @@ namespace GameboyEmulatorGraphics
         public void Update(int cycles)
         {
             lcd.Update(cycles);
+
+            if (lcd.shouldDrawScanline)
+            {
+
+            }
         }
     }
 }

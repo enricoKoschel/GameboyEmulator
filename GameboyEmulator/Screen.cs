@@ -28,7 +28,7 @@ namespace GameboyEmulatorScreen
             screen = new RectangleShape[SCREEN_GAME_WIDTH, SCREEN_GAME_HEIGHT];
             window = new RenderWindow(new VideoMode(SCREEN_DRAW_WIDTH, SCREEN_DRAW_HEIGHT), "GameBoy Emulator", Styles.Close);
             window.SetActive();
-            InitializeScreen();
+            Initialize();
 
 
             //Assign event handlers
@@ -40,7 +40,7 @@ namespace GameboyEmulatorScreen
             get { return window.IsOpen; }
         }
 
-        private void InitializeScreen()
+        private void Initialize()
         {
             for (int i = 0; i < SCREEN_GAME_WIDTH; i++)
             {
@@ -73,7 +73,7 @@ namespace GameboyEmulatorScreen
             }
         }
 
-        public void DrawScreen()
+        public void Draw()
         {
             if (!window.IsOpen) throw new InvalidOperationException("Cannot draw Screen when Window is closed!");
 

@@ -129,6 +129,13 @@ namespace GameboyEmulatorLCD
             {
                 //VBlank
                 Mode = 1;
+
+                if (CurrentScanline > 153)
+                {
+                    //One Frame done
+                    CurrentScanline = 0;
+                    drawScanlineCounter = 0;
+                }
             }
             else
             {
