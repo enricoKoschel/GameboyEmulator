@@ -127,21 +127,23 @@ namespace GameboyEmulatorMemory
                 {
                     ioPorts[address - IO_PORTS_BASE_ADDRESS] = data;
                 }
-
-                switch (address)
+                else
                 {
-                    case 0xFF44:
-                        {
-                            //Current Scanline register - Reset when written to
-                            ioPorts[address - IO_PORTS_BASE_ADDRESS] = 0;
-                            break;
-                        }
-                    default:
-                        {
-                            ioPorts[address - IO_PORTS_BASE_ADDRESS] = data;
-                            break;
-                        }
-                }
+                    switch (address)
+                    {
+                        case 0xFF44:
+                            {
+                                //Current Scanline register - Reset when written to
+                                ioPorts[address - IO_PORTS_BASE_ADDRESS] = 0;
+                                break;
+                            }
+                        default:
+                            {
+                                ioPorts[address - IO_PORTS_BASE_ADDRESS] = data;
+                                break;
+                            }
+                    }
+                }        
             }
             else if (IsBetween(address, HIGH_RAM_BASE_ADDRESS, INTERRUPT_ENABLE_REG_ADDRESS))
             {

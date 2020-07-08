@@ -22,7 +22,8 @@ namespace GameboyEmulatorLCD
 
         private int drawScanlineCounter = 0;
         public bool shouldDrawScanline = false;
-        private byte CurrentScanline
+        public bool shouldIncreaseScanline = false;
+        public byte CurrentScanline
         {
             get
             {
@@ -59,15 +60,11 @@ namespace GameboyEmulatorLCD
         }
 
         //Flags
-        private bool IsEnabled
+        public bool IsEnabled
         {
             get
             {
                 return cpu.GetBit(ControlRegister, 7);
-            }
-            set
-            {
-                ControlRegister = cpu.SetBit(ControlRegister, 7, value);
             }
         }
         private byte Mode
@@ -87,24 +84,37 @@ namespace GameboyEmulatorLCD
                 StatusRegister |= value;
             }
         }
+        public bool TilesEnabled
+        {
+            get
+            {
+                return cpu.GetBit(ControlRegister, 0);
+            }
+        }
+        public bool SpritesEnabled
+        {
+            get
+            {
+                return cpu.GetBit(ControlRegister, 1);
+            }
+        }
 
         public void Update(int cycles)
         {
-            if (IsEnabled)
-            {
-                drawScanlineCounter += cycles;
-            }
-            else
-            {
-                return;
-            }
+            drawScanlineCounter += cycles;
 
             shouldDrawScanline = false;
+            shouldIncreaseScanline = false;
 
-            if(drawScanlineCounter >= 456)
+            if (drawScanlineCounter >= 456)
             {
-                //Draw Scanline every 456 Clockcycles
-                shouldDrawScanline = true;
+                //Increase Scanline every 456 Clockcycles, only draw if not in VBlank
+                if (CurrentScanline < 144)
+                {
+                    shouldDrawScanline = true;
+                }
+                
+                shouldIncreaseScanline = true;
                 drawScanlineCounter = 0;
             }
 
@@ -123,7 +133,7 @@ namespace GameboyEmulatorLCD
             //    return;
             //}
 
-            //TODO - Interrupts
+            //TODO - Interrupts  
 
             if(CurrentScanline >= 144)
             {
