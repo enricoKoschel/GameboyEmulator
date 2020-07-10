@@ -130,6 +130,14 @@ namespace GameboyEmulatorCPU
             }
         }
 
+        public bool IsRunning
+        {
+            get
+            {
+                return graphics.IsScreenOpen;
+            }
+        }
+
         //Constants
         private const int MAX_CPU_CYCLES_PER_FRAME = 70224;
 

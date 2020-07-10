@@ -20,12 +20,12 @@ namespace GameboyEmulatorScreen
         private const int SCREEN_DRAW_WIDTH = SCREEN_GAME_WIDTH * SCREEN_SCALE;
         private const int SCREEN_DRAW_HEIGHT = SCREEN_GAME_HEIGHT * SCREEN_SCALE;
 
-        private readonly RectangleShape[,] screen;
+        private readonly RectangleShape[,] buffer;
         private readonly RenderWindow window;
         
         public Screen()
         {
-            screen = new RectangleShape[SCREEN_GAME_WIDTH, SCREEN_GAME_HEIGHT];
+            buffer = new RectangleShape[SCREEN_GAME_WIDTH, SCREEN_GAME_HEIGHT];
             window = new RenderWindow(new VideoMode(SCREEN_DRAW_WIDTH, SCREEN_DRAW_HEIGHT), "GameBoy Emulator", Styles.Close);
             window.SetActive();
             Initialize();
@@ -46,27 +46,27 @@ namespace GameboyEmulatorScreen
             {
                 for (int j = 0; j < SCREEN_GAME_HEIGHT; j++)
                 {
-                    screen[i, j] = new RectangleShape();
-                    screen[i, j].Size = new Vector2f(SCREEN_SCALE, SCREEN_SCALE);
-                    screen[i, j].Position = new Vector2f(i * SCREEN_SCALE, j * SCREEN_SCALE);
+                    buffer[i, j] = new RectangleShape();
+                    buffer[i, j].Size = new Vector2f(SCREEN_SCALE, SCREEN_SCALE);
+                    buffer[i, j].Position = new Vector2f(i * SCREEN_SCALE, j * SCREEN_SCALE);
 
                     //TODO - Remove Debug pattern
                     switch ((i % 4) + (j % 4))
                     {
                         case 0:
                         case 4:
-                            screen[i, j].FillColor = Colors.WHITE;
+                            buffer[i, j].FillColor = Colors.WHITE;
                             break;
                         case 1:
                         case 5:
-                            screen[i, j].FillColor = Colors.LIGHT_GRAY;
+                            buffer[i, j].FillColor = Colors.LIGHT_GRAY;
                             break;
                         case 2:
                         case 6:
-                            screen[i, j].FillColor = Colors.DARK_GRAY;
+                            buffer[i, j].FillColor = Colors.DARK_GRAY;
                             break;
                         case 3:
-                            screen[i, j].FillColor = Colors.BLACK;
+                            buffer[i, j].FillColor = Colors.BLACK;
                             break;
                     }                    
                 }
@@ -80,7 +80,7 @@ namespace GameboyEmulatorScreen
             window.Clear();
             window.DispatchEvents();
 
-            foreach (RectangleShape rect in screen)
+            foreach (RectangleShape rect in buffer)
             {
                 window.Draw(rect);
             }

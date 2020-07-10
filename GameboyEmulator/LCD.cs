@@ -1,19 +1,22 @@
 ﻿using System;
 using GameboyEmulatorCPU;
 using GameboyEmulatorMemory;
+using GameboyEmulatorScreen;
 
 namespace GameboyEmulatorLCD
 {
     class LCD
     {
         //Modules
-        readonly Memory memory;
-        readonly CPU cpu;
+        private readonly Memory memory;
+        private readonly CPU cpu;
+        private readonly Screen screen;
 
-        public LCD(Memory memory, CPU cpu)
+        public LCD(Memory memory, CPU cpu, Screen screen)
         {
             this.memory = memory;
             this.cpu = cpu;
+            this.screen = screen;
         }
 
         //Constants
@@ -23,19 +26,25 @@ namespace GameboyEmulatorLCD
         private int drawScanlineCounter = 0;
         public bool shouldDrawScanline = false;
         public bool shouldIncreaseScanline = false;
-        public byte CurrentScanline
+
+        //Registers
+        private byte Mode
         {
             get
             {
-                return memory.Read(0xFF44);
+                return (byte)(StatusRegister & 0b00000011);
             }
             set
             {
-                memory.Write(0xFF44, value, true);
+                if (value > 0x3)
+                {
+                    throw new ArgumentOutOfRangeException("LCD Mode cannot be larger than 3!");
+                }
+
+                StatusRegister &= 0b11111100;
+                StatusRegister |= value;
             }
         }
-
-        //Registers
         private byte ControlRegister
         {
             get
@@ -58,6 +67,103 @@ namespace GameboyEmulatorLCD
                 memory.Write(0xFF41, value);
             }
         }
+        public byte CurrentScanline
+        {
+            get
+            {
+                return memory.Read(0xFF44);
+            }
+            set
+            {
+                memory.Write(0xFF44, value, true);
+            }
+        }
+        public byte ScrollX
+        {
+            get
+            {
+                return memory.Read(0xFF43);
+            }
+            set
+            {
+                memory.Write(0xFF43, value);
+            }
+        }
+        public byte ScrollY
+        {
+            get
+            {
+                return memory.Read(0xFF42);
+            }
+            set
+            {
+                memory.Write(0xFF42, value);
+            }
+        }
+        public byte WindowX
+        {
+            get
+            {
+                return memory.Read(0xFF4B);
+            }
+            set
+            {
+                memory.Write(0xFF4B, value);
+            }
+        }
+        public byte WindowY
+        {
+            get
+            {
+                return (byte)(memory.Read(0xFF4A) - 7);
+            }
+            set
+            {
+                memory.Write(0xFF4A, (byte)(value + 7));
+            }
+        }       
+        public ushort WindowTileMapBaseAddress
+        {
+            get
+            {
+                if(cpu.GetBit(ControlRegister, 6))
+                {
+                    return 0x9C00;
+                }
+                else
+                {
+                    return 0x9800;
+                }
+            }
+        }
+        public ushort BackgroundTileMapBaseAddress
+        {
+            get
+            {
+                if (cpu.GetBit(ControlRegister, 3))
+                {
+                    return 0x9C00;
+                }
+                else
+                {
+                    return 0x9800;
+                }
+            }
+        }
+        public ushort TileDataBaseAddress
+        {
+            get
+            {
+                if (cpu.GetBit(ControlRegister, 4))
+                {
+                    return 0x8000;
+                }
+                else
+                {
+                    return 0x8800;
+                }
+            }
+        }
 
         //Flags
         public bool IsEnabled
@@ -66,24 +172,7 @@ namespace GameboyEmulatorLCD
             {
                 return cpu.GetBit(ControlRegister, 7);
             }
-        }
-        private byte Mode
-        {
-            get
-            {
-                return (byte)(StatusRegister & 0b00000011);
-            }
-            set
-            {
-                if(value > 0x3)
-                {
-                    throw new ArgumentOutOfRangeException("LCD Mode cannot be larger than 3!");
-                }
-
-                StatusRegister &= 0b11111100;
-                StatusRegister |= value;
-            }
-        }
+        }      
         public bool TilesEnabled
         {
             get
@@ -96,6 +185,13 @@ namespace GameboyEmulatorLCD
             get
             {
                 return cpu.GetBit(ControlRegister, 1);
+            }
+        }
+        public bool WindowEnabled
+        {
+            get
+            {
+                return cpu.GetBit(ControlRegister, 5);
             }
         }
 
@@ -145,6 +241,8 @@ namespace GameboyEmulatorLCD
                     //One Frame done
                     CurrentScanline = 0;
                     drawScanlineCounter = 0;
+
+                    screen.Draw();
                 }
             }
             else

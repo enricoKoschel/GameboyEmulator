@@ -1,20 +1,31 @@
 ﻿using GameboyEmulatorMemory;
 using GameboyEmulatorLCD;
 using GameboyEmulatorCPU;
+using GameboyEmulatorScreen;
 
 namespace GameboyEmulatorGraphics
 {
     class Graphics
     {
         //Modules
-        readonly Memory memory; //TODO - Maybe remove this
-        readonly LCD lcd;
+        private readonly Memory memory; //TODO - Maybe remove this
+        private readonly LCD lcd;
+        private readonly Screen screen;
 
         public Graphics(Memory memory, CPU cpu)
         {
             this.memory = memory;
 
-            lcd = new LCD(memory, cpu);
+            screen = new Screen();
+            lcd = new LCD(memory, cpu, screen);
+        }
+
+        public bool IsScreenOpen
+        {
+            get
+            {
+                return screen.IsOpen;
+            }
         }
 
         public void Update(int cycles)
@@ -51,7 +62,7 @@ namespace GameboyEmulatorGraphics
 
         private void RenderTiles()
         {
-
+            
         }
         private void RenderSprites()
         {
