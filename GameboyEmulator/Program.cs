@@ -1,19 +1,17 @@
-﻿using GameboyEmulatorCPU;
-
-namespace GameboyEmulatorMain
+﻿namespace GameboyEmulator
 {
-    class Program
-    {
-        static void Main(string[] args)
-        {
-            CPU emulator = new CPU();
+	static class Program
+	{
+		public static void Main(string[] args)
+		{
+			Cpu emulator = new Cpu();
 
-            emulator.Start();
+			emulator.Start();
 
-            while (emulator.IsRunning)
-            {
-                emulator.Update();
-            }            
-        }
-    }
+			while (emulator.IsRunning)
+			{
+				emulator.Update();
+			}
+		}
+	}
 }

@@ -1,72 +1,43 @@
-﻿using GameboyEmulatorMemory;
-using GameboyEmulatorLCD;
-using GameboyEmulatorCPU;
-using GameboyEmulatorScreen;
-
-namespace GameboyEmulatorGraphics
+﻿namespace GameboyEmulator
 {
-    class Graphics
-    {
-        //Modules
-        private readonly Memory memory; //TODO - Maybe remove this
-        private readonly LCD lcd;
-        private readonly Screen screen;
+	class Graphics
+	{
+		//Modules
+		private readonly Lcd    lcd;
+		private readonly Screen screen;
 
-        public Graphics(Memory memory, CPU cpu)
-        {
-            this.memory = memory;
+		public Graphics(Memory memory, Cpu cpu)
+		{
+			screen = new Screen();
+			lcd    = new Lcd(memory, cpu, screen);
+		}
 
-            screen = new Screen();
-            lcd = new LCD(memory, cpu, screen);
-        }
+		public bool IsScreenOpen => screen.IsOpen;
 
-        public bool IsScreenOpen
-        {
-            get
-            {
-                return screen.IsOpen;
-            }
-        }
+		public void Update(int cycles)
+		{
+			if (!lcd.IsEnabled) return;
 
-        public void Update(int cycles)
-        {
-            if (!lcd.IsEnabled)
-            {
-                return;
-            }
+			lcd.Update(cycles);
 
-            lcd.Update(cycles);
+			if (lcd.shouldDrawScanline) DrawScanline();
 
-            if (lcd.shouldDrawScanline)
-            {
-                DrawScanline();
-            }
+			if (lcd.shouldIncreaseScanline) lcd.CurrentScanline++;
+		}
 
-            if (lcd.shouldIncreaseScanline)
-            {
-                lcd.CurrentScanline++;
-            }           
-        }
+		private void DrawScanline()
+		{
+			if (lcd.TilesEnabled) RenderTiles();
 
-        private void DrawScanline()
-        {
-            if (lcd.TilesEnabled)
-            {
-                RenderTiles();
-            }
-            if (lcd.SpritesEnabled)
-            {
-                RenderSprites();
-            }
-        }
+			if (lcd.SpritesEnabled) RenderSprites();
+		}
 
-        private void RenderTiles()
-        {
-            
-        }
-        private void RenderSprites()
-        {
+		private void RenderTiles()
+		{
+		}
 
-        }
-    }
+		private void RenderSprites()
+		{
+		}
+	}
 }
