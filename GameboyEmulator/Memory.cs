@@ -7,17 +7,16 @@ namespace GameboyEmulator
 	{
 		// ReSharper disable CommentTypo
 		//Memory Map
-		//Complete cartridge with all banks
-		//0x0000-0x7FFF | First two rom banks
-		//0x8000-0x9FFF
-		//0xA000-0xBFFF
-		//0xC000-0xDFFF
-		//0xE000-0xFDFF (same as 0xC000-0xDDFF)
-		//0xFE00-0xFE9F
-		//0xFEA0-0xFEFF (unused)
-		//0xFF00-0xFF7F
-		//0xFF80-0xFFFE
-		//0xFFFF
+		//0x0000-0x7FFF		First two rom banks
+		//0x8000-0x9FFF		Video Ram
+		//0xA000-0xBFFF		Cartridge Ram
+		//0xC000-0xDFFF		Work Ram
+		//0xE000-0xFDFF		Echo Ram (same as 0xC000-0xDDFF)
+		//0xFE00-0xFE9F		Sprite Attributes
+		//0xFEA0-0xFEFF		Unused
+		//0xFF00-0xFF7F		IO Ports
+		//0xFF80-0xFFFE		High Ram
+		//0xFFFF			Interrupt Enable Register
 		// ReSharper restore CommentTypo
 
 		private          byte[] cartridgeRomWithBanks;
@@ -90,6 +89,12 @@ namespace GameboyEmulator
 
 			if (IsBetween(address, CARTRIDGE_ROM_BASE_ADDRESS, VIDEO_RAM_BASE_ADDRESS)) return cartridgeRom[address];
 
+			if (IsBetween(address, VIDEO_RAM_BASE_ADDRESS, CARTRIDGE_RAM_BASE_ADDRESS))
+			{
+				//IO Ports
+				return videoRam[address - VIDEO_RAM_BASE_ADDRESS];
+			}
+
 			if (IsBetween(address, IO_PORTS_BASE_ADDRESS, HIGH_RAM_BASE_ADDRESS))
 			{
 				//IO Ports
@@ -97,12 +102,12 @@ namespace GameboyEmulator
 			}
 
 			if (IsBetween(address, HIGH_RAM_BASE_ADDRESS, INTERRUPT_ENABLE_REG_ADDRESS))
+			{
 				//High Ram
 				return highRam[address - HIGH_RAM_BASE_ADDRESS];
+			}
 
-			throw new NotImplementedException(
-				$"Read Memory location: 0x{address:X} not implemented yet!"
-			);
+			throw new NotImplementedException($"Read Memory location: 0x{address:X} not implemented yet!");
 		}
 
 		public void Write(ushort address, byte data, bool dontReset = false)
@@ -141,9 +146,9 @@ namespace GameboyEmulator
 					{
 						//Current Scanline register - Reset when written to
 						0xFF44 => 0,
-						
+
 						//Default
-						_      => data
+						_ => data
 					};
 				}
 			}

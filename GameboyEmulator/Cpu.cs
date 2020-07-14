@@ -461,8 +461,7 @@ namespace GameboyEmulator
 		}
 
 		//Bit-wise functions
-		// ReSharper disable once MemberCanBeMadeStatic.Global
-		public bool GetBit(byte data, int bit)
+		public static bool GetBit(byte data, int bit)
 		{
 			if (bit > 7 || bit < 0) throw new IndexOutOfRangeException($"Cannot access Bit {bit} of a Byte!");
 

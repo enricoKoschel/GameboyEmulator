@@ -20,12 +20,13 @@ namespace GameboyEmulator
 		private const int SCREEN_DRAW_WIDTH  = SCREEN_GAME_WIDTH * SCREEN_SCALE;
 		private const int SCREEN_DRAW_HEIGHT = SCREEN_GAME_HEIGHT * SCREEN_SCALE;
 
-		private readonly RectangleShape[,] buffer;
-		private readonly RenderWindow      window;
+		private readonly RenderWindow window;
+
+		public RectangleShape[,] Buffer { get; }
 
 		public Screen()
 		{
-			buffer = new RectangleShape[SCREEN_GAME_WIDTH, SCREEN_GAME_HEIGHT];
+			Buffer = new RectangleShape[SCREEN_GAME_WIDTH, SCREEN_GAME_HEIGHT];
 			window = new RenderWindow(
 				new VideoMode(SCREEN_DRAW_WIDTH, SCREEN_DRAW_HEIGHT), "GameBoy Emulator", Styles.Close
 			);
@@ -45,7 +46,7 @@ namespace GameboyEmulator
 			{
 				for (int j = 0; j < SCREEN_GAME_HEIGHT; j++)
 				{
-					buffer[i, j] = new RectangleShape
+					Buffer[i, j] = new RectangleShape
 					{
 						Size     = new Vector2f(SCREEN_SCALE, SCREEN_SCALE),
 						Position = new Vector2f(i * SCREEN_SCALE, j * SCREEN_SCALE)
@@ -56,32 +57,32 @@ namespace GameboyEmulator
 					{
 						case 0:
 						case 4:
-							buffer[i, j].FillColor = Colors.white;
+							Buffer[i, j].FillColor = Colors.white;
 							break;
 						case 1:
 						case 5:
-							buffer[i, j].FillColor = Colors.lightGray;
+							Buffer[i, j].FillColor = Colors.lightGray;
 							break;
 						case 2:
 						case 6:
-							buffer[i, j].FillColor = Colors.darkGray;
+							Buffer[i, j].FillColor = Colors.darkGray;
 							break;
 						case 3:
-							buffer[i, j].FillColor = Colors.black;
+							Buffer[i, j].FillColor = Colors.black;
 							break;
 					}
 				}
 			}
 		}
 
-		public void Draw()
+		public void DrawFrame()
 		{
 			if (!window.IsOpen) throw new InvalidOperationException("Cannot draw Screen when Window is closed!");
 
 			window.Clear();
 			window.DispatchEvents();
 
-			foreach (RectangleShape rect in buffer) window.Draw(rect);
+			foreach (RectangleShape rect in Buffer) window.Draw(rect);
 
 			window.Display();
 		}

@@ -6,13 +6,11 @@ namespace GameboyEmulator
 	{
 		//Modules
 		private readonly Memory memory;
-		private readonly Cpu    cpu;
 		private readonly Screen screen;
 
 		public Lcd(Memory memory, Cpu cpu, Screen screen)
 		{
 			this.memory = memory;
-			this.cpu    = cpu;
 			this.screen = screen;
 		}
 
@@ -80,20 +78,24 @@ namespace GameboyEmulator
 			set => memory.Write(0xFF4A, (byte)(value + 7));
 		}
 
-		public ushort WindowTileMapBaseAddress => cpu.GetBit(ControlRegister, 6) ? (ushort)0x9C00 : (ushort)0x9800;
+		public ushort WindowTileMapBaseAddress => Cpu.GetBit(ControlRegister, 6) ? (ushort)0x9C00 : (ushort)0x9800;
 
-		public ushort BackgroundTileMapBaseAddress => cpu.GetBit(ControlRegister, 3) ? (ushort)0x9C00 : (ushort)0x9800;
+		public ushort BackgroundTileMapBaseAddress => Cpu.GetBit(ControlRegister, 3) ? (ushort)0x9C00 : (ushort)0x9800;
 
-		public ushort TileDataBaseAddress => cpu.GetBit(ControlRegister, 4) ? (ushort)0x8000 : (ushort)0x8800;
+		public ushort TileDataBaseAddress => Cpu.GetBit(ControlRegister, 4) ? (ushort)0x8000 : (ushort)0x8800;
+
+		public bool TileDataIsSigned => !Cpu.GetBit(ControlRegister, 4);
+
+		public byte TilePalette => memory.Read(0xFF47);
 
 		//Flags
-		public bool IsEnabled => cpu.GetBit(ControlRegister, 7);
+		public bool IsEnabled => Cpu.GetBit(ControlRegister, 7);
 
-		public bool TilesEnabled => cpu.GetBit(ControlRegister, 0);
+		public bool TilesEnabled => Cpu.GetBit(ControlRegister, 0);
 
-		public bool SpritesEnabled => cpu.GetBit(ControlRegister, 1);
+		public bool SpritesEnabled => Cpu.GetBit(ControlRegister, 1);
 
-		public bool WindowEnabled => cpu.GetBit(ControlRegister, 5);
+		public bool WindowEnabled => Cpu.GetBit(ControlRegister, 5);
 
 		public void Update(int cycles)
 		{
@@ -139,7 +141,7 @@ namespace GameboyEmulator
 				CurrentScanline     = 0;
 				drawScanlineCounter = 0;
 
-				screen.Draw();
+				screen.DrawFrame();
 			}
 			else
 			{
