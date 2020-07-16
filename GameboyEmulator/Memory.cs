@@ -27,8 +27,6 @@ namespace GameboyEmulator
 		private readonly byte[] spriteAttributes;
 		private readonly byte[] ioPorts;
 		private readonly byte[] highRam;
-		private          byte   interruptEnableReg;
-
 
 		private const int CARTRIDGE_ROM_BASE_ADDRESS     = 0x0000;
 		private const int VIDEO_RAM_BASE_ADDRESS         = 0x8000;
@@ -41,14 +39,22 @@ namespace GameboyEmulator
 		private const int HIGH_RAM_BASE_ADDRESS          = 0xFF80;
 		private const int INTERRUPT_ENABLE_REG_ADDRESS   = 0xFFFF;
 
+		//Modules
+		private readonly Cpu        cpu;
+		private readonly Interrupts interrupts;
+
 		//File paths
 		private const string BOOT_ROM_FILE_PATH = "../../../roms/boot.gb";
+		private       bool   bootRomEnabled     = false;
 
 		//TODO - Accept game file path as console parameter / make into property
 		private const string GAME_ROM_FILE_PATH = "../../../roms/schrodi.gb";
 
-		public Memory()
+		public Memory(Cpu cpu, Interrupts interrupts)
 		{
+			this.cpu        = cpu;
+			this.interrupts = interrupts;
+
 			videoRam         = new byte[0x2000];
 			cartridgeRam     = new byte[0x2000];
 			workRam          = new byte[0x2000];
@@ -59,18 +65,29 @@ namespace GameboyEmulator
 
 		public void LoadGame()
 		{
-			cartridgeRom = File.ReadAllBytes(BOOT_ROM_FILE_PATH);
-
-			//Resize for Cartridge Header
-			Array.Resize(ref cartridgeRom, 0x150);
-
-			cartridgeRomWithBanks = File.ReadAllBytes(GAME_ROM_FILE_PATH);
-
-			//Copy Cartridge Header
-			for (int i = 0x100; i < 0x150; i++)
+			if (bootRomEnabled)
 			{
-				cartridgeRom[i] = cartridgeRomWithBanks[i];
+				cartridgeRom = File.ReadAllBytes(BOOT_ROM_FILE_PATH);
+
+				//Resize for Cartridge Header
+				Array.Resize(ref cartridgeRom, 0x150);
+
+				cartridgeRomWithBanks = File.ReadAllBytes(GAME_ROM_FILE_PATH);
+
+				//Copy Cartridge Header
+				for (int i = 0x100; i < 0x150; i++) cartridgeRom[i] = cartridgeRomWithBanks[i];
 			}
+			else
+			{
+				InitializeRegisters();
+
+				cartridgeRom = File.ReadAllBytes(GAME_ROM_FILE_PATH);
+			}
+		}
+
+		private void InitializeRegisters()
+		{
+			cpu.InitializeRegisters();
 		}
 
 		private void DisableBootRom()
@@ -87,7 +104,13 @@ namespace GameboyEmulator
 				throw new IndexOutOfRangeException($"Cannot access Memory at Address {address}!");
 			}
 
-			if (IsBetween(address, CARTRIDGE_ROM_BASE_ADDRESS, VIDEO_RAM_BASE_ADDRESS)) return cartridgeRom[address];
+			if (IsBetween(address, CARTRIDGE_ROM_BASE_ADDRESS, VIDEO_RAM_BASE_ADDRESS))
+			{
+				//Cartridge Rom
+				return cartridgeRom[address];
+
+				//TODO - Implement Banking
+			}
 
 			if (IsBetween(address, VIDEO_RAM_BASE_ADDRESS, CARTRIDGE_RAM_BASE_ADDRESS))
 			{

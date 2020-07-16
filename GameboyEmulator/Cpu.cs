@@ -14,8 +14,17 @@ namespace GameboyEmulator
 		}
 
 		//Modules
-		private readonly Memory   memory;
-		private readonly Graphics graphics;
+		private readonly Memory     memory;
+		private readonly Graphics   graphics;
+		private readonly Interrupts interrupts;
+
+		public Cpu()
+		{
+			//Initialize modules
+			interrupts = new Interrupts();
+			memory     = new Memory(this, interrupts);
+			graphics   = new Graphics(memory, this);
+		}
 
 		//Registers
 		private ushort programCounter;
@@ -103,13 +112,6 @@ namespace GameboyEmulator
 		//Constants
 		private const int MAX_CPU_CYCLES_PER_FRAME = 70224;
 
-		public Cpu()
-		{
-			//Initialize modules
-			memory   = new Memory();
-			graphics = new Graphics(memory, this);
-		}
-
 		public void Start()
 		{
 			memory.LoadGame();
@@ -134,284 +136,201 @@ namespace GameboyEmulator
 
 			switch (opcode)
 			{
+				//NOP
+				case 0x00:
+					return 4;
+				//INC B
 				case 0x04:
-				{
-					//INC B
 					bRegister = Increment(bRegister);
 					return 4;
-				}
+				//DEC B
 				case 0x05:
-				{
-					//DEC B
 					bRegister = Decrement(bRegister);
 					return 4;
-				}
+				//LD B,n
 				case 0x06:
-				{
-					//LD B,n
 					bRegister = Load8BitImmediate();
 					return 8;
-				}
+				//INC C
 				case 0x0C:
-				{
-					//INC C
 					cRegister = Increment(cRegister);
 					return 4;
-				}
+				//DEC C
 				case 0x0D:
-				{
-					//DEC C
 					cRegister = Decrement(cRegister);
 					return 4;
-				}
+				//LD C,n
 				case 0x0E:
-				{
-					//LD C,n
 					cRegister = Load8BitImmediate();
 					return 8;
-				}
+				//LD DE,nn
 				case 0x11:
-				{
-					//LD DE,nn
 					DeRegister = Load16BitImmediate();
 					return 12;
-				}
+				//INC DE
 				case 0x13:
-				{
-					//INC DE
 					DeRegister = Increment(DeRegister);
 					return 8;
-				}
+				//DEC D
 				case 0x15:
-				{
-					//DEC D
 					dRegister = Decrement(dRegister);
 					return 4;
-				}
+				//LD D,n
 				case 0x16:
-				{
-					//LD D,n
 					dRegister = Load8BitImmediate();
 					return 8;
-				}
+				//RLA
 				case 0x17:
-				{
-					//RLA
 					aRegister = RotateLeftCarry(aRegister);
 					return 4;
-				}
+				//JR n
 				case 0x18:
-				{
-					//JR n
 					return JumpRelative(JumpConditions.NoCondition);
-				}
+				//LD A,(DE)
 				case 0x1A:
-				{
-					//LD A,(DE)
 					aRegister = memory.Read(DeRegister);
 					return 8;
-				}
+				//DEC E
 				case 0x1D:
-				{
-					//DEC E
 					eRegister = Decrement(eRegister);
 					return 4;
-				}
+				//LD E,n
 				case 0x1E:
-				{
-					//LD E,n
 					eRegister = Load8BitImmediate();
 					return 8;
-				}
+				//JR NZ,n
 				case 0x20:
-				{
-					//JR NZ,n
 					return JumpRelative(JumpConditions.Nz);
-				}
+				//LD HL,nn
 				case 0x21:
-				{
-					//LD HL,nn
 					HlRegister = Load16BitImmediate();
 					return 12;
-				}
+				//LD (HL+),A
 				case 0x22:
-				{
-					//LD (HL+),A                       
 					return WriteHlDecrement(aRegister, true);
-				}
+				//INC HL
 				case 0x23:
-				{
-					//INC HL
 					HlRegister = Increment(HlRegister);
 					return 8;
-				}
+				//INC H
 				case 0x24:
-				{
-					//INC H
 					hRegister = Increment(hRegister);
 					return 4;
-				}
+				//JR Z,n
 				case 0x28:
-				{
-					//JR Z,n
 					return JumpRelative(JumpConditions.Z);
-				}
+				//LD L,n
 				case 0x2E:
-				{
-					//LD L,n
 					lRegister = Load8BitImmediate();
 					return 8;
-				}
+				//LD SP,nn
 				case 0x31:
-				{
-					//LD SP,nn
 					stackPointer = Load16BitImmediate();
 					return 12;
-				}
+				//LD (HL-),A
 				case 0x32:
-				{
-					//LD (HL-),A
 					return WriteHlDecrement(aRegister, false);
-				}
+				//DEC A
 				case 0x3D:
-				{
-					//DEC A
 					aRegister = Decrement(aRegister);
 					return 4;
-				}
+				//LD A,n
 				case 0x3E:
-				{
-					//LD A,n
 					aRegister = Load8BitImmediate();
 					return 8;
-				}
+				//LD C,A
 				case 0x4F:
-				{
-					//LD C,A
 					cRegister = aRegister;
 					return 4;
-				}
+				//LD D,A
 				case 0x57:
-				{
-					//LD D,A
 					dRegister = aRegister;
 					return 4;
-				}
+				//LD H,A
 				case 0x67:
-				{
-					//LD H,A
 					hRegister = aRegister;
 					return 4;
-				}
+				//LD (HL),A
 				case 0x77:
-				{
-					//LD (HL),A
 					memory.Write(HlRegister, aRegister);
 					return 8;
-				}
+				//LD A,B
 				case 0x78:
-				{
-					//LD A,B
 					aRegister = bRegister;
 					return 4;
-				}
+				//LD A,E
 				case 0x7B:
-				{
-					//LD A,E
 					aRegister = eRegister;
 					return 4;
-				}
+				//LD A,H
 				case 0x7C:
-				{
-					//LD A,H
 					aRegister = hRegister;
 					return 4;
-				}
+				//LD A,L
 				case 0x7D:
-				{
-					//LD A,L
 					aRegister = lRegister;
 					return 4;
-				}
+				//ADD A,(HL)
 				case 0x86:
-				{
-					//ADD A,(HL)
 					AddByteToAReg(memory.Read(HlRegister));
 					return 8;
-				}
+				//SUB B
 				case 0x90:
-				{
-					//SUB B
 					SubtractByteFromAReg(bRegister, false);
 					return 4;
-				}
+				//XOR A
 				case 0xAF:
-				{
-					//XOR A
 					XorIntoA(aRegister);
 					return 4;
-				}
+				//CP (HL)
 				case 0xBE:
-				{
-					//CP (HL)
 					SubtractByteFromAReg(memory.Read(HlRegister), true);
 					return 8;
-				}
+				//POP BC
 				case 0xC1:
-				{
-					//POP BC
 					BcRegister = PopStack();
 					return 12;
-				}
+				//JP nn
+				case 0xC3:
+					return JumpImmediate(JumpConditions.NoCondition);
+				//PUSH BC
 				case 0xC5:
-				{
-					//PUSH BC
 					PushStack(BcRegister);
 					return 16;
-				}
+				//RET
 				case 0xC9:
-				{
-					//RET
 					return ReturnSubroutine();
-				}
+				//Extended Opcode
 				case 0xCB:
-				{
-					//Extended Opcode
 					return ExecuteExtendedOpcode();
-				}
+				//CALL nn
 				case 0xCD:
-				{
-					//CALL nn
 					return CallSubroutine();
-				}
+				//LD (0xFF00+n),A
 				case 0xE0:
-				{
-					//LD (0xFF00+n),A
 					return WriteIoPortsImmediateOffset(aRegister);
-				}
+				//LD (0xFF00+C),A
 				case 0xE2:
-				{
-					//LD (0xFF00+C),A
 					return WriteIoPortsCRegisterOffset(aRegister);
-				}
+				//LD (nn),A
 				case 0xEA:
-				{
-					//LD (nn),A
 					memory.Write(Load16BitImmediate(), aRegister);
 					return 16;
-				}
+				//LD A,(0xFF00+n)
 				case 0xF0:
-				{
-					//LD A,(0xFF00+n)
 					aRegister = memory.Read((ushort)(0xFF00 + Load8BitImmediate()));
 					return 12;
-				}
+				//DI
+				case 0xF3:
+					throw new NotImplementedException("Disable Interrupts after the next opcode!");
+					interrupts.masterInterruptEnable = false;
+					return 4;
+				//CP n
 				case 0xFE:
-				{
-					//CP n
 					SubtractByteFromAReg(Load8BitImmediate(), true);
 					return 8;
-				}
+
+				//Invalid Opcode
 				default:
 					throw new NotImplementedException(
 						$"Opcode 0x{opcode:X} not implemented yet!"
@@ -425,18 +344,16 @@ namespace GameboyEmulator
 
 			switch (opcode)
 			{
+				//RL C
 				case 0x11:
-				{
-					//RL C
 					cRegister = RotateLeftCarry(cRegister);
 					return 8;
-				}
+				//BIT 7,H
 				case 0x7C:
-				{
-					//BIT 7,H
 					GameboyBit(hRegister, 7);
 					return 8;
-				}
+
+				//Invalid Opcode
 				default:
 					throw new NotImplementedException(
 						$"Extended Opcode 0xCB{opcode:X} not implemented yet!"
@@ -556,6 +473,16 @@ namespace GameboyEmulator
 			if (carryFlag.GetType().Name != "String") CarryFlag         = ToBool(carryFlag);
 		}
 
+		public void InitializeRegisters()
+		{
+			AfRegister     = 0x01B0;
+			BcRegister     = 0x0013;
+			DeRegister     = 0x00D8;
+			HlRegister     = 0x014D;
+			stackPointer   = 0xFFFE;
+			programCounter = 0x100;
+		}
+
 		//Load functions
 		private ushort Load16BitImmediate()
 		{
@@ -596,7 +523,25 @@ namespace GameboyEmulator
 			//Signed relative Jump amount
 			sbyte relativeJumpAmount = (sbyte)Load8BitImmediate();
 
-			bool shouldJump = condition switch
+			if (!ShouldJump(condition)) return 8;
+
+			programCounter = AddSignedToUnsigned(programCounter, relativeJumpAmount);
+			return 12;
+		}
+
+		private int JumpImmediate(JumpConditions condition)
+		{
+			ushort jumpAddress = Load16BitImmediate();
+
+			if (!ShouldJump(condition)) return 12;
+
+			programCounter = jumpAddress;
+			return 16;
+		}
+
+		private bool ShouldJump(JumpConditions condition)
+		{
+			return condition switch
 			{
 				//Non-Zero
 				JumpConditions.Nz =>
@@ -621,11 +566,6 @@ namespace GameboyEmulator
 				//Default
 				_ => false
 			};
-
-			if (!shouldJump) return 8;
-
-			programCounter = AddSignedToUnsigned(programCounter, relativeJumpAmount);
-			return 12;
 		}
 
 		private int CallSubroutine()
