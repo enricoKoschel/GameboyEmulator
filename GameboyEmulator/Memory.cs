@@ -45,7 +45,7 @@ namespace GameboyEmulator
 		private const string BOOT_ROM_FILE_PATH = "../../../roms/boot.gb";
 
 		//TODO - Accept game file path as console parameter / make into property
-		private const string GAME_ROM_FILE_PATH = "../../../roms/tetris.gb";
+		private const string GAME_ROM_FILE_PATH = "../../../roms/schrodi.gb";
 
 		public Memory()
 		{

@@ -40,11 +40,11 @@ namespace GameboyEmulator
 		private void RenderTiles()
 		{
 			//Background
-			int tileMapY = (lcd.CurrentScanline + lcd.ScrollY) / 8;
+			int tileMapY = (lcd.CurrentScanline + lcd.ScrollY) / 8 * 32;
 
 			for (int tileMapX = lcd.ScrollX; tileMapX < lcd.ScrollX + 20; tileMapX++)
 			{
-				ushort tileMapIndex  = (ushort)(lcd.BackgroundTileMapBaseAddress + tileMapY * 32 + tileMapX);
+				ushort tileMapIndex  = (ushort)(lcd.BackgroundTileMapBaseAddress + tileMapY + tileMapX);
 				ushort tileDataIndex = lcd.TileDataBaseAddress;
 
 				if (lcd.TileDataIsSigned)
@@ -52,7 +52,7 @@ namespace GameboyEmulator
 				else
 					tileDataIndex += (ushort)(memory.Read(tileMapIndex) * 16);
 
-				byte currentTileLine = (byte)((lcd.CurrentScanline % 8) * 2);
+				byte currentTileLine = (byte)(((lcd.CurrentScanline + lcd.ScrollY) % 8) * 2);
 				byte tileDataLo      = memory.Read((ushort)(tileDataIndex + currentTileLine));
 				byte tileDataHi      = memory.Read((ushort)(tileDataIndex + currentTileLine + 1));
 

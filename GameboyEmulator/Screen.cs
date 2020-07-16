@@ -51,26 +51,6 @@ namespace GameboyEmulator
 						Size     = new Vector2f(SCREEN_SCALE, SCREEN_SCALE),
 						Position = new Vector2f(i * SCREEN_SCALE, j * SCREEN_SCALE)
 					};
-
-					//TODO - Remove Debug pattern
-					switch ((i % 4) + (j % 4))
-					{
-						case 0:
-						case 4:
-							Buffer[i, j].FillColor = Colors.white;
-							break;
-						case 1:
-						case 5:
-							Buffer[i, j].FillColor = Colors.lightGray;
-							break;
-						case 2:
-						case 6:
-							Buffer[i, j].FillColor = Colors.darkGray;
-							break;
-						case 3:
-							Buffer[i, j].FillColor = Colors.black;
-							break;
-					}
 				}
 			}
 		}
