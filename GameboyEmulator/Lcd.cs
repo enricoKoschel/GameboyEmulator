@@ -99,6 +99,8 @@ namespace GameboyEmulator
 
 		public void Update(int cycles)
 		{
+			if (!IsEnabled) return;
+			
 			drawScanlineCounter += cycles;
 
 			shouldDrawScanline     = false;
@@ -116,17 +118,18 @@ namespace GameboyEmulator
 			SetStatus();
 		}
 
+		public void UpdateDisabled()
+		{
+			drawScanlineCounter = 0;
+			CurrentScanline     = 0;
+			Mode                = 1;
+
+			screen.ClearScreen();
+			screen.DrawFrame();
+		}
+
 		private void SetStatus()
 		{
-			//TODO - Fix this
-			if (!IsEnabled)
-			{
-				drawScanlineCounter = 0;
-				CurrentScanline     = 0;
-				Mode                = 1;
-				return;
-			}
-
 			//TODO - Interrupts  
 
 			if (CurrentScanline >= 144)

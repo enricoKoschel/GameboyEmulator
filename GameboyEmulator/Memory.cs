@@ -45,10 +45,11 @@ namespace GameboyEmulator
 
 		//File paths
 		private const string BOOT_ROM_FILE_PATH = "../../../roms/boot.gb";
-		private       bool   bootRomEnabled     = false;
+		private       bool   bootRomEnabled     = true;
 
 		//TODO - Accept game file path as console parameter / make into property
 		private const string GAME_ROM_FILE_PATH = "../../../roms/test/cpu_instrs/individual/01-special.gb";
+		//private const string GAME_ROM_FILE_PATH = "../../../roms/test/cpu_instrs/cpu_instrs.gb";
 
 		public Memory(Cpu cpu, Interrupts interrupts)
 		{
@@ -88,8 +89,44 @@ namespace GameboyEmulator
 		private void InitializeRegisters()
 		{
 			cpu.InitializeRegisters();
+			InitializeMemory();
 		}
 
+		private void InitializeMemory()
+		{
+			Write(0xFF05, 0x00, true);
+			Write(0xFF06, 0x00, true);
+			Write(0xFF07, 0x00, true);
+			Write(0xFF10, 0x80, true);
+			Write(0xFF11, 0xBF, true);
+			Write(0xFF12, 0xF3, true);
+			Write(0xFF14, 0xBF, true);
+			Write(0xFF16, 0x3F, true);
+			Write(0xFF17, 0x00, true);
+			Write(0xFF19, 0xBF, true);
+			Write(0xFF1A, 0x7F, true);
+			Write(0xFF1B, 0xFF, true);
+			Write(0xFF1C, 0x9F, true);
+			Write(0xFF1E, 0xBF, true);
+			Write(0xFF20, 0xFF, true);
+			Write(0xFF21, 0x00, true);
+			Write(0xFF22, 0x00, true);
+			Write(0xFF23, 0xBF, true);
+			Write(0xFF24, 0x77, true);
+			Write(0xFF25, 0xF3, true);
+			Write(0xFF26, 0xF1, true);
+			Write(0xFF40, 0x91, true);
+			Write(0xFF42, 0x00, true);
+			Write(0xFF43, 0x00, true);
+			Write(0xFF45, 0x00, true);
+			Write(0xFF47, 0xFC, true);
+			Write(0xFF48, 0xFF, true);
+			Write(0xFF49, 0xFF, true);
+			Write(0xFF4A, 0x00, true);
+			Write(0xFF4B, 0x00, true);
+			Write(0xFFFF, 0x00, true);
+		}
+		
 		private void DisableBootRom()
 		{
 			//Overwrite Boot rom with Game rom, thus disabling it

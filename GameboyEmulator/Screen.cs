@@ -67,6 +67,16 @@ namespace GameboyEmulator
 			window.Display();
 		}
 
+		public void ClearScreen()
+		{
+			for (int i = 0; i < SCREEN_GAME_WIDTH; i++)
+			{
+				for (int j = 0; j < SCREEN_GAME_HEIGHT; j++)
+				{
+					Buffer[i, j].FillColor = Colors.white;;
+				}
+			}
+		}
 
 		//Event handlers
 		private static void OnClose(object sender, EventArgs e)
