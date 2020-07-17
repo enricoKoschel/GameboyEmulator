@@ -21,9 +21,9 @@ namespace GameboyEmulator
 
 		public void Update(int cycles)
 		{
-			if (!lcd.IsEnabled) return;
-
 			lcd.Update(cycles);
+
+			if (!lcd.IsEnabled) return;
 
 			if (lcd.shouldDrawScanline) DrawScanline();
 
@@ -79,7 +79,7 @@ namespace GameboyEmulator
 		{
 		}
 
-		private Color GetColor(byte palette, byte paletteIndex)
+		private static Color GetColor(byte palette, byte paletteIndex)
 		{
 			int colorIdLo = paletteIndex * 2;
 			int colorIdHi = colorIdLo + 1;

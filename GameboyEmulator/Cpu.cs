@@ -112,6 +112,9 @@ namespace GameboyEmulator
 		//Constants
 		private const int MAX_CPU_CYCLES_PER_FRAME = 70224;
 
+		//Flags
+		private int disableInterruptsNextOpcode;
+
 		public void Start()
 		{
 			memory.LoadGame();
@@ -124,6 +127,18 @@ namespace GameboyEmulator
 			while (cyclesThisFrame < MAX_CPU_CYCLES_PER_FRAME)
 			{
 				int cycles = ExecuteOpcode();
+
+				//Delayed Interrupt disabling
+				switch (disableInterruptsNextOpcode)
+				{
+					case 1:
+						disableInterruptsNextOpcode = 2;
+						break;
+					case 2:
+						disableInterruptsNextOpcode      = 0;
+						interrupts.masterInterruptEnable = false;
+						break;
+				}
 
 				cyclesThisFrame += cycles;
 				graphics.Update(cycles);
@@ -139,6 +154,14 @@ namespace GameboyEmulator
 				//NOP
 				case 0x00:
 					return 4;
+				//LD BC,nn
+				case 0x01:
+					BcRegister = Load16BitImmediate();
+					return 12;
+				//INC BC
+				case 0x03:
+					BcRegister = Increment(BcRegister);
+					return 8;
 				//INC B
 				case 0x04:
 					bRegister = Increment(bRegister);
@@ -150,6 +173,10 @@ namespace GameboyEmulator
 				//LD B,n
 				case 0x06:
 					bRegister = Load8BitImmediate();
+					return 8;
+				//LD A,(BC)
+				case 0x0A:
+					aRegister = memory.Read(BcRegister);
 					return 8;
 				//INC C
 				case 0x0C:
@@ -167,10 +194,18 @@ namespace GameboyEmulator
 				case 0x11:
 					DeRegister = Load16BitImmediate();
 					return 12;
+				//LD (DE),A
+				case 0x12:
+					memory.Write(DeRegister, aRegister);
+					return 8;
 				//INC DE
 				case 0x13:
 					DeRegister = Increment(DeRegister);
 					return 8;
+				//INC D
+				case 0x14:
+					dRegister = Increment(dRegister);
+					return 4;
 				//DEC D
 				case 0x15:
 					dRegister = Decrement(dRegister);
@@ -190,6 +225,10 @@ namespace GameboyEmulator
 				case 0x1A:
 					aRegister = memory.Read(DeRegister);
 					return 8;
+				//INC E
+				case 0x1C:
+					eRegister = Increment(eRegister);
+					return 4;
 				//DEC E
 				case 0x1D:
 					eRegister = Decrement(eRegister);
@@ -219,6 +258,10 @@ namespace GameboyEmulator
 				//JR Z,n
 				case 0x28:
 					return JumpRelative(JumpConditions.Z);
+				//LD A,(HL+)
+				case 0x2A:
+					aRegister = ReadHlDecrement(true);
+					return 8;
 				//LD L,n
 				case 0x2E:
 					lRegister = Load8BitImmediate();
@@ -238,6 +281,10 @@ namespace GameboyEmulator
 				case 0x3E:
 					aRegister = Load8BitImmediate();
 					return 8;
+				//LD B,A
+				case 0x47:
+					bRegister = aRegister;
+					return 4;
 				//LD C,A
 				case 0x4F:
 					cRegister = aRegister;
@@ -246,10 +293,34 @@ namespace GameboyEmulator
 				case 0x57:
 					dRegister = aRegister;
 					return 4;
+				//LD H,C
+				case 0x61:
+					hRegister = cRegister;
+					return 4;
+				//LD H,E
+				case 0x63:
+					hRegister = eRegister;
+					return 4;
+				//LD H,L
+				case 0x65:
+					hRegister = lRegister;
+					return 4;
 				//LD H,A
 				case 0x67:
 					hRegister = aRegister;
 					return 4;
+				//LD L,C
+				case 0x69:
+					lRegister = cRegister;
+					return 4;
+				//LD L,H
+				case 0x6C:
+					lRegister = hRegister;
+					return 4;
+				//LD (HL),B
+				case 0x70:
+					memory.Write(HlRegister, bRegister);
+					return 8;
 				//LD (HL),A
 				case 0x77:
 					memory.Write(HlRegister, aRegister);
@@ -282,6 +353,10 @@ namespace GameboyEmulator
 				case 0xAF:
 					XorIntoA(aRegister);
 					return 4;
+				//OR C
+				case 0xB1:
+					OrIntoA(cRegister);
+					return 4;
 				//CP (HL)
 				case 0xBE:
 					SubtractByteFromAReg(memory.Read(HlRegister), true);
@@ -290,28 +365,51 @@ namespace GameboyEmulator
 				case 0xC1:
 					BcRegister = PopStack();
 					return 12;
+				//JP NZ,nn
+				case 0xC2:
+					return JumpImmediate(JumpConditions.Nz);
 				//JP nn
 				case 0xC3:
 					return JumpImmediate(JumpConditions.NoCondition);
+				//CALL NZ,nn
+				case 0xC4:
+					return CallSubroutine(JumpConditions.Nz);
 				//PUSH BC
 				case 0xC5:
-					PushStack(BcRegister);
-					return 16;
+					return PushStack(BcRegister);
 				//RET
 				case 0xC9:
-					return ReturnSubroutine();
+					return ReturnSubroutine(JumpConditions.NoCondition);
 				//Extended Opcode
 				case 0xCB:
 					return ExecuteExtendedOpcode();
 				//CALL nn
 				case 0xCD:
-					return CallSubroutine();
+					return CallSubroutine(JumpConditions.NoCondition);
+				//SUB n
+				case 0xD6:
+					SubtractByteFromAReg(Load8BitImmediate(), false);
+					return 8;
+				//RET C
+				case 0xD8:
+					return ReturnSubroutine(JumpConditions.C);
 				//LD (0xFF00+n),A
 				case 0xE0:
 					return WriteIoPortsImmediateOffset(aRegister);
+				//POP HL
+				case 0xE1:
+					HlRegister = PopStack();
+					return 12;
 				//LD (0xFF00+C),A
 				case 0xE2:
 					return WriteIoPortsCRegisterOffset(aRegister);
+				//PUSH HL
+				case 0xE5:
+					return PushStack(HlRegister);
+				//AND n
+				case 0xE6:
+					AndIntoA(Load8BitImmediate());
+					return 8;
 				//LD (nn),A
 				case 0xEA:
 					memory.Write(Load16BitImmediate(), aRegister);
@@ -320,11 +418,22 @@ namespace GameboyEmulator
 				case 0xF0:
 					aRegister = memory.Read((ushort)(0xFF00 + Load8BitImmediate()));
 					return 12;
+				//POP AF
+				case 0xF1:
+					//TODO - Upper nibble of flag register should not be affected
+					AfRegister = PopStack();
+					return 12;
 				//DI
 				case 0xF3:
-					throw new NotImplementedException("Disable Interrupts after the next opcode!");
-					interrupts.masterInterruptEnable = false;
+					disableInterruptsNextOpcode = 1;
 					return 4;
+				//PUSH AF
+				case 0xF5:
+					return PushStack(AfRegister);
+				//LD A,(nn)
+				case 0xFA:
+					aRegister = memory.Read(Load16BitImmediate());
+					return 16;
 				//CP n
 				case 0xFE:
 					SubtractByteFromAReg(Load8BitImmediate(), true);
@@ -424,7 +533,22 @@ namespace GameboyEmulator
 		private void XorIntoA(byte data)
 		{
 			aRegister ^= data;
+
 			SetFlags(aRegister == 0, 0, 0, 0);
+		}
+
+		private void OrIntoA(byte data)
+		{
+			aRegister |= data;
+
+			SetFlags(aRegister == 0, 0, 0, 0);
+		}
+
+		private void AndIntoA(byte data)
+		{
+			aRegister &= data;
+
+			SetFlags(aRegister == 0, 0, 1, 0);
 		}
 
 		private void GameboyBit(byte data, int bit)
@@ -517,6 +641,15 @@ namespace GameboyEmulator
 			return 8;
 		}
 
+		private byte ReadHlDecrement(bool increment)
+		{
+			byte data = memory.Read(HlRegister);
+
+			HlRegister += (ushort)(increment ? 1 : -1);
+
+			return data;
+		}
+
 		//Jump functions
 		private int JumpRelative(JumpConditions condition)
 		{
@@ -568,17 +701,30 @@ namespace GameboyEmulator
 			};
 		}
 
-		private int CallSubroutine()
+		private int CallSubroutine(JumpConditions condition)
 		{
+			ushort jumpAddress = Load16BitImmediate();
+
+			if (!ShouldJump(condition)) return 12;
+
 			PushStack((ushort)(programCounter + 2));
-			programCounter = Load16BitImmediate();
+			programCounter = jumpAddress;
 			return 24;
 		}
 
-		private int ReturnSubroutine()
+		private int ReturnSubroutine(JumpConditions condition)
 		{
+			if (condition == JumpConditions.NoCondition)
+			{
+				//Special Case for unconditional return
+				programCounter = PopStack();
+				return 16;
+			}
+
+			if (!ShouldJump(condition)) return 8;
+
 			programCounter = PopStack();
-			return 16;
+			return 20;
 		}
 
 		//Math functions
@@ -638,13 +784,15 @@ namespace GameboyEmulator
 		}
 
 		//Stack functions
-		private void PushStack(ushort data)
+		private int PushStack(ushort data)
 		{
 			byte lo = GetLoByte(data);
 			byte hi = GetHiByte(data);
 
 			memory.Write(stackPointer--, lo);
 			memory.Write(stackPointer--, hi);
+
+			return 16;
 		}
 
 		private ushort PopStack()

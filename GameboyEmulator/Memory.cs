@@ -48,7 +48,7 @@ namespace GameboyEmulator
 		private       bool   bootRomEnabled     = false;
 
 		//TODO - Accept game file path as console parameter / make into property
-		private const string GAME_ROM_FILE_PATH = "../../../roms/schrodi.gb";
+		private const string GAME_ROM_FILE_PATH = "../../../roms/test/cpu_instrs/individual/01-special.gb";
 
 		public Memory(Cpu cpu, Interrupts interrupts)
 		{
@@ -101,7 +101,7 @@ namespace GameboyEmulator
 			if (IsBetween(address, UNUSED_BASE_ADDRESS, IO_PORTS_BASE_ADDRESS))
 			{
 				//Unused Memory
-				throw new IndexOutOfRangeException($"Cannot access Memory at Address {address}!");
+				throw new IndexOutOfRangeException($"Cannot access Memory at Address 0x{address:X}!");
 			}
 
 			if (IsBetween(address, CARTRIDGE_ROM_BASE_ADDRESS, VIDEO_RAM_BASE_ADDRESS))
@@ -112,9 +112,21 @@ namespace GameboyEmulator
 				//TODO - Implement Banking
 			}
 
+			if (IsBetween(address, WORK_RAM_BASE_ADDRESS, ECHO_RAM_BASE_ADDRESS))
+			{
+				//Work Ram
+				return workRam[address - WORK_RAM_BASE_ADDRESS];
+			}
+
+			if (IsBetween(address, ECHO_RAM_BASE_ADDRESS, SPRITE_ATTRIBUTES_BASE_ADDRESS))
+			{
+				//Echo Ram - Same as Work Ram
+				return workRam[address - ECHO_RAM_BASE_ADDRESS];
+			}
+
 			if (IsBetween(address, VIDEO_RAM_BASE_ADDRESS, CARTRIDGE_RAM_BASE_ADDRESS))
 			{
-				//IO Ports
+				//Video Ram
 				return videoRam[address - VIDEO_RAM_BASE_ADDRESS];
 			}
 
@@ -138,7 +150,7 @@ namespace GameboyEmulator
 			if (IsBetween(address, UNUSED_BASE_ADDRESS, IO_PORTS_BASE_ADDRESS))
 			{
 				//Unused Memory / Out of Bounds
-				throw new IndexOutOfRangeException($"Cannot access Memory at Address {address}!");
+				throw new IndexOutOfRangeException($"Cannot access Memory at Address 0x{address:X}!");
 			}
 
 			if (IsBetween(address, CARTRIDGE_ROM_BASE_ADDRESS, VIDEO_RAM_BASE_ADDRESS))
@@ -148,8 +160,18 @@ namespace GameboyEmulator
 			}
 			else if (IsBetween(address, VIDEO_RAM_BASE_ADDRESS, CARTRIDGE_RAM_BASE_ADDRESS))
 			{
-				//Video RAM
+				//Video Ram
 				videoRam[address - VIDEO_RAM_BASE_ADDRESS] = data;
+			}
+			else if (IsBetween(address, WORK_RAM_BASE_ADDRESS, ECHO_RAM_BASE_ADDRESS))
+			{
+				//Work Ram
+				workRam[address - WORK_RAM_BASE_ADDRESS] = data;
+			}
+			else if (IsBetween(address, ECHO_RAM_BASE_ADDRESS, SPRITE_ATTRIBUTES_BASE_ADDRESS))
+			{
+				//Echo Ram - Same as Work RAM
+				workRam[address - ECHO_RAM_BASE_ADDRESS] = data;
 			}
 			else if (IsBetween(address, IO_PORTS_BASE_ADDRESS, HIGH_RAM_BASE_ADDRESS))
 			{
@@ -179,6 +201,10 @@ namespace GameboyEmulator
 			{
 				//High Ram
 				highRam[address - HIGH_RAM_BASE_ADDRESS] = data;
+			}
+			else if (address == INTERRUPT_ENABLE_REG_ADDRESS)
+			{
+				interrupts.interruptEnableRegister = data;
 			}
 			else
 			{

@@ -118,15 +118,14 @@ namespace GameboyEmulator
 
 		private void SetStatus()
 		{
-			//TODO - Maybe add this
-			//if (!lcdEnabled())
-			//{
-			//    scanlineCounter = 456;
-			//    mainMem[SCANLINE_REG] = 0;
-			//    status = (status & 0b11111100) | 1;
-			//    writeMem(LCD_STATUS_REG, status);
-			//    return;
-			//}
+			//TODO - Fix this
+			if (!IsEnabled)
+			{
+				drawScanlineCounter = 0;
+				CurrentScanline     = 0;
+				Mode                = 1;
+				return;
+			}
 
 			//TODO - Interrupts  
 
