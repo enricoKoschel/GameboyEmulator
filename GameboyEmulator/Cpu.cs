@@ -707,7 +707,7 @@ namespace GameboyEmulator
 
 			if (!ShouldJump(condition)) return 12;
 
-			PushStack((ushort)(programCounter + 2));
+			PushStack(programCounter);
 			programCounter = jumpAddress;
 			return 24;
 		}
