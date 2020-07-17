@@ -49,7 +49,6 @@ namespace GameboyEmulator
 
 		//TODO - Accept game file path as console parameter / make into property
 		private const string GAME_ROM_FILE_PATH = "../../../roms/test/cpu_instrs/individual/01-special.gb";
-		//private const string GAME_ROM_FILE_PATH = "../../../roms/test/cpu_instrs/cpu_instrs.gb";
 
 		public Memory(Cpu cpu, Interrupts interrupts)
 		{
