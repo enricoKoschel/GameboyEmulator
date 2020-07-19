@@ -46,7 +46,8 @@ namespace GameboyEmulator
 			set
 			{
 				aRegister    = GetHiByte(value);
-				flagRegister = GetLoByte(value);
+				//Lower nibble of Flag Register should always be zero
+				flagRegister = (byte)(GetLoByte(value) & 0xF0);
 			}
 		}
 
@@ -551,8 +552,7 @@ namespace GameboyEmulator
 					return 12;
 				//POP AF
 				case 0xF1:
-					//TODO - Upper nibble of flag register should not be affected
-					AfRegister = PopStack();
+					AfRegister   =  PopStack();
 					return 12;
 				//DI
 				case 0xF3:

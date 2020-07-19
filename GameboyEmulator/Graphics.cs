@@ -49,6 +49,12 @@ namespace GameboyEmulator
 
 			for (int tileMapX = lcd.ScrollX; tileMapX < lcd.ScrollX + 20; tileMapX++)
 			{
+				if (tileMapY > 0x399)
+				{
+					//Overflow at bottom of Screen, start at the top again
+					tileMapY -= 0x400;
+				}
+
 				ushort tileMapIndex  = (ushort)(lcd.BackgroundTileMapBaseAddress + tileMapY + tileMapX);
 				ushort tileDataIndex = lcd.TileDataBaseAddress;
 

@@ -45,7 +45,7 @@ namespace GameboyEmulator
 
 		//File paths
 		private const string BOOT_ROM_FILE_PATH = "../../../roms/boot.gb";
-		private       bool   bootRomEnabled     = true;
+		private       bool   bootRomEnabled     = false;
 
 		//TODO - Accept game file path as console parameter / make into property
 		private const string GAME_ROM_FILE_PATH = "../../../roms/test/cpu_instrs/individual/01-special.gb";
@@ -125,7 +125,7 @@ namespace GameboyEmulator
 			Write(0xFF4B, 0x00, true);
 			Write(0xFFFF, 0x00, true);
 		}
-		
+
 		private void DisableBootRom()
 		{
 			//Overwrite Boot rom with Game rom, thus disabling it
@@ -248,6 +248,11 @@ namespace GameboyEmulator
 					$"Write Memory location: 0x{address:X} not implemented yet!"
 				); //TODO - implement write memory
 			}
+		}
+
+		public void DumpVram()
+		{
+			File.WriteAllBytes("../../../vramDump.bin", videoRam);
 		}
 
 		//Utility functions
