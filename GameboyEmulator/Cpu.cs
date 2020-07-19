@@ -45,7 +45,7 @@ namespace GameboyEmulator
 			get => MakeWord(aRegister, flagRegister);
 			set
 			{
-				aRegister    = GetHiByte(value);
+				aRegister = GetHiByte(value);
 				//Lower nibble of Flag Register should always be zero
 				flagRegister = (byte)(GetLoByte(value) & 0xF0);
 			}
@@ -175,9 +175,20 @@ namespace GameboyEmulator
 				case 0x06:
 					bRegister = Load8BitImmediate();
 					return 8;
+				//RLCA
+				case 0x07:
+					aRegister = RotateLeftIntoCarry(aRegister);
+					return 4;
+				//LD (nn),SP
+				case 0x08:
+					return LoadStackPointerIntoMemory();
 				//LD A,(BC)
 				case 0x0A:
 					aRegister = memory.Read(BcRegister);
+					return 8;
+				//DEC BC
+				case 0x0B:
+					BcRegister = Decrement(BcRegister);
 					return 8;
 				//INC C
 				case 0x0C:
@@ -268,6 +279,9 @@ namespace GameboyEmulator
 				case 0x26:
 					hRegister = Load8BitImmediate();
 					return 8;
+				//DAA
+				case 0x27:
+					return DecimalAdjustARegister();
 				//JR Z,n
 				case 0x28:
 					return JumpRelative(JumpConditions.Z);
@@ -291,6 +305,9 @@ namespace GameboyEmulator
 				case 0x2E:
 					lRegister = Load8BitImmediate();
 					return 8;
+				//CPL
+				case 0x2F:
+					return ComplementARegister();
 				//JR NC,n
 				case 0x30:
 					return JumpRelative(JumpConditions.Nc);
@@ -320,6 +337,10 @@ namespace GameboyEmulator
 				case 0x3E:
 					aRegister = Load8BitImmediate();
 					return 8;
+				//LD B,B
+				case 0x40:
+					//Useless opcode
+					return 4;
 				//LD B,(HL)
 				case 0x46:
 					bRegister = memory.Read(HlRegister);
@@ -424,6 +445,10 @@ namespace GameboyEmulator
 				case 0x7E:
 					aRegister = memory.Read(HlRegister);
 					return 8;
+				//ADD A,L
+				case 0x85:
+					AddByteToAReg(lRegister);
+					return 4;
 				//ADD A,(HL)
 				case 0x86:
 					AddByteToAReg(memory.Read(HlRegister));
@@ -431,6 +456,10 @@ namespace GameboyEmulator
 				//SUB B
 				case 0x90:
 					SubtractByteFromAReg(bRegister, false);
+					return 4;
+				//AND A
+				case 0xA7:
+					AndIntoA(aRegister);
 					return 4;
 				//XOR C
 				case 0xA9:
@@ -552,7 +581,7 @@ namespace GameboyEmulator
 					return 12;
 				//POP AF
 				case 0xF1:
-					AfRegister   =  PopStack();
+					AfRegister = PopStack();
 					return 12;
 				//DI
 				case 0xF3:
@@ -596,6 +625,10 @@ namespace GameboyEmulator
 				case 0x1A:
 					dRegister = RotateRightThroughCarry(dRegister);
 					return 8;
+				//SWAP A
+				case 0x37:
+					aRegister = SwapNibbles(aRegister);
+					return 8;
 				//SRL B
 				case 0x38:
 					bRegister = ShiftRightIntoCarryMsb0(bRegister);
@@ -604,6 +637,18 @@ namespace GameboyEmulator
 				case 0x7C:
 					GameboyBit(hRegister, 7);
 					return 8;
+				//BIT 7,(HL)
+				case 0x7E:
+					GameboyBit(memory.Read(HlRegister), 7);
+					return 16;
+				//RES 7,(HL)
+				case 0xBE:
+					memory.Write(HlRegister, SetBit(memory.Read(HlRegister), 7, false));
+					return 16;
+				//SET 7,(HL)
+				case 0xFE:
+					memory.Write(HlRegister, SetBit(memory.Read(HlRegister), 7, true));
+					return 16;
 
 				//Invalid Opcode
 				default:
@@ -697,6 +742,26 @@ namespace GameboyEmulator
 		private void GameboyBit(byte data, int bit)
 		{
 			SetFlags(!GetBit(data, bit), 0, 1, "");
+		}
+
+		private int ComplementARegister()
+		{
+			aRegister = (byte)~aRegister;
+
+			SetFlags("", 1, 1, "");
+
+			return 4;
+		}
+
+		private byte SwapNibbles(byte data)
+		{
+			byte lowerNibble = (byte)(data & 0xF);
+			data >>= 4;
+			data |=  (byte)(lowerNibble << 4);
+
+			SetFlags(data == 0, 0, 0, 0);
+
+			return data;
 		}
 
 		private byte RotateLeftThroughCarry(byte data)
@@ -827,6 +892,16 @@ namespace GameboyEmulator
 			HlRegister += (ushort)(increment ? 1 : -1);
 
 			return data;
+		}
+
+		private int LoadStackPointerIntoMemory()
+		{
+			ushort address = Load16BitImmediate();
+
+			memory.Write(address++, GetLoByte(stackPointer));
+			memory.Write(address, GetHiByte(stackPointer));
+
+			return 20;
 		}
 
 		//Jump functions
@@ -970,6 +1045,36 @@ namespace GameboyEmulator
 			SetFlags("", 0, halfCarry, carry);
 
 			return (ushort)(data1 + data2);
+		}
+
+		private int DecimalAdjustARegister()
+		{
+			//TODO - Probably doesnt work
+			if (!SubtractFlag)
+			{
+				if (CarryFlag || aRegister > 0x9F)
+				{
+					aRegister += 0x60;
+					CarryFlag =  true;
+				}
+
+				if (HalfCarryFlag || (aRegister & 0xF) > 0x9) aRegister += 0x6;
+			}
+			else
+			{
+				if (CarryFlag)
+				{
+					aRegister -= 0x60;
+					CarryFlag =  true;
+				}
+
+				if (HalfCarryFlag) aRegister -= 0x6;
+			}
+
+			ZeroFlag      = aRegister == 0;
+			HalfCarryFlag = false;
+
+			return 4;
 		}
 
 		//Stack functions
