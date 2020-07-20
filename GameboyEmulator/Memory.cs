@@ -149,6 +149,18 @@ namespace GameboyEmulator
 				//TODO - Implement Banking
 			}
 
+			if (IsBetween(address, VIDEO_RAM_BASE_ADDRESS, CARTRIDGE_RAM_BASE_ADDRESS))
+			{
+				//Video Ram
+				return videoRam[address - VIDEO_RAM_BASE_ADDRESS];
+			}
+
+			if (IsBetween(address, CARTRIDGE_RAM_BASE_ADDRESS, WORK_RAM_BASE_ADDRESS))
+			{
+				//Cartridge Ram
+				return cartridgeRam[address - CARTRIDGE_RAM_BASE_ADDRESS];
+			}
+
 			if (IsBetween(address, WORK_RAM_BASE_ADDRESS, ECHO_RAM_BASE_ADDRESS))
 			{
 				//Work Ram
@@ -161,10 +173,10 @@ namespace GameboyEmulator
 				return workRam[address - ECHO_RAM_BASE_ADDRESS];
 			}
 
-			if (IsBetween(address, VIDEO_RAM_BASE_ADDRESS, CARTRIDGE_RAM_BASE_ADDRESS))
+			if (IsBetween(address, SPRITE_ATTRIBUTES_BASE_ADDRESS, UNUSED_BASE_ADDRESS))
 			{
-				//Video Ram
-				return videoRam[address - VIDEO_RAM_BASE_ADDRESS];
+				//Sprite Attributes
+				return spriteAttributes[address - SPRITE_ATTRIBUTES_BASE_ADDRESS];
 			}
 
 			if (IsBetween(address, IO_PORTS_BASE_ADDRESS, HIGH_RAM_BASE_ADDRESS))

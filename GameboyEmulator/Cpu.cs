@@ -365,6 +365,10 @@ namespace GameboyEmulator
 				case 0x57:
 					dRegister = aRegister;
 					return 4;
+				//LD E,C
+				case 0x59:
+					eRegister = cRegister;
+					return 4;
 				//LD E,A
 				case 0x5F:
 					eRegister = aRegister;
@@ -472,6 +476,10 @@ namespace GameboyEmulator
 				//XOR A
 				case 0xAF:
 					XorIntoA(aRegister);
+					return 4;
+				//OR B
+				case 0xB0:
+					OrIntoA(bRegister);
 					return 4;
 				//OR C
 				case 0xB1:
@@ -590,6 +598,10 @@ namespace GameboyEmulator
 				//PUSH AF
 				case 0xF5:
 					return PushStack(AfRegister);
+				//LD SP,HL
+				case 0xF9:
+					stackPointer = HlRegister;
+					return 8;
 				//LD A,(nn)
 				case 0xFA:
 					aRegister = memory.Read(Load16BitImmediate());
@@ -598,6 +610,9 @@ namespace GameboyEmulator
 				case 0xFE:
 					SubtractByteFromAReg(Load8BitImmediate(), true);
 					return 8;
+				//RST 38H
+				case 0xFF:
+					return ResetOpcode(0x38);
 
 				//Invalid Opcode
 				default:
@@ -635,11 +650,11 @@ namespace GameboyEmulator
 					return 8;
 				//BIT 7,H
 				case 0x7C:
-					GameboyBit(hRegister, 7);
+					BitOpcode(hRegister, 7);
 					return 8;
 				//BIT 7,(HL)
 				case 0x7E:
-					GameboyBit(memory.Read(HlRegister), 7);
+					BitOpcode(memory.Read(HlRegister), 7);
 					return 16;
 				//RES 7,(HL)
 				case 0xBE:
@@ -739,7 +754,7 @@ namespace GameboyEmulator
 			SetFlags(aRegister == 0, 0, 1, 0);
 		}
 
-		private void GameboyBit(byte data, int bit)
+		private void BitOpcode(byte data, int bit)
 		{
 			SetFlags(!GetBit(data, bit), 0, 1, "");
 		}
@@ -981,6 +996,15 @@ namespace GameboyEmulator
 			return 20;
 		}
 
+		private int ResetOpcode(byte address)
+		{
+			PushStack(programCounter);
+
+			programCounter = address;
+
+			return 16;
+		}
+
 		//Math functions
 		private static ushort AddSignedToUnsigned(ushort unsignedWord, sbyte signedByte)
 		{
@@ -1049,29 +1073,20 @@ namespace GameboyEmulator
 
 		private int DecimalAdjustARegister()
 		{
-			//TODO - Probably doesnt work
-			if (!SubtractFlag)
-			{
-				if (CarryFlag || aRegister > 0x9F)
-				{
-					aRegister += 0x60;
-					CarryFlag =  true;
-				}
+			int correction = 0;
 
-				if (HalfCarryFlag || (aRegister & 0xF) > 0x9) aRegister += 0x6;
-			}
-			else
-			{
-				if (CarryFlag)
-				{
-					aRegister -= 0x60;
-					CarryFlag =  true;
-				}
+			if (HalfCarryFlag || (!SubtractFlag && ((aRegister & 0xF) > 9))) correction |= 6;
 
-				if (HalfCarryFlag) aRegister -= 0x6;
+			if (CarryFlag || (!SubtractFlag && aRegister > 0x99))
+			{
+				correction |= 0x60;
+				CarryFlag  =  true;
 			}
 
-			ZeroFlag      = aRegister == 0;
+			aRegister += (byte)(SubtractFlag ? -correction : correction);
+
+			ZeroFlag = aRegister == 0;
+
 			HalfCarryFlag = false;
 
 			return 4;
@@ -1083,16 +1098,16 @@ namespace GameboyEmulator
 			byte lo = GetLoByte(data);
 			byte hi = GetHiByte(data);
 
-			memory.Write(stackPointer--, lo);
-			memory.Write(stackPointer--, hi);
+			memory.Write(--stackPointer, hi);
+			memory.Write(--stackPointer, lo);
 
 			return 16;
 		}
 
 		private ushort PopStack()
 		{
-			byte hi = memory.Read(++stackPointer);
-			byte lo = memory.Read(++stackPointer);
+			byte lo = memory.Read(stackPointer++);
+			byte hi = memory.Read(stackPointer++);
 
 			return MakeWord(hi, lo);
 		}
