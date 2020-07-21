@@ -1,0 +1,18 @@
+test\
+	daa.gb	Passed
+	
+	cpu_instrs\
+		cpu_instrs.gb	Not tested
+		
+		individual\
+			01	Passed
+			02	Not tested
+			03	Passed
+			04	Passed
+			05	Not tested
+			06	Not tested
+			07	Not tested
+			08	Not tested
+			09	Not tested
+			10	Not tested
+			11	Not tested

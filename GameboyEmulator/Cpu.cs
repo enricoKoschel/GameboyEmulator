@@ -326,6 +326,10 @@ namespace GameboyEmulator
 				case 0x35:
 					memory.Write(HlRegister, Decrement(memory.Read(HlRegister)));
 					return 12;
+				//LD (HL),n
+				case 0x36:
+					memory.Write(HlRegister, Load8BitImmediate());
+					return 12;
 				//JR C,n
 				case 0x38:
 					return JumpRelative(JumpConditions.C);
@@ -495,7 +499,7 @@ namespace GameboyEmulator
 					return 8;
 				//SUB B
 				case 0x90:
-					SubtractByteFromAReg(bRegister, false);
+					SubtractByteFromAReg(bRegister);
 					return 4;
 				//AND A
 				case 0xA7:
@@ -587,7 +591,7 @@ namespace GameboyEmulator
 					return CallSubroutine(JumpConditions.NoCondition);
 				//ADC A,n
 				case 0xCE:
-					AddByteToAReg(Load8BitImmediate(), true);
+					AddByteToAReg(Load8BitImmediate(), CarryFlag);
 					return 8;
 				//RET NC
 				case 0xD0:
@@ -601,11 +605,15 @@ namespace GameboyEmulator
 					return PushStack(DeRegister);
 				//SUB n
 				case 0xD6:
-					SubtractByteFromAReg(Load8BitImmediate(), false);
+					SubtractByteFromAReg(Load8BitImmediate());
 					return 8;
 				//RET C
 				case 0xD8:
 					return ReturnSubroutine(JumpConditions.C);
+				//SBC A,n
+				case 0xDE:
+					SubtractByteFromAReg(Load8BitImmediate(), false, CarryFlag);
+					return 8;
 				//LD (0xFF00+n),A
 				case 0xE0:
 					return WriteIoPortsImmediateOffset(aRegister);
@@ -654,6 +662,10 @@ namespace GameboyEmulator
 				//PUSH AF
 				case 0xF5:
 					return PushStack(AfRegister);
+				//OR n
+				case 0xF6:
+					OrIntoA(Load8BitImmediate());
+					return 8;
 				//LD HL,SP+n
 				case 0xF8:
 					HlRegister = AddUnsignedImmediateToStackPointer();
@@ -1105,20 +1117,22 @@ namespace GameboyEmulator
 			return (ushort)(data - 1);
 		}
 
-		private void SubtractByteFromAReg(byte data, bool compare)
+		private void SubtractByteFromAReg(byte data, bool compare = false, bool withCarry = false)
 		{
-			bool halfCarry = ToBool(((aRegister & 0xF) - (data & 0xF)) & 0x10);
-			bool carry     = ToBool((aRegister - data) < 0);
+			int result = aRegister - data - (withCarry ? 1 : 0);
+			
+			bool halfCarry = ToBool(((aRegister & 0xF) - (data & 0xF) - (withCarry ? 1 : 0)) & 0x10);
+			bool carryFlag = result < 0;
 
-			SetFlags((aRegister - data) == 0, 1, halfCarry, carry);
+			SetFlags((byte)result == 0, 1, halfCarry, carryFlag);
 
-			if (!compare) aRegister -= data;
+			if (!compare) aRegister = (byte)result;
 		}
 
 		private void AddByteToAReg(byte data, bool withCarry = false)
 		{
 			bool halfCarry = ToBool(((aRegister & 0xF) + (data & 0xF) + (withCarry ? 1 : 0)) & 0x10);
-			bool carryFlag = ToBool((aRegister + data + (withCarry ? 1 : 0)) > 255);
+			bool carryFlag = (aRegister + data + (withCarry ? 1 : 0)) > 255;
 
 			aRegister += (byte)(data + (withCarry ? 1 : 0));
 
@@ -1128,7 +1142,7 @@ namespace GameboyEmulator
 		private ushort Add16BitRegisters(ushort data1, ushort data2)
 		{
 			bool halfCarry = ToBool(((data1 & 0xFFF) + (data2 & 0xFFF)) & 0x1000);
-			bool carry     = ToBool((data1 + data2) > 0xFFFF);
+			bool carry     = (data1 + data2) > 0xFFFF;
 
 			SetFlags("", 0, halfCarry, carry);
 
