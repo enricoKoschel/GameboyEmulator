@@ -359,7 +359,7 @@ namespace GameboyEmulator
 					return 4;
 				//LD D,(HL)
 				case 0x56:
-					dRegister = memory.Read(hRegister);
+					dRegister = memory.Read(HlRegister);
 					return 8;
 				//LD D,A
 				case 0x57:
@@ -492,6 +492,18 @@ namespace GameboyEmulator
 				//OR A
 				case 0xB7:
 					OrIntoA(aRegister);
+					return 4;
+				//CP B
+				case 0xB8:
+					SubtractByteFromAReg(bRegister, true);
+					return 4;
+				//CP C
+				case 0xB9:
+					SubtractByteFromAReg(cRegister, true);
+					return 4;
+				//CP D
+				case 0xBA:
+					SubtractByteFromAReg(dRegister, true);
 					return 4;
 				//CP E
 				case 0xBB:
