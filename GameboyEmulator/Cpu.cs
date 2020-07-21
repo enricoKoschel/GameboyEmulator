@@ -318,6 +318,10 @@ namespace GameboyEmulator
 				//LD (HL-),A
 				case 0x32:
 					return WriteHlDecrement(aRegister, false);
+				//INC SP
+				case 0x33:
+					stackPointer = Increment(stackPointer);
+					return 8;
 				//DEC (HL)
 				case 0x35:
 					memory.Write(HlRegister, Decrement(memory.Read(HlRegister)));
@@ -325,6 +329,14 @@ namespace GameboyEmulator
 				//JR C,n
 				case 0x38:
 					return JumpRelative(JumpConditions.C);
+				//ADD HL,SP
+				case 0x39:
+					HlRegister = Add16BitRegisters(HlRegister, stackPointer);
+					return 8;
+				//DEC SP
+				case 0x3B:
+					stackPointer = Decrement(stackPointer);
+					return 8;
 				//INC A
 				case 0x3C:
 					aRegister = Increment(aRegister);
@@ -369,6 +381,14 @@ namespace GameboyEmulator
 				case 0x59:
 					eRegister = cRegister;
 					return 4;
+				//LD E,L
+				case 0x5D:
+					eRegister = lRegister;
+					return 4;
+				//LD E,(HL)
+				case 0x5E:
+					eRegister = memory.Read(HlRegister);
+					return 8;
 				//LD E,A
 				case 0x5F:
 					eRegister = aRegister;
@@ -376,6 +396,10 @@ namespace GameboyEmulator
 				//LD H,C
 				case 0x61:
 					hRegister = cRegister;
+					return 4;
+				//LD H,D
+				case 0x62:
+					hRegister = dRegister;
 					return 4;
 				//LD H,E
 				case 0x63:
@@ -385,6 +409,10 @@ namespace GameboyEmulator
 				case 0x65:
 					hRegister = lRegister;
 					return 4;
+				//LD H,(HL)
+				case 0x66:
+					hRegister = memory.Read(HlRegister);
+					return 8;
 				//LD H,A
 				case 0x67:
 					hRegister = aRegister;
@@ -392,6 +420,10 @@ namespace GameboyEmulator
 				//LD L,C
 				case 0x69:
 					lRegister = cRegister;
+					return 4;
+				//LD L,E
+				case 0x6B:
+					lRegister = eRegister;
 					return 4;
 				//LD L,H
 				case 0x6C:
@@ -416,6 +448,10 @@ namespace GameboyEmulator
 				//LD (HL),D
 				case 0x72:
 					memory.Write(HlRegister, dRegister);
+					return 8;
+				//LD (HL),E
+				case 0x73:
+					memory.Write(HlRegister, eRegister);
 					return 8;
 				//LD (HL),A
 				case 0x77:
@@ -468,6 +504,10 @@ namespace GameboyEmulator
 				//XOR C
 				case 0xA9:
 					XorIntoA(cRegister);
+					return 4;
+				//XOR L
+				case 0xAD:
+					XorIntoA(lRegister);
 					return 4;
 				//XOR (HL)
 				case 0xAE:
@@ -583,6 +623,10 @@ namespace GameboyEmulator
 				case 0xE6:
 					AndIntoA(Load8BitImmediate());
 					return 8;
+				//ADD SP,n
+				case 0xE8:
+					stackPointer = AddUnsignedImmediateToStackPointer();
+					return 16;
 				//JP (HL)
 				case 0xE9:
 					programCounter = HlRegister;
@@ -610,6 +654,10 @@ namespace GameboyEmulator
 				//PUSH AF
 				case 0xF5:
 					return PushStack(AfRegister);
+				//LD HL,SP+n
+				case 0xF8:
+					HlRegister = AddUnsignedImmediateToStackPointer();
+					return 12;
 				//LD SP,HL
 				case 0xF9:
 					stackPointer = HlRegister;
@@ -651,6 +699,10 @@ namespace GameboyEmulator
 				//RR D
 				case 0x1A:
 					dRegister = RotateRightThroughCarry(dRegister);
+					return 8;
+				//RR E
+				case 0x1B:
+					eRegister = RotateRightThroughCarry(eRegister);
 					return 8;
 				//SWAP A
 				case 0x37:
@@ -1075,7 +1127,7 @@ namespace GameboyEmulator
 
 		private ushort Add16BitRegisters(ushort data1, ushort data2)
 		{
-			bool halfCarry = ToBool(((data1 & 0xF00) + (data2 & 0xF00)) & 0x1000);
+			bool halfCarry = ToBool(((data1 & 0xFFF) + (data2 & 0xFFF)) & 0x1000);
 			bool carry     = ToBool((data1 + data2) > 0xFFFF);
 
 			SetFlags("", 0, halfCarry, carry);
@@ -1102,6 +1154,19 @@ namespace GameboyEmulator
 			HalfCarryFlag = false;
 
 			return 4;
+		}
+
+		private ushort AddUnsignedImmediateToStackPointer()
+		{
+			byte  dataU = Load8BitImmediate();
+			sbyte dataS = (sbyte)dataU;
+
+			bool halfCarry = ToBool(((stackPointer & 0xF) + (dataU & 0xF)) & 0x10);
+			bool carry     = ((stackPointer & 0xFF) + dataU) > 0xFF;
+
+			SetFlags(0, 0, halfCarry, carry);
+
+			return (ushort)(stackPointer + dataS);
 		}
 
 		//Stack functions
