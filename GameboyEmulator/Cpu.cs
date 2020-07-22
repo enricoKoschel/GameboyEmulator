@@ -19,7 +19,7 @@ namespace GameboyEmulator
 			NextCycle,
 			False
 		}
-		
+
 		//Modules
 		private readonly Memory     memory;
 		private readonly Graphics   graphics;
@@ -144,10 +144,11 @@ namespace GameboyEmulator
 						disableInterrupts = InterruptStatus.ThisCycle;
 						break;
 					case InterruptStatus.ThisCycle:
-						disableInterrupts      = InterruptStatus.False;
+						disableInterrupts                = InterruptStatus.False;
 						interrupts.masterInterruptEnable = false;
 						break;
 				}
+
 				//Delayed Interrupt enabling
 				switch (enableInterrupts)
 				{
@@ -155,11 +156,11 @@ namespace GameboyEmulator
 						enableInterrupts = InterruptStatus.ThisCycle;
 						break;
 					case InterruptStatus.ThisCycle:
-						enableInterrupts       = InterruptStatus.False;
+						enableInterrupts                 = InterruptStatus.False;
 						interrupts.masterInterruptEnable = true;
 						break;
 				}
-				
+
 				cyclesThisFrame += cycles;
 				graphics.Update(cycles);
 			}
@@ -178,6 +179,10 @@ namespace GameboyEmulator
 				case 0x01:
 					BcRegister = Load16BitImmediate();
 					return 12;
+				//LD (BC),A
+				case 0x02:
+					memory.Write(BcRegister, aRegister);
+					return 8;
 				//INC BC
 				case 0x03:
 					BcRegister = Increment(BcRegister);
@@ -196,7 +201,7 @@ namespace GameboyEmulator
 					return 8;
 				//RLCA
 				case 0x07:
-					aRegister = RotateLeftIntoCarry(aRegister);
+					aRegister = RotateLeftIntoCarry(aRegister, true);
 					return 4;
 				//LD (nn),SP
 				case 0x08:
@@ -225,6 +230,10 @@ namespace GameboyEmulator
 				case 0x0E:
 					cRegister = Load8BitImmediate();
 					return 8;
+				//RRCA
+				case 0x0F:
+					aRegister = RotateRightIntoCarry(aRegister, true);
+					return 4;
 				//LD DE,nn
 				case 0x11:
 					DeRegister = Load16BitImmediate();
@@ -251,7 +260,7 @@ namespace GameboyEmulator
 					return 8;
 				//RLA
 				case 0x17:
-					aRegister = RotateLeftThroughCarry(aRegister);
+					aRegister = RotateLeftThroughCarry(aRegister, true);
 					return 4;
 				//JR n
 				case 0x18:
@@ -282,7 +291,7 @@ namespace GameboyEmulator
 					return 8;
 				//RRA
 				case 0x1F:
-					aRegister = RotateRightThroughCarry(aRegister);
+					aRegister = RotateRightThroughCarry(aRegister, true);
 					return 4;
 				//JR NZ,n
 				case 0x20:
@@ -357,6 +366,10 @@ namespace GameboyEmulator
 				case 0x33:
 					stackPointer = Increment(stackPointer);
 					return 8;
+				//INC (HL)
+				case 0x34:
+					memory.Write(HlRegister, Increment(memory.Read(HlRegister)));
+					return 12;
 				//DEC (HL)
 				case 0x35:
 					memory.Write(HlRegister, Decrement(memory.Read(HlRegister)));
@@ -365,12 +378,19 @@ namespace GameboyEmulator
 				case 0x36:
 					memory.Write(HlRegister, Load8BitImmediate());
 					return 12;
+				//SCF
+				case 0x37:
+					return SetCarryFlagOpcode();
 				//JR C,n
 				case 0x38:
 					return JumpRelative(JumpConditions.C);
 				//ADD HL,SP
 				case 0x39:
 					HlRegister = Add16BitRegisters(HlRegister, stackPointer);
+					return 8;
+				//LD A,(HL-)
+				case 0x3A:
+					aRegister = ReadHlDecrement(false);
 					return 8;
 				//DEC SP
 				case 0x3B:
@@ -388,6 +408,9 @@ namespace GameboyEmulator
 				case 0x3E:
 					aRegister = Load8BitImmediate();
 					return 8;
+				//CCF
+				case 0x3F:
+					return ComplementCarryFlagOpcode();
 				//LD B,B
 				case 0x40:
 					//Useless Opcode
@@ -640,6 +663,26 @@ namespace GameboyEmulator
 				case 0x7F:
 					//Useless Opcode
 					return 4;
+				//ADD A,B
+				case 0x80:
+					AddByteToAReg(bRegister);
+					return 4;
+				//ADD A,C
+				case 0x81:
+					AddByteToAReg(cRegister);
+					return 4;
+				//ADD A,D
+				case 0x82:
+					AddByteToAReg(dRegister);
+					return 4;
+				//ADD A,E
+				case 0x83:
+					AddByteToAReg(eRegister);
+					return 4;
+				//ADD A,H
+				case 0x84:
+					AddByteToAReg(hRegister);
+					return 4;
 				//ADD A,L
 				case 0x85:
 					AddByteToAReg(lRegister);
@@ -648,17 +691,157 @@ namespace GameboyEmulator
 				case 0x86:
 					AddByteToAReg(memory.Read(HlRegister));
 					return 8;
+				//ADD A,A
+				case 0x87:
+					AddByteToAReg(aRegister);
+					return 4;
+				//ADC A,B
+				case 0x88:
+					AddByteToAReg(bRegister, CarryFlag);
+					return 4;
+				//ADC A,C
+				case 0x89:
+					AddByteToAReg(cRegister, CarryFlag);
+					return 4;
+				//ADC A,D
+				case 0x8A:
+					AddByteToAReg(dRegister, CarryFlag);
+					return 4;
+				//ADC A,E
+				case 0x8B:
+					AddByteToAReg(eRegister, CarryFlag);
+					return 4;
+				//ADC A,H
+				case 0x8C:
+					AddByteToAReg(hRegister, CarryFlag);
+					return 4;
+				//ADC A,L
+				case 0x8D:
+					AddByteToAReg(lRegister, CarryFlag);
+					return 4;
+				//ADC A,(HL)
+				case 0x8E:
+					AddByteToAReg(Load8BitImmediate(), CarryFlag);
+					return 8;
+				//ADC A,A
+				case 0x8F:
+					AddByteToAReg(aRegister, CarryFlag);
+					return 4;
 				//SUB B
 				case 0x90:
 					SubtractByteFromAReg(bRegister);
 					return 4;
+				//SUB C
+				case 0x91:
+					SubtractByteFromAReg(cRegister);
+					return 4;
+				//SUB D
+				case 0x92:
+					SubtractByteFromAReg(dRegister);
+					return 4;
+				//SUB E
+				case 0x93:
+					SubtractByteFromAReg(eRegister);
+					return 4;
+				//SUB H
+				case 0x94:
+					SubtractByteFromAReg(hRegister);
+					return 4;
+				//SUB L
+				case 0x95:
+					SubtractByteFromAReg(lRegister);
+					return 4;
+				//SUB (HL)
+				case 0x96:
+					SubtractByteFromAReg(memory.Read(HlRegister));
+					return 8;
+				//SUB A
+				case 0x97:
+					SubtractByteFromAReg(aRegister);
+					return 4;
+				//SBC A,B
+				case 0x98:
+					SubtractByteFromAReg(bRegister, false, CarryFlag);
+					return 4;
+				//SBC A,C
+				case 0x99:
+					SubtractByteFromAReg(cRegister, false, CarryFlag);
+					return 4;
+				//SBC A,D
+				case 0x9A:
+					SubtractByteFromAReg(dRegister, false, CarryFlag);
+					return 4;
+				//SBC A,E
+				case 0x9B:
+					SubtractByteFromAReg(eRegister, false, CarryFlag);
+					return 4;
+				//SBC A,H
+				case 0x9C:
+					SubtractByteFromAReg(hRegister, false, CarryFlag);
+					return 4;
+				//SBC A,L
+				case 0x9D:
+					SubtractByteFromAReg(lRegister, false, CarryFlag);
+					return 4;
+				//SBC A,(HL)
+				case 0x9E:
+					SubtractByteFromAReg(memory.Read(HlRegister), false, CarryFlag);
+					return 8;
+				//SBC A,A
+				case 0x9F:
+					SubtractByteFromAReg(aRegister, false, CarryFlag);
+					return 4;
+				//AND B
+				case 0xA0:
+					AndIntoA(bRegister);
+					return 4;
+				//AND C
+				case 0xA1:
+					AndIntoA(cRegister);
+					return 4;
+				//AND D
+				case 0xA2:
+					AndIntoA(dRegister);
+					return 4;
+				//AND E
+				case 0xA3:
+					AndIntoA(eRegister);
+					return 4;
+				//AND H
+				case 0xA4:
+					AndIntoA(hRegister);
+					return 4;
+				//AND L
+				case 0xA5:
+					AndIntoA(lRegister);
+					return 4;
+				//AND (HL)
+				case 0xA6:
+					AndIntoA(memory.Read(HlRegister));
+					return 8;
 				//AND A
 				case 0xA7:
 					AndIntoA(aRegister);
 					return 4;
+				//XOR B
+				case 0xA8:
+					XorIntoA(bRegister);
+					return 4;
 				//XOR C
 				case 0xA9:
 					XorIntoA(cRegister);
+					return 4;
+				//XOR D
+				case 0xAA:
+					XorIntoA(dRegister);
+					return 4;
+				//XOR E
+				case 0xAB:
+					XorIntoA(eRegister);
+					return 4;
+				//XOR H
+				case 0xAC:
+					XorIntoA(hRegister);
 					return 4;
 				//XOR L
 				case 0xAD:
@@ -679,6 +862,22 @@ namespace GameboyEmulator
 				//OR C
 				case 0xB1:
 					OrIntoA(cRegister);
+					return 4;
+				//OR D
+				case 0xB2:
+					OrIntoA(dRegister);
+					return 4;
+				//OR E
+				case 0xB3:
+					OrIntoA(eRegister);
+					return 4;
+				//OR H
+				case 0xB4:
+					OrIntoA(hRegister);
+					return 4;
+				//OR L
+				case 0xB5:
+					OrIntoA(lRegister);
 					return 4;
 				//OR (HL)
 				case 0xB6:
@@ -704,10 +903,22 @@ namespace GameboyEmulator
 				case 0xBB:
 					SubtractByteFromAReg(eRegister, true);
 					return 4;
+				//CP H
+				case 0xBC:
+					SubtractByteFromAReg(hRegister, true);
+					return 4;
+				//CP L
+				case 0xBD:
+					SubtractByteFromAReg(lRegister, true);
+					return 4;
 				//CP (HL)
 				case 0xBE:
 					SubtractByteFromAReg(memory.Read(HlRegister), true);
 					return 8;
+				//CP A
+				case 0xBF:
+					SubtractByteFromAReg(aRegister, true);
+					return 4;
 				//RET NZ
 				case 0xC0:
 					return ReturnSubroutine(JumpConditions.Nz);
@@ -849,6 +1060,10 @@ namespace GameboyEmulator
 				case 0xF1:
 					AfRegister = PopStack();
 					return 12;
+				//LD A,(0xFF00+C)
+				case 0xF2:
+					aRegister = memory.Read((ushort)(0xFF00 + cRegister));
+					return 8;
 				//DI
 				case 0xF3:
 					disableInterrupts = InterruptStatus.NextCycle;
@@ -897,9 +1112,105 @@ namespace GameboyEmulator
 
 			switch (opcode)
 			{
+				//RLC B
+				case 0x00:
+					bRegister = RotateLeftIntoCarry(bRegister);
+					return 8;
+				//RLC C
+				case 0x01:
+					cRegister = RotateLeftIntoCarry(cRegister);
+					return 8;
+				//RLC D
+				case 0x02:
+					dRegister = RotateLeftIntoCarry(dRegister);
+					return 8;
+				//RLC E
+				case 0x03:
+					eRegister = RotateLeftIntoCarry(eRegister);
+					return 8;
+				//RLC H
+				case 0x04:
+					hRegister = RotateLeftIntoCarry(hRegister);
+					return 8;
+				//RLC L
+				case 0x05:
+					lRegister = RotateLeftIntoCarry(lRegister);
+					return 8;
+				//RLC (HL)
+				case 0x06:
+					memory.Write(HlRegister, RotateLeftIntoCarry(memory.Read(HlRegister)));
+					return 16;
+				//RLC A
+				case 0x07:
+					aRegister = RotateLeftIntoCarry(aRegister);
+					return 8;
+				//RRC B
+				case 0x08:
+					bRegister = RotateRightIntoCarry(bRegister);
+					return 8;
+				//RRC C
+				case 0x09:
+					cRegister = RotateRightIntoCarry(cRegister);
+					return 8;
+				//RRC D
+				case 0x0A:
+					dRegister = RotateRightIntoCarry(dRegister);
+					return 8;
+				//RRC E
+				case 0x0B:
+					eRegister = RotateRightIntoCarry(eRegister);
+					return 8;
+				//RRC H
+				case 0x0C:
+					hRegister = RotateRightIntoCarry(hRegister);
+					return 8;
+				//RRC L
+				case 0x0D:
+					lRegister = RotateRightIntoCarry(lRegister);
+					return 8;
+				//RRC (HL)
+				case 0x0E:
+					memory.Write(HlRegister, RotateRightIntoCarry(memory.Read(HlRegister)));
+					return 16;
+				//RRC A
+				case 0x0F:
+					aRegister = RotateRightIntoCarry(aRegister);
+					return 8;
+				//RL B
+				case 0x10:
+					bRegister = RotateLeftThroughCarry(bRegister);
+					return 8;
 				//RL C
 				case 0x11:
 					cRegister = RotateLeftThroughCarry(cRegister);
+					return 8;
+				//RL D
+				case 0x12:
+					dRegister = RotateLeftThroughCarry(dRegister);
+					return 8;
+				//RL E
+				case 0x13:
+					eRegister = RotateLeftThroughCarry(eRegister);
+					return 8;
+				//RL H
+				case 0x14:
+					hRegister = RotateLeftThroughCarry(hRegister);
+					return 8;
+				//RL L
+				case 0x15:
+					lRegister = RotateLeftThroughCarry(lRegister);
+					return 8;
+				//RL (HL)
+				case 0x16:
+					memory.Write(HlRegister, RotateLeftThroughCarry(memory.Read(HlRegister)));
+					return 16;
+				//RL A
+				case 0x17:
+					aRegister = RotateLeftThroughCarry(aRegister);
+					return 8;
+				//RR B
+				case 0x18:
+					bRegister = RotateRightThroughCarry(bRegister);
 					return 8;
 				//RR C
 				case 0x19:
@@ -913,6 +1224,114 @@ namespace GameboyEmulator
 				case 0x1B:
 					eRegister = RotateRightThroughCarry(eRegister);
 					return 8;
+				//RR H
+				case 0x1C:
+					hRegister = RotateRightThroughCarry(hRegister);
+					return 8;
+				//RR L
+				case 0x1D:
+					lRegister = RotateRightThroughCarry(lRegister);
+					return 8;
+				//RR (HL)
+				case 0x1E:
+					memory.Write(HlRegister, RotateRightThroughCarry(memory.Read(HlRegister)));
+					return 16;
+				//RR A
+				case 0x1F:
+					aRegister = RotateRightThroughCarry(aRegister);
+					return 8;
+				//SLA B
+				case 0x20:
+					bRegister = ShiftLeftIntoCarryLsb0(bRegister);
+					return 8;
+				//SLA C
+				case 0x21:
+					cRegister = ShiftLeftIntoCarryLsb0(cRegister);
+					return 8;
+				//SLA D
+				case 0x22:
+					dRegister = ShiftLeftIntoCarryLsb0(dRegister);
+					return 8;
+				//SLA E
+				case 0x23:
+					eRegister = ShiftLeftIntoCarryLsb0(eRegister);
+					return 8;
+				//SLA H
+				case 0x24:
+					hRegister = ShiftLeftIntoCarryLsb0(hRegister);
+					return 8;
+				//SLA L
+				case 0x25:
+					lRegister = ShiftLeftIntoCarryLsb0(lRegister);
+					return 8;
+				//SLA (HL)
+				case 0x26:
+					memory.Write(HlRegister, ShiftLeftIntoCarryLsb0(memory.Read(HlRegister)));
+					return 16;
+				//SLA A
+				case 0x27:
+					aRegister = ShiftLeftIntoCarryLsb0(aRegister);
+					return 8;
+				//SRA B
+				case 0x28:
+					bRegister = ShiftRightIntoCarryKeepMsb(bRegister);
+					return 8;
+				//SRA C
+				case 0x29:
+					cRegister = ShiftRightIntoCarryKeepMsb(cRegister);
+					return 8;
+				//SRA D
+				case 0x2A:
+					dRegister = ShiftRightIntoCarryKeepMsb(dRegister);
+					return 8;
+				//SRA E
+				case 0x2B:
+					eRegister = ShiftRightIntoCarryKeepMsb(eRegister);
+					return 8;
+				//SRA H
+				case 0x2C:
+					hRegister = ShiftRightIntoCarryKeepMsb(hRegister);
+					return 8;
+				//SRA L
+				case 0x2D:
+					lRegister = ShiftRightIntoCarryKeepMsb(lRegister);
+					return 8;
+				//SRA (HL)
+				case 0x2E:
+					memory.Write(HlRegister, ShiftRightIntoCarryKeepMsb(memory.Read(HlRegister)));
+					return 16;
+				//SRA A
+				case 0x2F:
+					aRegister = ShiftRightIntoCarryKeepMsb(aRegister);
+					return 8;
+				//SWAP B
+				case 0x30:
+					bRegister = SwapNibbles(bRegister);
+					return 8;
+				//SWAP C
+				case 0x31:
+					cRegister = SwapNibbles(cRegister);
+					return 8;
+				//SWAP D
+				case 0x32:
+					dRegister = SwapNibbles(dRegister);
+					return 8;
+				//SWAP E
+				case 0x33:
+					eRegister = SwapNibbles(eRegister);
+					return 8;
+				//SWAP H
+				case 0x34:
+					hRegister = SwapNibbles(hRegister);
+					return 8;
+				//SWAP L
+				case 0x35:
+					lRegister = SwapNibbles(lRegister);
+					return 8;
+				//SWAP (HL)
+				case 0x36:
+					memory.Write(HlRegister, SwapNibbles(memory.Read(HlRegister)));
+					return 16;
 				//SWAP A
 				case 0x37:
 					aRegister = SwapNibbles(aRegister);
@@ -920,6 +1339,34 @@ namespace GameboyEmulator
 				//SRL B
 				case 0x38:
 					bRegister = ShiftRightIntoCarryMsb0(bRegister);
+					return 8;
+				//SRL C
+				case 0x39:
+					cRegister = ShiftRightIntoCarryMsb0(cRegister);
+					return 8;
+				//SRL D
+				case 0x3A:
+					dRegister = ShiftRightIntoCarryMsb0(dRegister);
+					return 8;
+				//SRL E
+				case 0x3B:
+					eRegister = ShiftRightIntoCarryMsb0(eRegister);
+					return 8;
+				//SRL H
+				case 0x3C:
+					hRegister = ShiftRightIntoCarryMsb0(hRegister);
+					return 8;
+				//SRL L
+				case 0x3D:
+					lRegister = ShiftRightIntoCarryMsb0(lRegister);
+					return 8;
+				//SRL (HL)
+				case 0x3E:
+					memory.Write(HlRegister, ShiftRightIntoCarryMsb0(memory.Read(HlRegister)));
+					return 16;
+				//SRL A
+				case 0x3F:
+					aRegister = ShiftRightIntoCarryMsb0(aRegister);
 					return 8;
 				//BIT 7,H
 				case 0x7C:
@@ -1052,50 +1499,62 @@ namespace GameboyEmulator
 			return data;
 		}
 
-		private byte RotateLeftThroughCarry(byte data)
+		private byte RotateLeftThroughCarry(byte data, bool dontAffectZeroFlag = false)
 		{
 			bool bit7 = GetBit(data, 7);
 
 			data <<= 1;
 			data =   SetBit(data, 0, CarryFlag);
 
-			SetFlags(data == 0, 0, 0, bit7);
+			if (dontAffectZeroFlag)
+				SetFlags("", 0, 0, bit7);
+			else
+				SetFlags(data == 0, 0, 0, bit7);
 
 			return data;
 		}
 
-		private byte RotateLeftIntoCarry(byte data)
+		private byte RotateLeftIntoCarry(byte data, bool dontAffectZeroFlag = false)
 		{
 			bool bit7 = GetBit(data, 7);
 
 			data <<= 1;
 			data =   SetBit(data, 0, bit7);
 
-			SetFlags(data == 0, 0, 0, bit7);
+			if (dontAffectZeroFlag)
+				SetFlags("", 0, 0, bit7);
+			else
+				SetFlags(data == 0, 0, 0, bit7);
 
 			return data;
 		}
 
-		private byte RotateRightThroughCarry(byte data)
+		private byte RotateRightThroughCarry(byte data, bool dontAffectZeroFlag = false)
 		{
 			bool bit0 = GetBit(data, 0);
 
 			data >>= 1;
 			data =   SetBit(data, 7, CarryFlag);
 
-			SetFlags(data == 0, 0, 0, bit0);
+			if (dontAffectZeroFlag)
+				SetFlags("", 0, 0, bit0);
+			else
+				SetFlags(data == 0, 0, 0, bit0);
 
 			return data;
 		}
 
-		private byte RotateRightIntoCarry(byte data)
+		private byte RotateRightIntoCarry(byte data, bool dontAffectZeroFlag = false)
 		{
 			bool bit0 = GetBit(data, 0);
 
 			data >>= 1;
 			data =   SetBit(data, 7, bit0);
 
-			SetFlags(data == 0, 0, 0, bit0);
+			if (dontAffectZeroFlag)
+				SetFlags("", 0, 0, bit0);
+			else
+				SetFlags(data == 0, 0, 0, bit0);
 
 			return data;
 		}
@@ -1108,6 +1567,30 @@ namespace GameboyEmulator
 			data =   SetBit(data, 7, false);
 
 			SetFlags(data == 0, 0, 0, bit0);
+
+			return data;
+		}
+
+		private byte ShiftRightIntoCarryKeepMsb(byte data)
+		{
+			bool bit0 = GetBit(data, 0);
+
+			data >>= 1;
+			data =   SetBit(data, 7, GetBit(data, 6));
+
+			SetFlags(data == 0, 0, 0, bit0);
+
+			return data;
+		}
+
+		private byte ShiftLeftIntoCarryLsb0(byte data)
+		{
+			bool bit7 = GetBit(data, 7);
+
+			data <<= 1;
+			data =   SetBit(data, 0, false);
+
+			SetFlags(data == 0, 0, 0, bit7);
 
 			return data;
 		}
@@ -1190,6 +1673,18 @@ namespace GameboyEmulator
 			memory.Write(address, GetHiByte(stackPointer));
 
 			return 20;
+		}
+
+		private int SetCarryFlagOpcode()
+		{
+			SetFlags("", 0, 0, 1);
+			return 4;
+		}
+
+		private int ComplementCarryFlagOpcode()
+		{
+			SetFlags("", 0, 0, !CarryFlag);
+			return 4;
 		}
 
 		//Jump functions
@@ -1317,7 +1812,7 @@ namespace GameboyEmulator
 		private void SubtractByteFromAReg(byte data, bool compare = false, bool withCarry = false)
 		{
 			int result = aRegister - data - (withCarry ? 1 : 0);
-			
+
 			bool halfCarry = ToBool(((aRegister & 0xF) - (data & 0xF) - (withCarry ? 1 : 0)) & 0x10);
 			bool carryFlag = result < 0;
 
