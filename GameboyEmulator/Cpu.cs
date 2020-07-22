@@ -28,9 +28,10 @@ namespace GameboyEmulator
 		public Cpu()
 		{
 			//Initialize modules
-			interrupts = new Interrupts();
+			//TODO - Resolver circular Dependency
+			interrupts = new Interrupts(memory);
 			memory     = new Memory(this, interrupts);
-			graphics   = new Graphics(memory, this);
+			graphics   = new Graphics(memory, this, interrupts);
 		}
 
 		//Registers
@@ -163,6 +164,7 @@ namespace GameboyEmulator
 
 				cyclesThisFrame += cycles;
 				graphics.Update(cycles);
+				interrupts.ServiceInterrupts();
 			}
 		}
 
@@ -1090,6 +1092,10 @@ namespace GameboyEmulator
 				case 0xFA:
 					aRegister = memory.Read(Load16BitImmediate());
 					return 16;
+				//EI
+				case 0xFB:
+					enableInterrupts = InterruptStatus.NextCycle;
+					return 4;
 				//CP n
 				case 0xFE:
 					SubtractByteFromAReg(Load8BitImmediate(), true);
@@ -2174,7 +2180,7 @@ namespace GameboyEmulator
 			return ToBool(((data >> bit) & 1));
 		}
 
-		private static byte SetBit(byte data, int bit, bool state)
+		public static byte SetBit(byte data, int bit, bool state)
 		{
 			if (bit > 7 || bit < 0) throw new IndexOutOfRangeException($"Cannot access Bit {bit} of a Byte!");
 
@@ -2249,50 +2255,50 @@ namespace GameboyEmulator
 			return data;
 		}
 
-		private byte RotateLeftThroughCarry(byte data, bool dontAffectZeroFlag = false)
+		private byte RotateLeftThroughCarry(byte data, bool resetZeroFlag = false)
 		{
 			bool bit7 = GetBit(data, 7);
 
 			data <<= 1;
 			data =   SetBit(data, 0, CarryFlag);
 
-			SetFlags(!dontAffectZeroFlag && data == 0, 0, 0, bit7);
+			SetFlags(!resetZeroFlag && data == 0, 0, 0, bit7);
 
 			return data;
 		}
 
-		private byte RotateLeftIntoCarry(byte data, bool dontAffectZeroFlag = false)
+		private byte RotateLeftIntoCarry(byte data, bool resetZeroFlag = false)
 		{
 			bool bit7 = GetBit(data, 7);
 
 			data <<= 1;
 			data =   SetBit(data, 0, bit7);
 
-			SetFlags(!dontAffectZeroFlag && data == 0, 0, 0, bit7);
+			SetFlags(!resetZeroFlag && data == 0, 0, 0, bit7);
 
 			return data;
 		}
 
-		private byte RotateRightThroughCarry(byte data, bool dontAffectZeroFlag = false)
+		private byte RotateRightThroughCarry(byte data, bool resetZeroFlag = false)
 		{
 			bool bit0 = GetBit(data, 0);
 
 			data >>= 1;
 			data =   SetBit(data, 7, CarryFlag);
 
-			SetFlags(!dontAffectZeroFlag && data == 0, 0, 0, bit0);
+			SetFlags(!resetZeroFlag && data == 0, 0, 0, bit0);
 
 			return data;
 		}
 
-		private byte RotateRightIntoCarry(byte data, bool dontAffectZeroFlag = false)
+		private byte RotateRightIntoCarry(byte data, bool resetZeroFlag = false)
 		{
 			bool bit0 = GetBit(data, 0);
 
 			data >>= 1;
 			data =   SetBit(data, 7, bit0);
 
-			SetFlags(!dontAffectZeroFlag && data == 0, 0, 0, bit0);
+			SetFlags(!resetZeroFlag && data == 0, 0, 0, bit0);
 
 			return data;
 		}

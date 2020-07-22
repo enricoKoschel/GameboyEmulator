@@ -5,13 +5,15 @@ namespace GameboyEmulator
 	class Lcd
 	{
 		//Modules
-		private readonly Memory memory;
-		private readonly Screen screen;
+		private readonly Memory     memory;
+		private readonly Screen     screen;
+		private readonly Interrupts interrupts;
 
-		public Lcd(Memory memory, Cpu cpu, Screen screen)
+		public Lcd(Memory memory, Cpu cpu, Screen screen, Interrupts interrupts)
 		{
-			this.memory = memory;
-			this.screen = screen;
+			this.memory     = memory;
+			this.screen     = screen;
+			this.interrupts = interrupts;
 		}
 
 		//Constants
@@ -97,10 +99,12 @@ namespace GameboyEmulator
 
 		public bool WindowEnabled => Cpu.GetBit(ControlRegister, 5);
 
+		private bool VblankRequested = false;
+
 		public void Update(int cycles)
 		{
 			if (!IsEnabled) return;
-			
+
 			drawScanlineCounter += cycles;
 
 			shouldDrawScanline     = false;
@@ -137,7 +141,11 @@ namespace GameboyEmulator
 				//VBlank
 				Mode = 1;
 
+				if (!VblankRequested) interrupts.RequestInterrupt(Interrupts.InterruptTypes.VBlank);
+
 				if (CurrentScanline <= 153) return;
+
+				VblankRequested = false;
 
 				//One Frame done
 				CurrentScanline     = 0;

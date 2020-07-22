@@ -9,12 +9,12 @@ namespace GameboyEmulator
 		private readonly Screen screen;
 		private readonly Memory memory;
 
-		public Graphics(Memory memory, Cpu cpu)
+		public Graphics(Memory memory, Cpu cpu, Interrupts interrupts)
 		{
 			this.memory = memory;
 
 			screen = new Screen();
-			lcd    = new Lcd(memory, cpu, screen);
+			lcd    = new Lcd(memory, cpu, screen, interrupts);
 		}
 
 		public bool IsScreenOpen => screen.IsOpen;
@@ -49,11 +49,8 @@ namespace GameboyEmulator
 
 			for (int tileMapX = lcd.ScrollX; tileMapX < lcd.ScrollX + 20; tileMapX++)
 			{
-				if (tileMapY > 0x399)
-				{
-					//Overflow at bottom of Screen, start at the top again
-					tileMapY -= 0x400;
-				}
+				//If Overflow at the bottom of Screen, start at the Top again
+				tileMapY %= 0x400;
 
 				ushort tileMapIndex  = (ushort)(lcd.BackgroundTileMapBaseAddress + tileMapY + tileMapX);
 				ushort tileDataIndex = lcd.TileDataBaseAddress;

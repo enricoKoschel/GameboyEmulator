@@ -45,10 +45,10 @@ namespace GameboyEmulator
 
 		//File paths
 		private const string BOOT_ROM_FILE_PATH = "../../../roms/boot.gb";
-		private       bool   bootRomEnabled     = false;
+		private       bool   bootRomEnabled     = true;
 
 		//TODO - Accept game file path as console parameter / make into property
-		private const string GAME_ROM_FILE_PATH = "../../../roms/test/cpu_instrs/individual/11-op a,(hl).gb";
+		private const string GAME_ROM_FILE_PATH = "../../../roms/test/cpu_instrs/individual/02-interrupts.gb";
 
 		public Memory(Cpu cpu, Interrupts interrupts)
 		{
@@ -190,6 +190,12 @@ namespace GameboyEmulator
 				return highRam[address - HIGH_RAM_BASE_ADDRESS];
 			}
 
+			if (address == INTERRUPT_ENABLE_REG_ADDRESS)
+			{
+				//Interrupt Enable Register
+				return interrupts.InterruptEnableRegister;
+			}
+
 			throw new NotImplementedException($"Read Memory location: 0x{address:X} not implemented yet!");
 		}
 
@@ -252,7 +258,7 @@ namespace GameboyEmulator
 			}
 			else if (address == INTERRUPT_ENABLE_REG_ADDRESS)
 			{
-				interrupts.interruptEnableRegister = data;
+				interrupts.InterruptEnableRegister = data;
 			}
 			else
 			{
