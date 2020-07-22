@@ -13,6 +13,6 @@ test\
 			06	Passed
 			07	Passed
 			08	Passed
-			09	Opcodes 0x07, 0x0F, 0x17, 0x1F produce an Error
-			10	Not tested
-			11	Not tested
+			09	Passed
+			10	Passed
+			11	Passed

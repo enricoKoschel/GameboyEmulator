@@ -48,7 +48,7 @@ namespace GameboyEmulator
 		private       bool   bootRomEnabled     = false;
 
 		//TODO - Accept game file path as console parameter / make into property
-		private const string GAME_ROM_FILE_PATH = "../../../roms/test/cpu_instrs/individual/09-op r,r.gb";
+		private const string GAME_ROM_FILE_PATH = "../../../roms/test/cpu_instrs/individual/11-op a,(hl).gb";
 
 		public Memory(Cpu cpu, Interrupts interrupts)
 		{

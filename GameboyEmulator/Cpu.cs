@@ -721,7 +721,7 @@ namespace GameboyEmulator
 					return 4;
 				//ADC A,(HL)
 				case 0x8E:
-					AddByteToAReg(Load8BitImmediate(), CarryFlag);
+					AddByteToAReg(memory.Read(HlRegister), CarryFlag);
 					return 8;
 				//ADC A,A
 				case 0x8F:
@@ -1368,28 +1368,778 @@ namespace GameboyEmulator
 				case 0x3F:
 					aRegister = ShiftRightIntoCarryMsb0(aRegister);
 					return 8;
+				//BIT 0,B
+				case 0x40:
+					BitOpcode(bRegister, 0);
+					return 8;
+				//BIT 0,C
+				case 0x41:
+					BitOpcode(cRegister, 0);
+					return 8;
+				//BIT 0,D
+				case 0x42:
+					BitOpcode(dRegister, 0);
+					return 8;
+				//BIT 0,E
+				case 0x43:
+					BitOpcode(eRegister, 0);
+					return 8;
+				//BIT 0,H
+				case 0x44:
+					BitOpcode(hRegister, 0);
+					return 8;
+				//BIT 0,L
+				case 0x45:
+					BitOpcode(lRegister, 0);
+					return 8;
+				//BIT 0,(HL)
+				case 0x46:
+					BitOpcode(memory.Read(HlRegister), 0);
+					return 16;
+				//BIT 0,A
+				case 0x47:
+					BitOpcode(aRegister, 0);
+					return 8;
+				//BIT 1,B
+				case 0x48:
+					BitOpcode(bRegister, 1);
+					return 8;
+				//BIT 1,C
+				case 0x49:
+					BitOpcode(cRegister, 1);
+					return 8;
+				//BIT 1,D
+				case 0x4A:
+					BitOpcode(dRegister, 1);
+					return 8;
+				//BIT 1,E
+				case 0x4B:
+					BitOpcode(eRegister, 1);
+					return 8;
+				//BIT 1,H
+				case 0x4C:
+					BitOpcode(hRegister, 1);
+					return 8;
+				//BIT 1,L
+				case 0x4D:
+					BitOpcode(lRegister, 1);
+					return 8;
+				//BIT 1,(HL)
+				case 0x4E:
+					BitOpcode(memory.Read(HlRegister), 1);
+					return 16;
+				//BIT 1,A
+				case 0x4F:
+					BitOpcode(aRegister, 1);
+					return 8;
+				//BIT 2,B
+				case 0x50:
+					BitOpcode(bRegister, 2);
+					return 8;
+				//BIT 2,C
+				case 0x51:
+					BitOpcode(cRegister, 2);
+					return 8;
+				//BIT 2,D
+				case 0x52:
+					BitOpcode(dRegister, 2);
+					return 8;
+				//BIT 2,E
+				case 0x53:
+					BitOpcode(eRegister, 2);
+					return 8;
+				//BIT 2,H
+				case 0x54:
+					BitOpcode(hRegister, 2);
+					return 8;
+				//BIT 2,L
+				case 0x55:
+					BitOpcode(lRegister, 2);
+					return 8;
+				//BIT 2,(HL)
+				case 0x56:
+					BitOpcode(memory.Read(HlRegister), 2);
+					return 16;
+				//BIT 2,A
+				case 0x57:
+					BitOpcode(aRegister, 2);
+					return 8;
+				//BIT 3,B
+				case 0x58:
+					BitOpcode(bRegister, 3);
+					return 8;
+				//BIT 3,C
+				case 0x59:
+					BitOpcode(cRegister, 3);
+					return 8;
+				//BIT 3,D
+				case 0x5A:
+					BitOpcode(dRegister, 3);
+					return 8;
+				//BIT 3,E
+				case 0x5B:
+					BitOpcode(eRegister, 3);
+					return 8;
+				//BIT 3,H
+				case 0x5C:
+					BitOpcode(hRegister, 3);
+					return 8;
+				//BIT 3,L
+				case 0x5D:
+					BitOpcode(lRegister, 3);
+					return 8;
+				//BIT 3,(HL)
+				case 0x5E:
+					BitOpcode(memory.Read(HlRegister), 3);
+					return 16;
+				//BIT 3,A
+				case 0x5F:
+					BitOpcode(aRegister, 3);
+					return 8;
+				//BIT 4,B
+				case 0x60:
+					BitOpcode(bRegister, 4);
+					return 8;
+				//BIT 4,C
+				case 0x61:
+					BitOpcode(cRegister, 4);
+					return 8;
+				//BIT 4,D
+				case 0x62:
+					BitOpcode(dRegister, 4);
+					return 8;
+				//BIT 4,E
+				case 0x63:
+					BitOpcode(eRegister, 4);
+					return 8;
+				//BIT 4,H
+				case 0x64:
+					BitOpcode(hRegister, 4);
+					return 8;
+				//BIT 4,L
+				case 0x65:
+					BitOpcode(lRegister, 4);
+					return 8;
+				//BIT 4,(HL)
+				case 0x66:
+					BitOpcode(memory.Read(HlRegister), 4);
+					return 16;
+				//BIT 4,A
+				case 0x67:
+					BitOpcode(aRegister, 4);
+					return 8;
+				//BIT 5,B
+				case 0x68:
+					BitOpcode(bRegister, 5);
+					return 8;
+				//BIT 5,C
+				case 0x69:
+					BitOpcode(cRegister, 5);
+					return 8;
+				//BIT 5,D
+				case 0x6A:
+					BitOpcode(dRegister, 5);
+					return 8;
+				//BIT 5,E
+				case 0x6B:
+					BitOpcode(eRegister, 5);
+					return 8;
+				//BIT 5,H
+				case 0x6C:
+					BitOpcode(hRegister, 5);
+					return 8;
+				//BIT 5,L
+				case 0x6D:
+					BitOpcode(lRegister, 5);
+					return 8;
+				//BIT 5,(HL)
+				case 0x6E:
+					BitOpcode(memory.Read(HlRegister), 5);
+					return 16;
+				//BIT 5,A
+				case 0x6F:
+					BitOpcode(aRegister, 5);
+					return 8;
+				//BIT 6,B
+				case 0x70:
+					BitOpcode(bRegister, 6);
+					return 8;
+				//BIT 6,C
+				case 0x71:
+					BitOpcode(cRegister, 6);
+					return 8;
+				//BIT 6,D
+				case 0x72:
+					BitOpcode(dRegister, 6);
+					return 8;
+				//BIT 6,E
+				case 0x73:
+					BitOpcode(eRegister, 6);
+					return 8;
+				//BIT 6,H
+				case 0x74:
+					BitOpcode(hRegister, 6);
+					return 8;
+				//BIT 6,L
+				case 0x75:
+					BitOpcode(lRegister, 6);
+					return 8;
+				//BIT 6,(HL)
+				case 0x76:
+					BitOpcode(memory.Read(HlRegister), 6);
+					return 16;
+				//BIT 6,A
+				case 0x77:
+					BitOpcode(aRegister, 6);
+					return 8;
+				//BIT 7,B
+				case 0x78:
+					BitOpcode(bRegister, 7);
+					return 8;
+				//BIT 7,C
+				case 0x79:
+					BitOpcode(cRegister, 7);
+					return 8;
+				//BIT 7,D
+				case 0x7A:
+					BitOpcode(dRegister, 7);
+					return 8;
+				//BIT 7,E
+				case 0x7B:
+					BitOpcode(eRegister, 7);
+					return 8;
 				//BIT 7,H
 				case 0x7C:
 					BitOpcode(hRegister, 7);
+					return 8;
+				//BIT 7,L
+				case 0x7D:
+					BitOpcode(lRegister, 7);
 					return 8;
 				//BIT 7,(HL)
 				case 0x7E:
 					BitOpcode(memory.Read(HlRegister), 7);
 					return 16;
+				//BIT 7,A
+				case 0x7F:
+					BitOpcode(aRegister, 7);
+					return 8;
+				//RES 0,B
+				case 0x80:
+					bRegister = SetBit(bRegister, 0, false);
+					return 8;
+				//RES 0,C
+				case 0x81:
+					cRegister = SetBit(cRegister, 0, false);
+					return 8;
+				//RES 0,D
+				case 0x82:
+					dRegister = SetBit(dRegister, 0, false);
+					return 8;
+				//RES 0,E
+				case 0x83:
+					eRegister = SetBit(eRegister, 0, false);
+					return 8;
+				//RES 0,H
+				case 0x84:
+					hRegister = SetBit(hRegister, 0, false);
+					return 8;
+				//RES 0,L
+				case 0x85:
+					lRegister = SetBit(lRegister, 0, false);
+					return 8;
+				//RES 0,(HL)
+				case 0x86:
+					memory.Write(HlRegister, SetBit(memory.Read(HlRegister), 0, false));
+					return 16;
+				//RES 0,A
+				case 0x87:
+					aRegister = SetBit(aRegister, 0, false);
+					return 8;
+				//RES 1,B
+				case 0x88:
+					bRegister = SetBit(bRegister, 1, false);
+					return 8;
+				//RES 1,C
+				case 0x89:
+					cRegister = SetBit(cRegister, 1, false);
+					return 8;
+				//RES 1,D
+				case 0x8A:
+					dRegister = SetBit(dRegister, 1, false);
+					return 8;
+				//RES 1,E
+				case 0x8B:
+					eRegister = SetBit(eRegister, 1, false);
+					return 8;
+				//RES 1,H
+				case 0x8C:
+					hRegister = SetBit(hRegister, 1, false);
+					return 8;
+				//RES 1,L
+				case 0x8D:
+					lRegister = SetBit(lRegister, 1, false);
+					return 8;
+				//RES 1,(HL)
+				case 0x8E:
+					memory.Write(HlRegister, SetBit(memory.Read(HlRegister), 1, false));
+					return 16;
+				//RES 1,A
+				case 0x8F:
+					aRegister = SetBit(aRegister, 1, false);
+					return 8;
+				//RES 2,B
+				case 0x90:
+					bRegister = SetBit(bRegister, 2, false);
+					return 8;
+				//RES 2,C
+				case 0x91:
+					cRegister = SetBit(cRegister, 2, false);
+					return 8;
+				//RES 2,D
+				case 0x92:
+					dRegister = SetBit(dRegister, 2, false);
+					return 8;
+				//RES 2,E
+				case 0x93:
+					eRegister = SetBit(eRegister, 2, false);
+					return 8;
+				//RES 2,H
+				case 0x94:
+					hRegister = SetBit(hRegister, 2, false);
+					return 8;
+				//RES 2,L
+				case 0x95:
+					lRegister = SetBit(lRegister, 2, false);
+					return 8;
+				//RES 2,(HL)
+				case 0x96:
+					memory.Write(HlRegister, SetBit(memory.Read(HlRegister), 2, false));
+					return 16;
+				//RES 2,A
+				case 0x97:
+					aRegister = SetBit(aRegister, 2, false);
+					return 8;
+				//RES 3,B
+				case 0x98:
+					bRegister = SetBit(bRegister, 3, false);
+					return 8;
+				//RES 3,C
+				case 0x99:
+					cRegister = SetBit(cRegister, 3, false);
+					return 8;
+				//RES 3,D
+				case 0x9A:
+					dRegister = SetBit(dRegister, 3, false);
+					return 8;
+				//RES 3,E
+				case 0x9B:
+					eRegister = SetBit(eRegister, 3, false);
+					return 8;
+				//RES 3,H
+				case 0x9C:
+					hRegister = SetBit(hRegister, 3, false);
+					return 8;
+				//RES 3,L
+				case 0x9D:
+					lRegister = SetBit(lRegister, 3, false);
+					return 8;
+				//RES 3,(HL)
+				case 0x9E:
+					memory.Write(HlRegister, SetBit(memory.Read(HlRegister), 3, false));
+					return 16;
+				//RES 3,A
+				case 0x9F:
+					aRegister = SetBit(aRegister, 3, false);
+					return 8;
+				//RES 4,B
+				case 0xA0:
+					bRegister = SetBit(bRegister, 4, false);
+					return 8;
+				//RES 4,C
+				case 0xA1:
+					cRegister = SetBit(cRegister, 4, false);
+					return 8;
+				//RES 4,D
+				case 0xA2:
+					dRegister = SetBit(dRegister, 4, false);
+					return 8;
+				//RES 4,E
+				case 0xA3:
+					eRegister = SetBit(eRegister, 4, false);
+					return 8;
+				//RES 4,H
+				case 0xA4:
+					hRegister = SetBit(hRegister, 4, false);
+					return 8;
+				//RES 4,L
+				case 0xA5:
+					lRegister = SetBit(lRegister, 4, false);
+					return 8;
+				//RES 4,(HL)
+				case 0xA6:
+					memory.Write(HlRegister, SetBit(memory.Read(HlRegister), 4, false));
+					return 16;
+				//RES 4,A
+				case 0xA7:
+					aRegister = SetBit(aRegister, 4, false);
+					return 8;
+				//RES 5,B
+				case 0xA8:
+					bRegister = SetBit(bRegister, 5, false);
+					return 8;
+				//RES 5,C
+				case 0xA9:
+					cRegister = SetBit(cRegister, 5, false);
+					return 8;
+				//RES 5,D
+				case 0xAA:
+					dRegister = SetBit(dRegister, 5, false);
+					return 8;
+				//RES 5,E
+				case 0xAB:
+					eRegister = SetBit(eRegister, 5, false);
+					return 8;
+				//RES 5,H
+				case 0xAC:
+					hRegister = SetBit(hRegister, 5, false);
+					return 8;
+				//RES 5,L
+				case 0xAD:
+					lRegister = SetBit(lRegister, 5, false);
+					return 8;
+				//RES 5,(HL)
+				case 0xAE:
+					memory.Write(HlRegister, SetBit(memory.Read(HlRegister), 5, false));
+					return 16;
+				//RES 5,A
+				case 0xAF:
+					aRegister = SetBit(aRegister, 5, false);
+					return 8;
+				//RES 6,B
+				case 0xB0:
+					bRegister = SetBit(bRegister, 6, false);
+					return 8;
+				//RES 6,C
+				case 0xB1:
+					cRegister = SetBit(cRegister, 6, false);
+					return 8;
+				//RES 6,D
+				case 0xB2:
+					dRegister = SetBit(dRegister, 6, false);
+					return 8;
+				//RES 6,E
+				case 0xB3:
+					eRegister = SetBit(eRegister, 6, false);
+					return 8;
+				//RES 6,H
+				case 0xB4:
+					hRegister = SetBit(hRegister, 6, false);
+					return 8;
+				//RES 6,L
+				case 0xB5:
+					lRegister = SetBit(lRegister, 6, false);
+					return 8;
+				//RES 6,(HL)
+				case 0xB6:
+					memory.Write(HlRegister, SetBit(memory.Read(HlRegister), 6, false));
+					return 16;
+				//RES 6,A
+				case 0xB7:
+					aRegister = SetBit(aRegister, 6, false);
+					return 8;
+				//RES 7,B
+				case 0xB8:
+					bRegister = SetBit(bRegister, 7, false);
+					return 8;
+				//RES 7,C
+				case 0xB9:
+					cRegister = SetBit(cRegister, 7, false);
+					return 8;
+				//RES 7,D
+				case 0xBA:
+					dRegister = SetBit(dRegister, 7, false);
+					return 8;
+				//RES 7,E
+				case 0xBB:
+					eRegister = SetBit(eRegister, 7, false);
+					return 8;
+				//RES 7,H
+				case 0xBC:
+					hRegister = SetBit(hRegister, 7, false);
+					return 8;
+				//RES 7,L
+				case 0xBD:
+					lRegister = SetBit(lRegister, 7, false);
+					return 8;
 				//RES 7,(HL)
 				case 0xBE:
 					memory.Write(HlRegister, SetBit(memory.Read(HlRegister), 7, false));
 					return 16;
+				//RES 7,A
+				case 0xBF:
+					aRegister = SetBit(aRegister, 7, false);
+					return 8;
+				//SET 0,B
+				case 0xC0:
+					bRegister = SetBit(bRegister, 0, true);
+					return 8;
+				//SET 0,C
+				case 0xC1:
+					cRegister = SetBit(cRegister, 0, true);
+					return 8;
+				//SET 0,D
+				case 0xC2:
+					dRegister = SetBit(dRegister, 0, true);
+					return 8;
+				//SET 0,E
+				case 0xC3:
+					eRegister = SetBit(eRegister, 0, true);
+					return 8;
+				//SET 0,H
+				case 0xC4:
+					hRegister = SetBit(hRegister, 0, true);
+					return 8;
+				//SET 0,L
+				case 0xC5:
+					lRegister = SetBit(lRegister, 0, true);
+					return 8;
+				//SET 0,(HL)
+				case 0xC6:
+					memory.Write(HlRegister, SetBit(memory.Read(HlRegister), 0, true));
+					return 16;
+				//SET 0,A
+				case 0xC7:
+					aRegister = SetBit(aRegister, 0, true);
+					return 8;
+				//SET 1,B
+				case 0xC8:
+					bRegister = SetBit(bRegister, 1, true);
+					return 8;
+				//SET 1,C
+				case 0xC9:
+					cRegister = SetBit(cRegister, 1, true);
+					return 8;
+				//SET 1,D
+				case 0xCA:
+					dRegister = SetBit(dRegister, 1, true);
+					return 8;
+				//SET 1,E
+				case 0xCB:
+					eRegister = SetBit(eRegister, 1, true);
+					return 8;
+				//SET 1,H
+				case 0xCC:
+					hRegister = SetBit(hRegister, 1, true);
+					return 8;
+				//SET 1,L
+				case 0xCD:
+					lRegister = SetBit(lRegister, 1, true);
+					return 8;
+				//SET 1,(HL)
+				case 0xCE:
+					memory.Write(HlRegister, SetBit(memory.Read(HlRegister), 1, true));
+					return 16;
+				//SET 1,A
+				case 0xCF:
+					aRegister = SetBit(aRegister, 1, true);
+					return 8;
+				//SET 2,B
+				case 0xD0:
+					bRegister = SetBit(bRegister, 2, true);
+					return 8;
+				//SET 2,C
+				case 0xD1:
+					cRegister = SetBit(cRegister, 2, true);
+					return 8;
+				//SET 2,D
+				case 0xD2:
+					dRegister = SetBit(dRegister, 2, true);
+					return 8;
+				//SET 2,E
+				case 0xD3:
+					eRegister = SetBit(eRegister, 2, true);
+					return 8;
+				//SET 2,H
+				case 0xD4:
+					hRegister = SetBit(hRegister, 2, true);
+					return 8;
+				//SET 2,L
+				case 0xD5:
+					lRegister = SetBit(lRegister, 2, true);
+					return 8;
+				//SET 2,(HL)
+				case 0xD6:
+					memory.Write(HlRegister, SetBit(memory.Read(HlRegister), 2, true));
+					return 16;
+				//SET 2,A
+				case 0xD7:
+					aRegister = SetBit(aRegister, 2, true);
+					return 8;
+				//SET 3,B
+				case 0xD8:
+					bRegister = SetBit(bRegister, 3, true);
+					return 8;
+				//SET 3,C
+				case 0xD9:
+					cRegister = SetBit(cRegister, 3, true);
+					return 8;
+				//SET 3,D
+				case 0xDA:
+					dRegister = SetBit(dRegister, 3, true);
+					return 8;
+				//SET 3,E
+				case 0xDB:
+					eRegister = SetBit(eRegister, 3, true);
+					return 8;
+				//SET 3,H
+				case 0xDC:
+					hRegister = SetBit(hRegister, 3, true);
+					return 8;
+				//SET 3,L
+				case 0xDD:
+					lRegister = SetBit(lRegister, 3, true);
+					return 8;
+				//SET 3,(HL)
+				case 0xDE:
+					memory.Write(HlRegister, SetBit(memory.Read(HlRegister), 3, true));
+					return 16;
+				//SET 3,A
+				case 0xDF:
+					aRegister = SetBit(aRegister, 3, true);
+					return 8;
+				//SET 4,B
+				case 0xE0:
+					bRegister = SetBit(bRegister, 4, true);
+					return 8;
+				//SET 4,C
+				case 0xE1:
+					cRegister = SetBit(cRegister, 4, true);
+					return 8;
+				//SET 4,D
+				case 0xE2:
+					dRegister = SetBit(dRegister, 4, true);
+					return 8;
+				//SET 4,E
+				case 0xE3:
+					eRegister = SetBit(eRegister, 4, true);
+					return 8;
+				//SET 4,H
+				case 0xE4:
+					hRegister = SetBit(hRegister, 4, true);
+					return 8;
+				//SET 4,L
+				case 0xE5:
+					lRegister = SetBit(lRegister, 4, true);
+					return 8;
+				//SET 4,(HL)
+				case 0xE6:
+					memory.Write(HlRegister, SetBit(memory.Read(HlRegister), 4, true));
+					return 16;
+				//SET 4,A
+				case 0xE7:
+					aRegister = SetBit(aRegister, 4, true);
+					return 8;
+				//SET 5,B
+				case 0xE8:
+					bRegister = SetBit(bRegister, 5, true);
+					return 8;
+				//SET 5,C
+				case 0xE9:
+					cRegister = SetBit(cRegister, 5, true);
+					return 8;
+				//SET 5,D
+				case 0xEA:
+					dRegister = SetBit(dRegister, 5, true);
+					return 8;
+				//SET 5,E
+				case 0xEB:
+					eRegister = SetBit(eRegister, 5, true);
+					return 8;
+				//SET 5,H
+				case 0xEC:
+					hRegister = SetBit(hRegister, 5, true);
+					return 8;
+				//SET 5,L
+				case 0xED:
+					lRegister = SetBit(lRegister, 5, true);
+					return 8;
+				//SET 5,(HL)
+				case 0xEE:
+					memory.Write(HlRegister, SetBit(memory.Read(HlRegister), 5, true));
+					return 16;
+				//SET 5,A
+				case 0xEF:
+					aRegister = SetBit(aRegister, 5, true);
+					return 8;
+				//SET 6,B
+				case 0xF0:
+					bRegister = SetBit(bRegister, 6, true);
+					return 8;
+				//SET 6,C
+				case 0xF1:
+					cRegister = SetBit(cRegister, 6, true);
+					return 8;
+				//SET 6,D
+				case 0xF2:
+					dRegister = SetBit(dRegister, 6, true);
+					return 8;
+				//SET 6,E
+				case 0xF3:
+					eRegister = SetBit(eRegister, 6, true);
+					return 8;
+				//SET 6,H
+				case 0xF4:
+					hRegister = SetBit(hRegister, 6, true);
+					return 8;
+				//SET 6,L
+				case 0xF5:
+					lRegister = SetBit(lRegister, 6, true);
+					return 8;
+				//SET 6,(HL)
+				case 0xF6:
+					memory.Write(HlRegister, SetBit(memory.Read(HlRegister), 6, true));
+					return 16;
+				//SET 6,A
+				case 0xF7:
+					aRegister = SetBit(aRegister, 6, true);
+					return 8;
+				//SET 7,B
+				case 0xF8:
+					bRegister = SetBit(bRegister, 7, true);
+					return 8;
+				//SET 7,C
+				case 0xF9:
+					cRegister = SetBit(cRegister, 7, true);
+					return 8;
+				//SET 7,D
+				case 0xFA:
+					dRegister = SetBit(dRegister, 7, true);
+					return 8;
+				//SET 7,E
+				case 0xFB:
+					eRegister = SetBit(eRegister, 7, true);
+					return 8;
+				//SET 7,H
+				case 0xFC:
+					hRegister = SetBit(hRegister, 7, true);
+					return 8;
+				//SET 7,L
+				case 0xFD:
+					lRegister = SetBit(lRegister, 7, true);
+					return 8;
 				//SET 7,(HL)
 				case 0xFE:
 					memory.Write(HlRegister, SetBit(memory.Read(HlRegister), 7, true));
 					return 16;
-
+				//SET 7,A
+				case 0xFF:
+					aRegister = SetBit(aRegister, 7, true);
+					return 8;
+				
 				//Invalid Opcode
 				default:
-					throw new NotImplementedException(
-						$"Extended Opcode 0xCB{opcode:X} not implemented yet!"
-					); //TODO - implement extended opcodes
+					throw new InvalidOperationException($"Invalid Extended Opcode 0xCB{opcode:X}!");
 			}
 		}
 
@@ -1506,10 +2256,7 @@ namespace GameboyEmulator
 			data <<= 1;
 			data =   SetBit(data, 0, CarryFlag);
 
-			if (dontAffectZeroFlag)
-				SetFlags("", 0, 0, bit7);
-			else
-				SetFlags(data == 0, 0, 0, bit7);
+			SetFlags(!dontAffectZeroFlag && data == 0, 0, 0, bit7);
 
 			return data;
 		}
@@ -1521,10 +2268,7 @@ namespace GameboyEmulator
 			data <<= 1;
 			data =   SetBit(data, 0, bit7);
 
-			if (dontAffectZeroFlag)
-				SetFlags("", 0, 0, bit7);
-			else
-				SetFlags(data == 0, 0, 0, bit7);
+			SetFlags(!dontAffectZeroFlag && data == 0, 0, 0, bit7);
 
 			return data;
 		}
@@ -1536,10 +2280,7 @@ namespace GameboyEmulator
 			data >>= 1;
 			data =   SetBit(data, 7, CarryFlag);
 
-			if (dontAffectZeroFlag)
-				SetFlags("", 0, 0, bit0);
-			else
-				SetFlags(data == 0, 0, 0, bit0);
+			SetFlags(!dontAffectZeroFlag && data == 0, 0, 0, bit0);
 
 			return data;
 		}
@@ -1551,10 +2292,7 @@ namespace GameboyEmulator
 			data >>= 1;
 			data =   SetBit(data, 7, bit0);
 
-			if (dontAffectZeroFlag)
-				SetFlags("", 0, 0, bit0);
-			else
-				SetFlags(data == 0, 0, 0, bit0);
+			SetFlags(!dontAffectZeroFlag && data == 0, 0, 0, bit0);
 
 			return data;
 		}
