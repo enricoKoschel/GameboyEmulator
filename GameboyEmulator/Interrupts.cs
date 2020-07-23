@@ -96,9 +96,9 @@ namespace GameboyEmulator
 			set => InterruptFlagRegister = Cpu.SetBit(InterruptFlagRegister, 4, value);
 		}
 
-		public bool masterInterruptEnable;
+		public bool masterInterruptEnable = true;
 
-		public void RequestInterrupt(InterruptTypes interrupt)
+		public void Request(InterruptTypes interrupt)
 		{
 			switch (interrupt)
 			{
@@ -120,19 +120,19 @@ namespace GameboyEmulator
 			}
 		}
 
-		public void CheckInterrupts()
+		public void Update()
 		{
 			if (!masterInterruptEnable || InterruptFlagRegister == 0 || InterruptEnableRegister == 0) return;
 
 			//Ordered in increasing Priority so that highest Priority always get's executed
-			if (JoypadEnabled && JoypadRequested) ServiceInterrupt(InterruptTypes.Joypad);
-			if (SerialEnabled && SerialRequested) ServiceInterrupt(InterruptTypes.Serial);
-			if (TimerEnabled && TimerRequested) ServiceInterrupt(InterruptTypes.Timer);
-			if (LcdStatEnabled && LcdStatRequested) ServiceInterrupt(InterruptTypes.LcdStat);
-			if (VBlankEnabled && VBlankRequested) ServiceInterrupt(InterruptTypes.VBlank);
+			if (JoypadEnabled && JoypadRequested) Service(InterruptTypes.Joypad);
+			if (SerialEnabled && SerialRequested) Service(InterruptTypes.Serial);
+			if (TimerEnabled && TimerRequested) Service(InterruptTypes.Timer);
+			if (LcdStatEnabled && LcdStatRequested) Service(InterruptTypes.LcdStat);
+			if (VBlankEnabled && VBlankRequested) Service(InterruptTypes.VBlank);
 		}
 
-		private void ServiceInterrupt(InterruptTypes interrupt)
+		private void Service(InterruptTypes interrupt)
 		{
 			masterInterruptEnable = false;
 

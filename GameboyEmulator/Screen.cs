@@ -32,6 +32,10 @@ namespace GameboyEmulator
 			);
 
 			window.SetActive();
+
+			//Gameboy runs at 60 fps
+			window.SetFramerateLimit(60);
+
 			Initialize();
 
 			//Assign event handlers
@@ -67,13 +71,14 @@ namespace GameboyEmulator
 			window.Display();
 		}
 
-		public void ClearScreen()
+		public void Clear()
 		{
 			for (int i = 0; i < SCREEN_GAME_WIDTH; i++)
 			{
 				for (int j = 0; j < SCREEN_GAME_HEIGHT; j++)
 				{
-					Buffer[i, j].FillColor = Colors.white;;
+					Buffer[i, j].FillColor = Colors.white;
+					;
 				}
 			}
 		}

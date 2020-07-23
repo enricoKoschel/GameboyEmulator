@@ -149,7 +149,7 @@ namespace GameboyEmulator
 
 			if (!CoincidenceInterruptEnabled) return;
 			
-			interrupts.RequestInterrupt(Interrupts.InterruptTypes.LcdStat);
+			interrupts.Request(Interrupts.InterruptTypes.LcdStat);
 		}
 
 		public void UpdateDisabled()
@@ -158,7 +158,7 @@ namespace GameboyEmulator
 			CurrentScanline     = 0;
 			Mode                = 1;
 
-			screen.ClearScreen();
+			screen.Clear();
 			screen.DrawFrame();
 		}
 
@@ -173,7 +173,7 @@ namespace GameboyEmulator
 
 				if (!vblankRequested)
 				{
-					interrupts.RequestInterrupt(Interrupts.InterruptTypes.VBlank);
+					interrupts.Request(Interrupts.InterruptTypes.VBlank);
 					vblankRequested = true;
 				}
 

@@ -24,6 +24,7 @@ namespace GameboyEmulator
 		private readonly Memory     memory;
 		private readonly Graphics   graphics;
 		private readonly Interrupts interrupts;
+		private readonly Timer      timer;
 
 		public Cpu()
 		{
@@ -31,6 +32,7 @@ namespace GameboyEmulator
 			memory     = new Memory(this);
 			interrupts = new Interrupts(memory, this);
 			graphics   = new Graphics(memory, this, interrupts);
+			timer      = new Timer(memory, interrupts);
 		}
 
 		//Registers
@@ -163,7 +165,8 @@ namespace GameboyEmulator
 
 				cyclesThisFrame += cycles;
 				graphics.Update(cycles);
-				interrupts.CheckInterrupts();
+				timer.Update(cycles);
+				interrupts.Update();
 			}
 		}
 

@@ -6,7 +6,7 @@ test\
 		
 		individual\
 			01	Passed
-			02	Timer Module needed
+			02	Fails - Error: "Timer doesn't work"
 			03	Passed
 			04	Passed
 			05	Passed

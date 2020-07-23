@@ -235,14 +235,14 @@ namespace GameboyEmulator
 				}
 
 				//IO Ports
-				//TODO - Implement IO Ports
 				if (dontReset)
 					ioPorts[address - IO_PORTS_BASE_ADDRESS] = data;
 				else
 				{
 					ioPorts[address - IO_PORTS_BASE_ADDRESS] = address switch
 					{
-						//Current Scanline register - Reset when written to
+						//Reset when written to
+						0xFF04 => 0,
 						0xFF44 => 0,
 
 						//Default
