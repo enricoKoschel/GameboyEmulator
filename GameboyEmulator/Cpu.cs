@@ -28,9 +28,8 @@ namespace GameboyEmulator
 		public Cpu()
 		{
 			//Initialize modules
-			//TODO - Resolver circular Dependency
-			interrupts = new Interrupts(memory);
-			memory     = new Memory(this, interrupts);
+			memory     = new Memory(this);
+			interrupts = new Interrupts(memory, this);
 			graphics   = new Graphics(memory, this, interrupts);
 		}
 
@@ -164,7 +163,7 @@ namespace GameboyEmulator
 
 				cyclesThisFrame += cycles;
 				graphics.Update(cycles);
-				interrupts.ServiceInterrupts();
+				interrupts.CheckInterrupts();
 			}
 		}
 
@@ -2637,6 +2636,13 @@ namespace GameboyEmulator
 			byte hi = memory.Read(stackPointer++);
 
 			return MakeWord(hi, lo);
+		}
+		
+		//Interrupt functions
+		public void ServiceInterrupt(ushort address)
+		{
+			PushStack(programCounter);
+			programCounter = address;
 		}
 	}
 }

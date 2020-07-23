@@ -6,7 +6,7 @@ test\
 		
 		individual\
 			01	Passed
-			02	Not tested
+			02	Timer Module needed
 			03	Passed
 			04	Passed
 			05	Passed

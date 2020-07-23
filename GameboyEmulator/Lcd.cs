@@ -56,6 +56,12 @@ namespace GameboyEmulator
 			set => memory.Write(0xFF44, value, true);
 		}
 
+		private byte CurrentScanlineCompare
+		{
+			get => memory.Read(0xFF45);
+			set => memory.Write(0xFF45, value, true);
+		}
+		
 		public byte ScrollX
 		{
 			get => memory.Read(0xFF43);
@@ -99,7 +105,19 @@ namespace GameboyEmulator
 
 		public bool WindowEnabled => Cpu.GetBit(ControlRegister, 5);
 
-		private bool VblankRequested = false;
+		private bool CoincidenceFlag
+		{
+			get => Cpu.GetBit(StatusRegister, 2);
+			set => Cpu.SetBit(StatusRegister, 2, value);
+		}
+
+		private bool CoincidenceInterruptEnabled
+		{
+			get => Cpu.GetBit(StatusRegister, 6);
+			set => Cpu.SetBit(StatusRegister, 6, value);
+		}
+		
+		private bool vblankRequested = false;
 
 		public void Update(int cycles)
 		{
@@ -120,6 +138,18 @@ namespace GameboyEmulator
 			}
 
 			SetStatus();
+			CompareLyWithLyc();
+		}
+
+		private void CompareLyWithLyc()
+		{
+			if(CurrentScanline != CurrentScanlineCompare) return;
+
+			CoincidenceFlag = true;
+
+			if (!CoincidenceInterruptEnabled) return;
+			
+			interrupts.RequestInterrupt(Interrupts.InterruptTypes.LcdStat);
 		}
 
 		public void UpdateDisabled()
@@ -141,11 +171,15 @@ namespace GameboyEmulator
 				//VBlank
 				Mode = 1;
 
-				if (!VblankRequested) interrupts.RequestInterrupt(Interrupts.InterruptTypes.VBlank);
+				if (!vblankRequested)
+				{
+					interrupts.RequestInterrupt(Interrupts.InterruptTypes.VBlank);
+					vblankRequested = true;
+				}
 
 				if (CurrentScanline <= 153) return;
 
-				VblankRequested = false;
+				vblankRequested = false;
 
 				//One Frame done
 				CurrentScanline     = 0;

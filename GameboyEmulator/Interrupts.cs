@@ -1,4 +1,5 @@
 ﻿using System;
+using SFML.Graphics;
 
 namespace GameboyEmulator
 {
@@ -15,19 +16,21 @@ namespace GameboyEmulator
 
 		//Modules
 		private readonly Memory memory;
+		private readonly Cpu    cpu;
 
-		public Interrupts(Memory memory)
+		public Interrupts(Memory memory, Cpu cpu)
 		{
 			this.memory = memory;
+			this.cpu    = cpu;
 		}
 
-		public byte InterruptEnableRegister
+		private byte InterruptEnableRegister
 		{
 			get => memory.Read(0xFFFF);
 			set => memory.Write(0xFFFF, (byte)(value & 0b00011111));
 		}
 
-		public byte InterruptFlagRegister
+		private byte InterruptFlagRegister
 		{
 			get => memory.Read(0xFF0F);
 			set => memory.Write(0xFF0F, (byte)(value & 0b00011111));
@@ -92,7 +95,7 @@ namespace GameboyEmulator
 			get => Cpu.GetBit(InterruptFlagRegister, 4);
 			set => InterruptFlagRegister = Cpu.SetBit(InterruptFlagRegister, 4, value);
 		}
-		
+
 		public bool masterInterruptEnable;
 
 		public void RequestInterrupt(InterruptTypes interrupt)
@@ -117,8 +120,45 @@ namespace GameboyEmulator
 			}
 		}
 
-		public void ServiceInterrupts()
+		public void CheckInterrupts()
 		{
+			if (!masterInterruptEnable || InterruptFlagRegister == 0 || InterruptEnableRegister == 0) return;
+
+			//Ordered in increasing Priority so that highest Priority always get's executed
+			if (JoypadEnabled && JoypadRequested) ServiceInterrupt(InterruptTypes.Joypad);
+			if (SerialEnabled && SerialRequested) ServiceInterrupt(InterruptTypes.Serial);
+			if (TimerEnabled && TimerRequested) ServiceInterrupt(InterruptTypes.Timer);
+			if (LcdStatEnabled && LcdStatRequested) ServiceInterrupt(InterruptTypes.LcdStat);
+			if (VBlankEnabled && VBlankRequested) ServiceInterrupt(InterruptTypes.VBlank);
+		}
+
+		private void ServiceInterrupt(InterruptTypes interrupt)
+		{
+			masterInterruptEnable = false;
+
+			switch (interrupt)
+			{
+				case InterruptTypes.VBlank:
+					cpu.ServiceInterrupt(0x40);
+					VBlankRequested = false;
+					break;
+				case InterruptTypes.LcdStat:
+					cpu.ServiceInterrupt(0x48);
+					LcdStatRequested = false;
+					break;
+				case InterruptTypes.Timer:
+					cpu.ServiceInterrupt(0x50);
+					TimerRequested = false;
+					break;
+				case InterruptTypes.Serial:
+					cpu.ServiceInterrupt(0x58);
+					SerialRequested = false;
+					break;
+				case InterruptTypes.Joypad:
+					cpu.ServiceInterrupt(0x60);
+					JoypadRequested = false;
+					break;
+			}
 		}
 	}
 }

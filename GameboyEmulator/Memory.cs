@@ -27,6 +27,7 @@ namespace GameboyEmulator
 		private readonly byte[] spriteAttributes;
 		private readonly byte[] ioPorts;
 		private readonly byte[] highRam;
+		private          byte   interruptEnableRegister;
 
 		private const int CARTRIDGE_ROM_BASE_ADDRESS     = 0x0000;
 		private const int VIDEO_RAM_BASE_ADDRESS         = 0x8000;
@@ -41,19 +42,17 @@ namespace GameboyEmulator
 
 		//Modules
 		private readonly Cpu        cpu;
-		private readonly Interrupts interrupts;
 
 		//File paths
 		private const string BOOT_ROM_FILE_PATH = "../../../roms/boot.gb";
-		private       bool   bootRomEnabled     = true;
+		private       bool   bootRomEnabled     = false;
 
 		//TODO - Accept game file path as console parameter / make into property
 		private const string GAME_ROM_FILE_PATH = "../../../roms/test/cpu_instrs/individual/02-interrupts.gb";
 
-		public Memory(Cpu cpu, Interrupts interrupts)
+		public Memory(Cpu cpu)
 		{
 			this.cpu        = cpu;
-			this.interrupts = interrupts;
 
 			videoRam         = new byte[0x2000];
 			cartridgeRam     = new byte[0x2000];
@@ -193,7 +192,7 @@ namespace GameboyEmulator
 			if (address == INTERRUPT_ENABLE_REG_ADDRESS)
 			{
 				//Interrupt Enable Register
-				return interrupts.InterruptEnableRegister;
+				return interruptEnableRegister;
 			}
 
 			throw new NotImplementedException($"Read Memory location: 0x{address:X} not implemented yet!");
@@ -231,7 +230,7 @@ namespace GameboyEmulator
 			{
 				if (address == 0xFF50)
 				{
-					//Boot Rom done
+					//Boot Rom disable Register
 					DisableBootRom();
 				}
 
@@ -258,7 +257,7 @@ namespace GameboyEmulator
 			}
 			else if (address == INTERRUPT_ENABLE_REG_ADDRESS)
 			{
-				interrupts.InterruptEnableRegister = data;
+				interruptEnableRegister = data;
 			}
 			else
 			{
