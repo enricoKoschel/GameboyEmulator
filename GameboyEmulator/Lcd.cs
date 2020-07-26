@@ -164,8 +164,6 @@ namespace GameboyEmulator
 
 		private void SetStatus()
 		{
-			//TODO - Interrupts  
-
 			if (CurrentScanline >= 144)
 			{
 				//VBlank

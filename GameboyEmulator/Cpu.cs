@@ -20,6 +20,14 @@ namespace GameboyEmulator
 			False
 		}
 
+		private enum HaltModes
+		{
+			HaltedImeTrue,
+			HaltedImeFalse,
+			HaltBug,
+			NotHalted
+		}
+
 		//Modules
 		private readonly Memory     memory;
 		private readonly Graphics   graphics;
@@ -125,6 +133,7 @@ namespace GameboyEmulator
 		//Flags
 		private InterruptStatus disableInterrupts;
 		private InterruptStatus enableInterrupts;
+		private HaltModes       haltMode = HaltModes.NotHalted;
 
 		public void Start()
 		{
@@ -172,7 +181,20 @@ namespace GameboyEmulator
 
 		private int ExecuteOpcode()
 		{
-			byte opcode = Load8BitImmediate();
+			if (haltMode != HaltModes.NotHalted && haltMode != HaltModes.HaltBug && interrupts.HasPendingInterrupts)
+				haltMode = HaltModes.NotHalted;
+
+			if (haltMode == HaltModes.HaltedImeFalse || haltMode == HaltModes.HaltedImeTrue)
+				return 4;
+
+			byte opcode;
+			if (haltMode == HaltModes.HaltBug)
+			{
+				opcode   = memory.Read(programCounter);
+				haltMode = HaltModes.NotHalted;
+			}
+			else
+				opcode = Load8BitImmediate();
 
 			switch (opcode)
 			{
@@ -631,6 +653,9 @@ namespace GameboyEmulator
 				case 0x75:
 					memory.Write(HlRegister, lRegister);
 					return 8;
+				//HALT
+				case 0x76:
+					return HaltCpu();
 				//LD (HL),A
 				case 0x77:
 					memory.Write(HlRegister, aRegister);
@@ -1108,9 +1133,7 @@ namespace GameboyEmulator
 
 				//Invalid Opcode
 				default:
-					throw new NotImplementedException(
-						$"Opcode 0x{opcode:X} not implemented yet!"
-					); //TODO - implement opcodes
+					throw new NotImplementedException($"Opcode 0x{opcode:X} not implemented yet!");
 			}
 		}
 
@@ -2144,7 +2167,7 @@ namespace GameboyEmulator
 				case 0xFF:
 					aRegister = SetBit(aRegister, 7, true);
 					return 8;
-				
+
 				//Invalid Opcode
 				default:
 					throw new InvalidOperationException($"Invalid Extended Opcode 0xCB{opcode:X}!");
@@ -2342,7 +2365,7 @@ namespace GameboyEmulator
 		}
 
 		//Bool functions
-		private static bool ToBool<T>(T data)
+		public static bool ToBool<T>(T data)
 		{
 			return Convert.ToBoolean(data);
 		}
@@ -2640,12 +2663,25 @@ namespace GameboyEmulator
 
 			return MakeWord(hi, lo);
 		}
-		
+
 		//Interrupt functions
 		public void ServiceInterrupt(ushort address)
 		{
 			PushStack(programCounter);
 			programCounter = address;
+		}
+
+		//Halt/Stop functions
+		private int HaltCpu()
+		{
+			if (interrupts.masterInterruptEnable)
+				haltMode = HaltModes.HaltedImeTrue;
+			else if (!interrupts.HasPendingInterrupts)
+				haltMode = HaltModes.HaltedImeFalse;
+			else
+				haltMode = HaltModes.HaltBug;
+
+			return 4;
 		}
 	}
 }

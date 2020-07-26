@@ -48,7 +48,7 @@ namespace GameboyEmulator
 		private       bool   bootRomEnabled     = false;
 
 		//TODO - Accept game file path as console parameter / make into property
-		private const string GAME_ROM_FILE_PATH = "../../../roms/test/cpu_instrs/individual/02-interrupts.gb";
+		private const string GAME_ROM_FILE_PATH = "../../../roms/test/halt_bug.gb";
 
 		public Memory(Cpu cpu)
 		{

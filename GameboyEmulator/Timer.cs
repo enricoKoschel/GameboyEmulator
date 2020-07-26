@@ -55,7 +55,7 @@ namespace GameboyEmulator
 		private int updateDividerRegisterCounter;
 
 		//Main Timer Frequency starts at 4096 Hz (Increment every 1024 Clock Cycles)
-		private int updateMainTimerCounter = 1024;
+		private int updateMainTimerCounter;
 
 		//Flags
 		private bool MainTimerEnabled => Cpu.GetBit(TimerControl, 2);

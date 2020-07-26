@@ -96,6 +96,8 @@ namespace GameboyEmulator
 			set => InterruptFlagRegister = Cpu.SetBit(InterruptFlagRegister, 4, value);
 		}
 
+		public bool HasPendingInterrupts => Cpu.ToBool(InterruptFlagRegister & InterruptEnableRegister & 0x1F);
+
 		public bool masterInterruptEnable = true;
 
 		public void Request(InterruptTypes interrupt)
