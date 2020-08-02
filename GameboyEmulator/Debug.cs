@@ -10,5 +10,10 @@ namespace GameboyEmulator
 		{
 			writer.WriteLine($"PC: 0x{programCounter:X}		Opcode: 0x{opcode:X}");
 		}
+
+		public static void DumpByteArray(byte[] array)
+		{
+			File.WriteAllBytes("../../../arrayDump.bin", array);
+		}
 	}
 }

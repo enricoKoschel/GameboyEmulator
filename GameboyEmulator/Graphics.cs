@@ -23,13 +23,6 @@ namespace GameboyEmulator
 		{
 			lcd.Update(cycles);
 
-			if (!lcd.IsEnabled)
-			{
-				//TODO - Fix display disabled behaviour
-				//lcd.UpdateDisabled();
-				//return;
-			}
-
 			if (lcd.shouldDrawScanline) DrawScanline();
 
 			if (lcd.shouldIncreaseScanline) lcd.CurrentScanline++;

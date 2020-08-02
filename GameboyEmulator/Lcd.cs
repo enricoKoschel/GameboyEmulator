@@ -61,7 +61,7 @@ namespace GameboyEmulator
 			get => memory.Read(0xFF45);
 			set => memory.Write(0xFF45, value, true);
 		}
-		
+
 		public byte ScrollX
 		{
 			get => memory.Read(0xFF43);
@@ -116,13 +116,11 @@ namespace GameboyEmulator
 			get => Cpu.GetBit(StatusRegister, 6);
 			set => Cpu.SetBit(StatusRegister, 6, value);
 		}
-		
-		private bool vblankRequested = false;
+
+		private bool vBlankRequested = false;
 
 		public void Update(int cycles)
 		{
-			if (!IsEnabled) return;
-
 			drawScanlineCounter += cycles;
 
 			shouldDrawScanline     = false;
@@ -143,12 +141,12 @@ namespace GameboyEmulator
 
 		private void CompareLyWithLyc()
 		{
-			if(CurrentScanline != CurrentScanlineCompare) return;
+			if (CurrentScanline != CurrentScanlineCompare) return;
 
 			CoincidenceFlag = true;
 
 			if (!CoincidenceInterruptEnabled) return;
-			
+
 			interrupts.Request(Interrupts.InterruptTypes.LcdStat);
 		}
 
@@ -169,15 +167,15 @@ namespace GameboyEmulator
 				//VBlank
 				Mode = 1;
 
-				if (!vblankRequested)
+				if (!vBlankRequested)
 				{
 					interrupts.Request(Interrupts.InterruptTypes.VBlank);
-					vblankRequested = true;
+					vBlankRequested = true;
 				}
 
 				if (CurrentScanline <= 153) return;
 
-				vblankRequested = false;
+				vBlankRequested = false;
 
 				//One Frame done
 				CurrentScanline     = 0;

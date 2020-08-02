@@ -56,6 +56,8 @@ namespace GameboyEmulator
 		private byte hRegister;
 		private byte lRegister;
 
+		private int totalExecutedOpcodes;
+
 		//Register pairs
 		private ushort AfRegister
 		{
@@ -181,20 +183,21 @@ namespace GameboyEmulator
 
 		private int ExecuteOpcode()
 		{
+			totalExecutedOpcodes++;
+
 			if (haltMode != HaltModes.NotHalted && haltMode != HaltModes.HaltBug && interrupts.HasPendingInterrupts)
 				haltMode = HaltModes.NotHalted;
 
 			if (haltMode == HaltModes.HaltedImeFalse || haltMode == HaltModes.HaltedImeTrue)
 				return 4;
 
-			byte opcode;
+			byte opcode = Load8BitImmediate();
 			if (haltMode == HaltModes.HaltBug)
 			{
-				opcode   = memory.Read(programCounter);
-				haltMode = HaltModes.NotHalted;
+				//If Halt Bug occurs, the Program Counter does not get increased after fetching Opcode 
+				programCounter -= 1;
+				haltMode       =  HaltModes.NotHalted;
 			}
-			else
-				opcode = Load8BitImmediate();
 
 			switch (opcode)
 			{

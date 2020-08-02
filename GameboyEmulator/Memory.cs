@@ -41,18 +41,18 @@ namespace GameboyEmulator
 		private const int INTERRUPT_ENABLE_REG_ADDRESS   = 0xFFFF;
 
 		//Modules
-		private readonly Cpu        cpu;
+		private readonly Cpu cpu;
 
 		//File paths
 		private const string BOOT_ROM_FILE_PATH = "../../../roms/boot.gb";
 		private       bool   bootRomEnabled     = false;
 
 		//TODO - Accept game file path as console parameter / make into property
-		private const string GAME_ROM_FILE_PATH = "../../../roms/test/halt_bug.gb";
+		private const string GAME_ROM_FILE_PATH = "../../../roms/tetris.gb";
 
 		public Memory(Cpu cpu)
 		{
-			this.cpu        = cpu;
+			this.cpu = cpu;
 
 			videoRam         = new byte[0x2000];
 			cartridgeRam     = new byte[0x2000];
@@ -135,8 +135,8 @@ namespace GameboyEmulator
 		{
 			if (IsBetween(address, UNUSED_BASE_ADDRESS, IO_PORTS_BASE_ADDRESS))
 			{
-				//Unused Memory
-				throw new IndexOutOfRangeException($"Cannot access Memory at Address 0x{address:X}!");
+				//Unused Memory / Out of Bounds
+				return 0xFF;
 			}
 
 			if (IsBetween(address, CARTRIDGE_ROM_BASE_ADDRESS, VIDEO_RAM_BASE_ADDRESS))
@@ -180,6 +180,13 @@ namespace GameboyEmulator
 			if (IsBetween(address, IO_PORTS_BASE_ADDRESS, HIGH_RAM_BASE_ADDRESS))
 			{
 				//IO Ports
+				if (address == 0xFF00)
+				{
+					//Temporary Fix, no Joypad Buttons pressed = 0x0F
+					//TODO - Implement Joypad
+					return 0x0F;
+				}
+				
 				return ioPorts[address - IO_PORTS_BASE_ADDRESS];
 			}
 
@@ -203,13 +210,13 @@ namespace GameboyEmulator
 			if (IsBetween(address, UNUSED_BASE_ADDRESS, IO_PORTS_BASE_ADDRESS))
 			{
 				//Unused Memory / Out of Bounds
-				throw new IndexOutOfRangeException($"Cannot access Memory at Address 0x{address:X}!");
+				return;
 			}
 
 			if (IsBetween(address, CARTRIDGE_ROM_BASE_ADDRESS, VIDEO_RAM_BASE_ADDRESS))
 			{
 				//Writing to Cartridge ROM triggers ROMBanking Controller
-				throw new NotImplementedException("Rom-Banking not implemented yet!"); //TODO - handle Rom-Banking
+				//throw new NotImplementedException("Rom-Banking not implemented yet!"); //TODO - handle Rom-Banking
 			}
 			else if (IsBetween(address, VIDEO_RAM_BASE_ADDRESS, CARTRIDGE_RAM_BASE_ADDRESS))
 			{
@@ -225,6 +232,11 @@ namespace GameboyEmulator
 			{
 				//Echo Ram - Same as Work RAM
 				workRam[address - ECHO_RAM_BASE_ADDRESS] = data;
+			}
+			else if (IsBetween(address, SPRITE_ATTRIBUTES_BASE_ADDRESS, UNUSED_BASE_ADDRESS))
+			{
+				//Sprite Attributes
+				spriteAttributes[address - SPRITE_ATTRIBUTES_BASE_ADDRESS] = data;
 			}
 			else if (IsBetween(address, IO_PORTS_BASE_ADDRESS, HIGH_RAM_BASE_ADDRESS))
 			{

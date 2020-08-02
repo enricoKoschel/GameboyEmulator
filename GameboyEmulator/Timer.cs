@@ -54,7 +54,6 @@ namespace GameboyEmulator
 
 		private int updateDividerRegisterCounter;
 
-		//Main Timer Frequency starts at 4096 Hz (Increment every 1024 Clock Cycles)
 		private int updateMainTimerCounter;
 
 		//Flags
