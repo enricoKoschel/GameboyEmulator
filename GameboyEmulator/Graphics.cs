@@ -93,7 +93,7 @@ namespace GameboyEmulator
 				0 => Colors.white,
 				1 => Colors.lightGray,
 				2 => Colors.darkGray,
-				_ => Color.Black
+				_ => Colors.black
 			};
 		}
 	}
