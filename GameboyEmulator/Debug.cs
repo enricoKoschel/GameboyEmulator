@@ -2,11 +2,17 @@
 
 namespace GameboyEmulator
 {
-	public class Debug
+	public static class Debug
 	{
-		private static readonly StreamWriter writer = new StreamWriter("../../../debug.txt");
+		private static StreamWriter writer;
+		public static  int          totalExecutedOpcodes;
 
-		public static void DumpOpcodes(int programCounter, int opcode)
+		public static void Initialize()
+		{
+			writer = new StreamWriter("../../../debug.txt");
+		}
+
+		public static void DumpOpcode(int programCounter, int opcode)
 		{
 			writer.WriteLine($"PC: 0x{programCounter:X}		Opcode: 0x{opcode:X}");
 		}

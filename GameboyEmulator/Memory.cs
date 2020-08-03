@@ -186,7 +186,7 @@ namespace GameboyEmulator
 					//TODO - Implement Joypad
 					return 0x0F;
 				}
-				
+
 				return ioPorts[address - IO_PORTS_BASE_ADDRESS];
 			}
 
@@ -240,10 +240,17 @@ namespace GameboyEmulator
 			}
 			else if (IsBetween(address, IO_PORTS_BASE_ADDRESS, HIGH_RAM_BASE_ADDRESS))
 			{
-				if (address == 0xFF50)
+				//Special Addresses
+				switch (address)
 				{
-					//Boot Rom disable Register
-					DisableBootRom();
+					case 0xFF46:
+						//DMA - Direct Memory Access
+						DirectMemoryAccess(data);
+						break;
+					case 0xFF50:
+						//Boot Rom disable Register
+						DisableBootRom();
+						break;
 				}
 
 				//IO Ports
@@ -279,9 +286,16 @@ namespace GameboyEmulator
 			}
 		}
 
-		public void DumpVram()
+		private void DirectMemoryAccess(byte sourceAddressLo)
 		{
-			File.WriteAllBytes("../../../vramDump.bin", videoRam);
+			if (sourceAddressLo > 0xF1) return;
+
+			ushort       sourceAddress      = (ushort)(sourceAddressLo * 0x100);
+			ushort       destinationAddress = 0xFE00;
+			const ushort finishAddress      = 0xFEA0;
+
+			while (destinationAddress < finishAddress)
+				Write(destinationAddress++, Read(sourceAddress++));
 		}
 
 		//Utility functions

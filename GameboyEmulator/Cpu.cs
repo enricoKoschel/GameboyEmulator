@@ -56,8 +56,6 @@ namespace GameboyEmulator
 		private byte hRegister;
 		private byte lRegister;
 
-		private int totalExecutedOpcodes;
-
 		//Register pairs
 		private ushort AfRegister
 		{
@@ -183,7 +181,7 @@ namespace GameboyEmulator
 
 		private int ExecuteOpcode()
 		{
-			totalExecutedOpcodes++;
+			Debug.totalExecutedOpcodes++;
 
 			if (haltMode != HaltModes.NotHalted && haltMode != HaltModes.HaltBug && interrupts.HasPendingInterrupts)
 				haltMode = HaltModes.NotHalted;
@@ -2170,11 +2168,9 @@ namespace GameboyEmulator
 				case 0xFF:
 					aRegister = SetBit(aRegister, 7, true);
 					return 8;
-
-				//Invalid Opcode
-				default:
-					throw new InvalidOperationException($"Invalid Extended Opcode 0xCB{opcode:X}!");
 			}
+
+			return 0;
 		}
 
 		//Word functions

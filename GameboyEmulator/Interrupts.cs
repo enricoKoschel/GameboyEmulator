@@ -1,7 +1,4 @@
-﻿using System;
-using SFML.Graphics;
-
-namespace GameboyEmulator
+﻿namespace GameboyEmulator
 {
 	class Interrupts
 	{
@@ -24,11 +21,7 @@ namespace GameboyEmulator
 			this.cpu    = cpu;
 		}
 
-		private byte InterruptEnableRegister
-		{
-			get => memory.Read(0xFFFF);
-			set => memory.Write(0xFFFF, (byte)(value & 0b00011111));
-		}
+		private byte InterruptEnableRegister => memory.Read(0xFFFF);
 
 		private byte InterruptFlagRegister
 		{
@@ -36,35 +29,15 @@ namespace GameboyEmulator
 			set => memory.Write(0xFF0F, (byte)(value & 0b00011111));
 		}
 
-		private bool VBlankEnabled
-		{
-			get => Cpu.GetBit(InterruptEnableRegister, 0);
-			set => InterruptEnableRegister = Cpu.SetBit(InterruptEnableRegister, 0, value);
-		}
+		private bool VBlankEnabled => Cpu.GetBit(InterruptEnableRegister, 0);
 
-		private bool LcdStatEnabled
-		{
-			get => Cpu.GetBit(InterruptEnableRegister, 1);
-			set => InterruptEnableRegister = Cpu.SetBit(InterruptEnableRegister, 1, value);
-		}
+		private bool LcdStatEnabled => Cpu.GetBit(InterruptEnableRegister, 1);
 
-		private bool TimerEnabled
-		{
-			get => Cpu.GetBit(InterruptEnableRegister, 2);
-			set => InterruptEnableRegister = Cpu.SetBit(InterruptEnableRegister, 2, value);
-		}
+		private bool TimerEnabled => Cpu.GetBit(InterruptEnableRegister, 2);
 
-		private bool SerialEnabled
-		{
-			get => Cpu.GetBit(InterruptEnableRegister, 3);
-			set => InterruptEnableRegister = Cpu.SetBit(InterruptEnableRegister, 3, value);
-		}
+		private bool SerialEnabled => Cpu.GetBit(InterruptEnableRegister, 3);
 
-		private bool JoypadEnabled
-		{
-			get => Cpu.GetBit(InterruptEnableRegister, 4);
-			set => InterruptEnableRegister = Cpu.SetBit(InterruptEnableRegister, 4, value);
-		}
+		private bool JoypadEnabled => Cpu.GetBit(InterruptEnableRegister, 4);
 
 		private bool VBlankRequested
 		{

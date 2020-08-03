@@ -27,11 +27,7 @@ namespace GameboyEmulator
 			set => memory.Write(0xFF05, value);
 		}
 
-		private byte TimerModulo
-		{
-			get => memory.Read(0xFF06);
-			set => memory.Write(0xFF06, value);
-		}
+		private byte TimerModulo => memory.Read(0xFF06);
 
 		private byte TimerControl
 		{
