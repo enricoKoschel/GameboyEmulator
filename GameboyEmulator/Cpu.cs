@@ -39,7 +39,7 @@ namespace GameboyEmulator
 			//Initialize modules
 			memory     = new Memory(this);
 			interrupts = new Interrupts(memory, this);
-			graphics   = new Graphics(memory, this, interrupts);
+			graphics   = new Graphics(memory, interrupts);
 			timer      = new Timer(memory, interrupts);
 		}
 

@@ -9,12 +9,12 @@ namespace GameboyEmulator
 		private readonly Screen screen;
 		private readonly Memory memory;
 
-		public Graphics(Memory memory, Cpu cpu, Interrupts interrupts)
+		public Graphics(Memory memory, Interrupts interrupts)
 		{
 			this.memory = memory;
 
 			screen = new Screen();
-			lcd    = new Lcd(memory, cpu, screen, interrupts);
+			lcd    = new Lcd(memory, screen, interrupts);
 		}
 
 		public bool IsScreenOpen => screen.IsOpen;
@@ -78,6 +78,64 @@ namespace GameboyEmulator
 
 		private void RenderSprites()
 		{
+			for (ushort oamSpriteAddress = 0xFE00; oamSpriteAddress < 0xFEA0;)
+			{
+				byte yPosition  = (byte)(memory.Read(oamSpriteAddress++) - 16);
+				byte xPosition  = (byte)(memory.Read(oamSpriteAddress++) - 8);
+				byte tileNumber = memory.Read(oamSpriteAddress++);
+				byte attributes = memory.Read(oamSpriteAddress++);
+
+				bool usingPalette0          = !Cpu.GetBit(attributes, 4);
+				bool xFlip                  = Cpu.GetBit(attributes, 5);
+				bool yFlip                  = Cpu.GetBit(attributes, 6);
+				bool spriteBehindBackground = Cpu.GetBit(attributes, 7);
+
+				//Check if Sprite is visible
+				if (lcd.CurrentScanline < yPosition || lcd.CurrentScanline >= yPosition + lcd.SpriteSize) continue;
+
+				int spriteLine = lcd.CurrentScanline - yPosition;
+
+				if (yFlip)
+				{
+					spriteLine -= 7;
+					spriteLine *= -1;
+				}
+
+				spriteLine *= 2;
+
+				ushort spriteDataAddress = (ushort)(0x8000 + spriteLine + tileNumber * 16);
+				byte   spriteDataLo      = memory.Read(spriteDataAddress++);
+				byte   spriteDataHi      = memory.Read(spriteDataAddress);
+
+				for (int spritePixelIndex = 7; spritePixelIndex >= 0; spritePixelIndex--)
+				{
+					int spriteDataIndex = spritePixelIndex;
+					if (xFlip)
+					{
+						spriteDataIndex -= 7;
+						spriteDataIndex *= -1;
+					}
+
+					ushort paletteAddress =
+						usingPalette0 ? Lcd.SPRITE_PALETTE_0_ADDRESS : Lcd.SPRITE_PALETTE_1_ADDRESS;
+
+					int  paletteIndexLo = Cpu.GetBit(spriteDataLo, spriteDataIndex) ? 1 : 0;
+					int  paletteIndexHi = Cpu.GetBit(spriteDataHi, spriteDataIndex) ? 1 : 0;
+					byte paletteIndex   = (byte)((paletteIndexHi << 1) | paletteIndexLo);
+
+					Color color = GetColor(memory.Read(paletteAddress), paletteIndex);
+
+					//White = Transparent
+					if (color == Color.White) continue;
+
+					int spriteDataIndexReverse = spriteDataIndex - 7;
+					spriteDataIndexReverse *= -1;
+
+					int bufferXIndex = xPosition + spriteDataIndexReverse;
+					int bufferYIndex = lcd.CurrentScanline;
+					screen.Buffer[bufferXIndex, bufferYIndex].FillColor = color;
+				}
+			}
 		}
 
 		private static Color GetColor(byte palette, byte paletteIndex)

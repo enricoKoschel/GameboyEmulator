@@ -9,7 +9,7 @@ namespace GameboyEmulator
 		private readonly Screen     screen;
 		private readonly Interrupts interrupts;
 
-		public Lcd(Memory memory, Cpu cpu, Screen screen, Interrupts interrupts)
+		public Lcd(Memory memory, Screen screen, Interrupts interrupts)
 		{
 			this.memory     = memory;
 			this.screen     = screen;
@@ -19,6 +19,9 @@ namespace GameboyEmulator
 		//Constants
 		private const int MODE_2_TIME = 80;
 		private const int MODE_3_TIME = 252;
+
+		public const ushort SPRITE_PALETTE_0_ADDRESS = 0xFF48;
+		public const ushort SPRITE_PALETTE_1_ADDRESS = 0xFF49;
 
 		private int  drawScanlineCounter;
 		public  bool shouldDrawScanline;
@@ -92,9 +95,9 @@ namespace GameboyEmulator
 
 		public ushort TileDataBaseAddress => Cpu.GetBit(ControlRegister, 4) ? (ushort)0x8000 : (ushort)0x8800;
 
-		public bool TileDataIsSigned => !Cpu.GetBit(ControlRegister, 4);
-
 		public byte TilePalette => memory.Read(0xFF47);
+
+		public int SpriteSize => Cpu.GetBit(ControlRegister, 2) ? 16 : 8;
 
 		//Flags
 		public bool IsEnabled => Cpu.GetBit(ControlRegister, 7);
@@ -104,6 +107,8 @@ namespace GameboyEmulator
 		public bool SpritesEnabled => Cpu.GetBit(ControlRegister, 1);
 
 		public bool WindowEnabled => Cpu.GetBit(ControlRegister, 5);
+
+		public bool TileDataIsSigned => !Cpu.GetBit(ControlRegister, 4);
 
 		private bool CoincidenceFlag
 		{
