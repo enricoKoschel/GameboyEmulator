@@ -131,8 +131,8 @@ namespace GameboyEmulator
 		private const int MAX_CPU_CYCLES_PER_FRAME = 70224;
 
 		//Flags
-		private InterruptStatus enableInterrupts;
-		private HaltModes       haltMode = HaltModes.NotHalted;
+		private InterruptStatus enableInterrupts = InterruptStatus.False;
+		private HaltModes       haltMode         = HaltModes.NotHalted;
 
 		public void Start()
 		{
@@ -2224,33 +2224,33 @@ namespace GameboyEmulator
 		{
 			aRegister ^= data;
 
-			SetFlags(aRegister == 0, 0, 0, 0);
+			SetFlags(aRegister == 0, false, false, false);
 		}
 
 		private void OrIntoA(byte data)
 		{
 			aRegister |= data;
 
-			SetFlags(aRegister == 0, 0, 0, 0);
+			SetFlags(aRegister == 0, false, false, false);
 		}
 
 		private void AndIntoA(byte data)
 		{
 			aRegister &= data;
 
-			SetFlags(aRegister == 0, 0, 1, 0);
+			SetFlags(aRegister == 0, false, true, false);
 		}
 
 		private void BitOpcode(byte data, int bit)
 		{
-			SetFlags(!GetBit(data, bit), 0, 1, "");
+			SetFlags(!GetBit(data, bit), false, true, null);
 		}
 
 		private int ComplementARegister()
 		{
 			aRegister = (byte)~aRegister;
 
-			SetFlags("", 1, 1, "");
+			SetFlags(null, true, true, null);
 
 			return 4;
 		}
@@ -2261,7 +2261,7 @@ namespace GameboyEmulator
 			data >>= 4;
 			data |=  (byte)(lowerNibble << 4);
 
-			SetFlags(data == 0, 0, 0, 0);
+			SetFlags(data == 0, false, false, false);
 
 			return data;
 		}
@@ -2273,7 +2273,7 @@ namespace GameboyEmulator
 			data <<= 1;
 			data =   SetBit(data, 0, CarryFlag);
 
-			SetFlags(!resetZeroFlag && data == 0, 0, 0, bit7);
+			SetFlags(!resetZeroFlag && data == 0, false, false, bit7);
 
 			return data;
 		}
@@ -2285,7 +2285,7 @@ namespace GameboyEmulator
 			data <<= 1;
 			data =   SetBit(data, 0, bit7);
 
-			SetFlags(!resetZeroFlag && data == 0, 0, 0, bit7);
+			SetFlags(!resetZeroFlag && data == 0, false, false, bit7);
 
 			return data;
 		}
@@ -2297,7 +2297,7 @@ namespace GameboyEmulator
 			data >>= 1;
 			data =   SetBit(data, 7, CarryFlag);
 
-			SetFlags(!resetZeroFlag && data == 0, 0, 0, bit0);
+			SetFlags(!resetZeroFlag && data == 0, false, false, bit0);
 
 			return data;
 		}
@@ -2309,7 +2309,7 @@ namespace GameboyEmulator
 			data >>= 1;
 			data =   SetBit(data, 7, bit0);
 
-			SetFlags(!resetZeroFlag && data == 0, 0, 0, bit0);
+			SetFlags(!resetZeroFlag && data == 0, false, false, bit0);
 
 			return data;
 		}
@@ -2321,7 +2321,7 @@ namespace GameboyEmulator
 			data >>= 1;
 			data =   SetBit(data, 7, false);
 
-			SetFlags(data == 0, 0, 0, bit0);
+			SetFlags(data == 0, false , false, bit0);
 
 			return data;
 		}
@@ -2333,7 +2333,7 @@ namespace GameboyEmulator
 			data >>= 1;
 			data =   SetBit(data, 7, GetBit(data, 6));
 
-			SetFlags(data == 0, 0, 0, bit0);
+			SetFlags(data == 0, false, false, bit0);
 
 			return data;
 		}
@@ -2345,26 +2345,26 @@ namespace GameboyEmulator
 			data <<= 1;
 			data =   SetBit(data, 0, false);
 
-			SetFlags(data == 0, 0, 0, bit7);
+			SetFlags(data == 0, false, false, bit7);
 
 			return data;
 		}
 
-		//Bool functions
-		public static bool ToBool<T>(T data)
+		public static bool ToBool(int data)
 		{
-			return Convert.ToBoolean(data);
+			return data != 0;
 		}
 
 		//Register functions
-		private void SetFlags<T1, T2, T3, T4>(T1 zeroFlag, T2 subtractFlag, T3 halfCarryFlag, T4 carryFlag)
+		/// <summary>
+		/// Sets CPU Flags. Argument of type Null leaves Flag unchanged
+		/// </summary>
+		private void SetFlags(bool? zeroFlag, bool? subtractFlag, bool? halfCarryFlag, bool? carryFlag)
 		{
-			//Argument of type String means "Leave Flag unchanged"
-
-			if (zeroFlag.GetType().Name != "String") ZeroFlag           = ToBool(zeroFlag);
-			if (subtractFlag.GetType().Name != "String") SubtractFlag   = ToBool(subtractFlag);
-			if (halfCarryFlag.GetType().Name != "String") HalfCarryFlag = ToBool(halfCarryFlag);
-			if (carryFlag.GetType().Name != "String") CarryFlag         = ToBool(carryFlag);
+			if (zeroFlag != null) ZeroFlag           = (bool)zeroFlag;
+			if (subtractFlag != null) SubtractFlag   = (bool)subtractFlag;
+			if (halfCarryFlag != null) HalfCarryFlag = (bool)halfCarryFlag;
+			if (carryFlag != null) CarryFlag         = (bool)carryFlag;
 		}
 
 		public void InitializeRegisters()
@@ -2432,13 +2432,13 @@ namespace GameboyEmulator
 
 		private int SetCarryFlagOpcode()
 		{
-			SetFlags("", 0, 0, 1);
+			SetFlags(null, false, false, true);
 			return 4;
 		}
 
 		private int ComplementCarryFlagOpcode()
 		{
-			SetFlags("", 0, 0, !CarryFlag);
+			SetFlags(null, false, false, !CarryFlag);
 			return 4;
 		}
 
@@ -2541,7 +2541,7 @@ namespace GameboyEmulator
 			bool halfCarry = ToBool(((data & 0xF) + 1) & 0x10);
 
 			data++;
-			SetFlags(data == 0, 0, halfCarry, "");
+			SetFlags(data == 0, false, halfCarry, null);
 			return data;
 		}
 
@@ -2555,7 +2555,7 @@ namespace GameboyEmulator
 			bool halfCarry = ToBool(((data & 0xF) - 1) & 0x10);
 
 			data--;
-			SetFlags(data == 0, 1, halfCarry, "");
+			SetFlags(data == 0, true, halfCarry, null);
 			return data;
 		}
 
@@ -2571,7 +2571,7 @@ namespace GameboyEmulator
 			bool halfCarry = ToBool(((aRegister & 0xF) - (data & 0xF) - (withCarry ? 1 : 0)) & 0x10);
 			bool carryFlag = result < 0;
 
-			SetFlags((byte)result == 0, 1, halfCarry, carryFlag);
+			SetFlags((byte)result == 0, true, halfCarry, carryFlag);
 
 			if (!compare) aRegister = (byte)result;
 		}
@@ -2583,7 +2583,7 @@ namespace GameboyEmulator
 
 			aRegister += (byte)(data + (withCarry ? 1 : 0));
 
-			SetFlags(aRegister == 0, 0, halfCarry, carryFlag);
+			SetFlags(aRegister == 0, false, halfCarry, carryFlag);
 		}
 
 		private ushort Add16BitRegisters(ushort data1, ushort data2)
@@ -2591,7 +2591,7 @@ namespace GameboyEmulator
 			bool halfCarry = ToBool(((data1 & 0xFFF) + (data2 & 0xFFF)) & 0x1000);
 			bool carry     = (data1 + data2) > 0xFFFF;
 
-			SetFlags("", 0, halfCarry, carry);
+			SetFlags(null, false, halfCarry, carry);
 
 			return (ushort)(data1 + data2);
 		}
@@ -2625,7 +2625,7 @@ namespace GameboyEmulator
 			bool halfCarry = ToBool(((stackPointer & 0xF) + (dataU & 0xF)) & 0x10);
 			bool carry     = ((stackPointer & 0xFF) + dataU) > 0xFF;
 
-			SetFlags(0, 0, halfCarry, carry);
+			SetFlags(false, false, halfCarry, carry);
 
 			return (ushort)(stackPointer + dataS);
 		}
