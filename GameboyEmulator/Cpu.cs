@@ -131,7 +131,6 @@ namespace GameboyEmulator
 		private const int MAX_CPU_CYCLES_PER_FRAME = 70224;
 
 		//Flags
-		private InterruptStatus disableInterrupts;
 		private InterruptStatus enableInterrupts;
 		private HaltModes       haltMode = HaltModes.NotHalted;
 
@@ -147,18 +146,6 @@ namespace GameboyEmulator
 			while (cyclesThisFrame < MAX_CPU_CYCLES_PER_FRAME)
 			{
 				int cycles = ExecuteOpcode();
-
-				//Delayed Interrupt disabling
-				switch (disableInterrupts)
-				{
-					case InterruptStatus.NextCycle:
-						disableInterrupts = InterruptStatus.ThisCycle;
-						break;
-					case InterruptStatus.ThisCycle:
-						disableInterrupts                = InterruptStatus.False;
-						interrupts.masterInterruptEnable = false;
-						break;
-				}
 
 				//Delayed Interrupt enabling
 				switch (enableInterrupts)
@@ -1096,7 +1083,7 @@ namespace GameboyEmulator
 					return 8;
 				//DI
 				case 0xF3:
-					disableInterrupts = InterruptStatus.NextCycle;
+					interrupts.masterInterruptEnable = false;
 					return 4;
 				//PUSH AF
 				case 0xF5:
