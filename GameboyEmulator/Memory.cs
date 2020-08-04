@@ -48,7 +48,7 @@ namespace GameboyEmulator
 		private       bool   bootRomEnabled     = false;
 
 		//TODO - Accept game file path as console parameter / make into property
-		private const string GAME_ROM_FILE_PATH = "../../../roms/tetris.gb";
+		private const string GAME_ROM_FILE_PATH = "../../../roms/drmario.gb";
 
 		public Memory(Cpu cpu)
 		{

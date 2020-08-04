@@ -123,10 +123,11 @@ namespace GameboyEmulator
 					int  paletteIndexHi = Cpu.GetBit(spriteDataHi, spriteDataIndex) ? 1 : 0;
 					byte paletteIndex   = (byte)((paletteIndexHi << 1) | paletteIndexLo);
 
-					Color color = GetColor(memory.Read(paletteAddress), paletteIndex);
+					//Transparent Pixel
+					if(paletteIndex == 0) continue;
 
-					//White = Transparent
-					if (color == Color.White) continue;
+					byte  palette = memory.Read(paletteAddress);
+					Color color   = GetColor(palette, paletteIndex);
 
 					int spriteDataIndexReverse = spriteDataIndex - 7;
 					spriteDataIndexReverse *= -1;
