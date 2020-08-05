@@ -110,11 +110,6 @@ namespace GameboyEmulator
 				for (int spritePixelIndex = 7; spritePixelIndex >= 0; spritePixelIndex--)
 				{
 					int spriteDataIndex = spritePixelIndex;
-					if (xFlip)
-					{
-						spriteDataIndex -= 7;
-						spriteDataIndex *= -1;
-					}
 
 					ushort paletteAddress =
 						usingPalette0 ? Lcd.SPRITE_PALETTE_0_ADDRESS : Lcd.SPRITE_PALETTE_1_ADDRESS;
@@ -129,9 +124,14 @@ namespace GameboyEmulator
 					byte  palette = memory.Read(paletteAddress);
 					Color color   = GetColor(palette, paletteIndex);
 
-					int spriteDataIndexReverse = spriteDataIndex - 7;
-					spriteDataIndexReverse *= -1;
+					int spriteDataIndexReverse = spriteDataIndex;
 
+					if (!xFlip)
+					{
+						spriteDataIndexReverse -= 7;
+						spriteDataIndexReverse *= -1;
+					}
+					
 					int bufferXIndex = xPosition + spriteDataIndexReverse;
 					int bufferYIndex = lcd.CurrentScanline;
 					screen.Buffer[bufferXIndex, bufferYIndex].FillColor = color;
