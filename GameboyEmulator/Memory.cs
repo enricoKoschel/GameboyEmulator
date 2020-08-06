@@ -48,7 +48,7 @@ namespace GameboyEmulator
 		private       bool   bootRomEnabled     = false;
 
 		//TODO - Accept game file path as console parameter / make into property
-		private const string GAME_ROM_FILE_PATH = "../../../roms/drmario.gb";
+		private const string GAME_ROM_FILE_PATH = "../../../roms/tetris.gb";
 
 		public Memory(Cpu cpu)
 		{
@@ -179,14 +179,6 @@ namespace GameboyEmulator
 
 			if (IsBetween(address, IO_PORTS_BASE_ADDRESS, HIGH_RAM_BASE_ADDRESS))
 			{
-				//IO Ports
-				if (address == 0xFF00)
-				{
-					//Temporary Fix, no Joypad Buttons pressed = 0x0F
-					//TODO - Implement Joypad
-					return 0x0F;
-				}
-
 				return ioPorts[address - IO_PORTS_BASE_ADDRESS];
 			}
 

@@ -21,10 +21,11 @@ namespace GameboyEmulator
 		private const int SCREEN_DRAW_HEIGHT = SCREEN_GAME_HEIGHT * SCREEN_SCALE;
 
 		private readonly RenderWindow window;
+		private readonly Joypad       joypad;
 
 		public RectangleShape[,] Buffer { get; }
 
-		public Screen()
+		public Screen(Joypad joypad)
 		{
 			Buffer = new RectangleShape[SCREEN_GAME_WIDTH, SCREEN_GAME_HEIGHT];
 			window = new RenderWindow(
@@ -36,10 +37,16 @@ namespace GameboyEmulator
 			//Gameboy runs at 60 fps
 			window.SetFramerateLimit(60);
 
+			window.SetKeyRepeatEnabled(false);
+
 			Initialize();
 
-			//Assign event handlers
 			window.Closed += OnClose;
+
+			//Joypad
+			this.joypad               =  joypad;
+			window.KeyPressed         += joypad.ButtonPressed;
+			window.KeyReleased        += joypad.ButtonReleased;
 		}
 
 		public bool IsOpen => window.IsOpen;

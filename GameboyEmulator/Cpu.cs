@@ -33,13 +33,15 @@ namespace GameboyEmulator
 		private readonly Graphics   graphics;
 		private readonly Interrupts interrupts;
 		private readonly Timer      timer;
+		private readonly Joypad     joypad;
 
 		public Cpu()
 		{
 			//Initialize modules
 			memory     = new Memory(this);
 			interrupts = new Interrupts(memory, this);
-			graphics   = new Graphics(memory, interrupts);
+			joypad     = new Joypad(memory, interrupts);
+			graphics   = new Graphics(memory, interrupts, joypad);
 			timer      = new Timer(memory, interrupts);
 		}
 
@@ -163,6 +165,7 @@ namespace GameboyEmulator
 				graphics.Update(cycles);
 				timer.Update(cycles);
 				interrupts.Update();
+				joypad.Update();
 			}
 		}
 
@@ -2321,7 +2324,7 @@ namespace GameboyEmulator
 			data >>= 1;
 			data =   SetBit(data, 7, false);
 
-			SetFlags(data == 0, false , false, bit0);
+			SetFlags(data == 0, false, false, bit0);
 
 			return data;
 		}

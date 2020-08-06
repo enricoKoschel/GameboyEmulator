@@ -9,11 +9,11 @@ namespace GameboyEmulator
 		private readonly Screen screen;
 		private readonly Memory memory;
 
-		public Graphics(Memory memory, Interrupts interrupts)
+		public Graphics(Memory memory, Interrupts interrupts, Joypad joypad)
 		{
 			this.memory = memory;
 
-			screen = new Screen();
+			screen = new Screen(joypad);
 			lcd    = new Lcd(memory, screen, interrupts);
 		}
 
@@ -80,8 +80,19 @@ namespace GameboyEmulator
 		{
 			for (ushort oamSpriteAddress = 0xFE00; oamSpriteAddress < 0xFEA0;)
 			{
-				byte yPosition  = (byte)(memory.Read(oamSpriteAddress++) - 16);
-				byte xPosition  = (byte)(memory.Read(oamSpriteAddress++) - 8);
+				byte yPosition = memory.Read(oamSpriteAddress++);
+				byte xPosition = memory.Read(oamSpriteAddress++);
+
+				//Check if Sprite is Off-Screen
+				if (xPosition == 0 || xPosition >= 168 || yPosition == 0 || yPosition >= 160)
+				{
+					oamSpriteAddress += 2;
+					continue;
+				}
+
+				xPosition -= 8;
+				yPosition -= 16;
+
 				byte tileNumber = memory.Read(oamSpriteAddress++);
 				byte attributes = memory.Read(oamSpriteAddress++);
 
@@ -119,7 +130,7 @@ namespace GameboyEmulator
 					byte paletteIndex   = (byte)((paletteIndexHi << 1) | paletteIndexLo);
 
 					//Transparent Pixel
-					if(paletteIndex == 0) continue;
+					if (paletteIndex == 0) continue;
 
 					byte  palette = memory.Read(paletteAddress);
 					Color color   = GetColor(palette, paletteIndex);
@@ -131,7 +142,7 @@ namespace GameboyEmulator
 						spriteDataIndexReverse -= 7;
 						spriteDataIndexReverse *= -1;
 					}
-					
+
 					int bufferXIndex = xPosition + spriteDataIndexReverse;
 					int bufferYIndex = lcd.CurrentScanline;
 					screen.Buffer[bufferXIndex, bufferYIndex].FillColor = color;
