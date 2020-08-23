@@ -40,8 +40,8 @@ namespace GameboyEmulator
 			//Initialize modules
 			memory     = new Memory(this);
 			interrupts = new Interrupts(memory, this);
-			joypad     = new Joypad(memory, interrupts);
-			graphics   = new Graphics(memory, interrupts, joypad);
+			graphics   = new Graphics(memory, interrupts);
+			joypad     = new Joypad(memory, interrupts, graphics);
 			timer      = new Timer(memory, interrupts);
 		}
 
@@ -165,8 +165,9 @@ namespace GameboyEmulator
 				graphics.Update(cycles);
 				timer.Update(cycles);
 				interrupts.Update();
-				joypad.Update();
+				joypad.Update(false);
 			}
+			joypad.Update(true);
 		}
 
 		private int ExecuteOpcode()

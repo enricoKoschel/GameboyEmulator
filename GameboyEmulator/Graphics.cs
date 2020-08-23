@@ -9,16 +9,21 @@ namespace GameboyEmulator
 		private readonly Screen screen;
 		private readonly Memory memory;
 
-		public Graphics(Memory memory, Interrupts interrupts, Joypad joypad)
+		public Graphics(Memory memory, Interrupts interrupts)
 		{
 			this.memory = memory;
 
-			screen = new Screen(joypad);
+			screen = new Screen();
 			lcd    = new Lcd(memory, screen, interrupts);
 		}
 
 		public bool IsScreenOpen => screen.IsOpen;
 
+		public Screen GetScreen()
+		{
+			return screen;
+		}
+		
 		public void Update(int cycles)
 		{
 			lcd.Update(cycles);
