@@ -36,8 +36,6 @@ namespace GameboyEmulator
 			//Gameboy runs at 60 fps
 			window.SetFramerateLimit(60);
 
-			window.SetKeyRepeatEnabled(false);
-
 			Initialize();
 
 			window.Closed += OnClose;

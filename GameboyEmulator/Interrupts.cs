@@ -90,7 +90,7 @@
 					SerialRequested = true;
 					break;
 				case InterruptTypes.Joypad:
-					SerialRequested = true;
+					JoypadRequested = true;
 					break;
 			}
 		}

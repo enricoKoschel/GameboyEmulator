@@ -164,8 +164,8 @@ namespace GameboyEmulator
 				cyclesThisFrame += cycles;
 				graphics.Update(cycles);
 				timer.Update(cycles);
-				interrupts.Update();
 				joypad.Update(false);
+				interrupts.Update();
 			}
 			joypad.Update(true);
 		}

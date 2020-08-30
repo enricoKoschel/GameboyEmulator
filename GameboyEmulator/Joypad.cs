@@ -1,4 +1,5 @@
-﻿using SFML.Window;
+﻿using System;
+using SFML.Window;
 
 namespace GameboyEmulator
 {
@@ -53,14 +54,43 @@ namespace GameboyEmulator
 		}
 
 		private bool hadFocusLastFrame;
-		private bool downOrStartPressedLastCycle;
-		private bool upOrSelectPressedLastCycle;
-		private bool leftOrButtonBPressedLastCycle;
-		private bool rightOrButtonAPressedLastCycle;
+
+		private bool downPressedThisFrame;
+		private bool upPressedThisFrame;
+		private bool leftPressedThisFrame;
+		private bool rightPressedThisFrame;
+		private bool startPressedThisFrame;
+		private bool selectPressedThisFrame;
+		private bool buttonBPressedThisFrame;
+		private bool buttonAPressedThisFrame;
+
+		private bool buttonPressedLastFrame;
+
+		private bool ButtonPressedThisFrame => downPressedThisFrame || upPressedThisFrame || leftPressedThisFrame ||
+											   rightPressedThisFrame || startPressedThisFrame ||
+											   selectPressedThisFrame || buttonBPressedThisFrame ||
+											   buttonAPressedThisFrame;
 
 		public void Update(bool frameDone)
 		{
-			if (frameDone) hadFocusLastFrame = window.HasFocus();
+			if (frameDone)
+			{
+				hadFocusLastFrame = window.HasFocus();
+
+				downPressedThisFrame    = Keyboard.IsKeyPressed(Keyboard.Key.Down);
+				upPressedThisFrame      = Keyboard.IsKeyPressed(Keyboard.Key.Up);
+				leftPressedThisFrame    = Keyboard.IsKeyPressed(Keyboard.Key.Left);
+				rightPressedThisFrame   = Keyboard.IsKeyPressed(Keyboard.Key.Right);
+				startPressedThisFrame   = Keyboard.IsKeyPressed(Keyboard.Key.Enter);
+				selectPressedThisFrame  = Keyboard.IsKeyPressed(Keyboard.Key.Space);
+				buttonBPressedThisFrame = Keyboard.IsKeyPressed(Keyboard.Key.A);
+				buttonAPressedThisFrame = Keyboard.IsKeyPressed(Keyboard.Key.S);
+
+				//Only request Interrupt if Button was pressed this Frame
+				if (ButtonPressedThisFrame && (ButtonPressedThisFrame != buttonPressedLastFrame)) interrupts.Request(Interrupts.InterruptTypes.Joypad);
+
+				buttonPressedLastFrame = ButtonPressedThisFrame;
+			}
 
 			DownOrStartPressed    = false;
 			UpOrSelectPressed     = false;
@@ -72,36 +102,19 @@ namespace GameboyEmulator
 
 			if (ButtonKeysSelected)
 			{
-				DownOrStartPressed    = Keyboard.IsKeyPressed(Keyboard.Key.Enter);
-				UpOrSelectPressed     = Keyboard.IsKeyPressed(Keyboard.Key.Space);
-				LeftOrButtonBPressed  = Keyboard.IsKeyPressed(Keyboard.Key.A);
-				RightOrButtonAPressed = Keyboard.IsKeyPressed(Keyboard.Key.S);
+				DownOrStartPressed    = startPressedThisFrame;
+				UpOrSelectPressed     = selectPressedThisFrame;
+				LeftOrButtonBPressed  = buttonBPressedThisFrame;
+				RightOrButtonAPressed = buttonAPressedThisFrame;
 			}
 
 			if (DirectionKeysSelected)
 			{
-				DownOrStartPressed    |= Keyboard.IsKeyPressed(Keyboard.Key.Down);
-				UpOrSelectPressed     |= Keyboard.IsKeyPressed(Keyboard.Key.Up);
-				LeftOrButtonBPressed  |= Keyboard.IsKeyPressed(Keyboard.Key.Left);
-				RightOrButtonAPressed |= Keyboard.IsKeyPressed(Keyboard.Key.Right);
+				DownOrStartPressed    = downPressedThisFrame;
+				UpOrSelectPressed     = upPressedThisFrame;
+				LeftOrButtonBPressed  = leftPressedThisFrame;
+				RightOrButtonAPressed = rightPressedThisFrame;
 			}
-
-
-			//Request Interrupt if Button was pressed this Cycle
-			bool requestInterrupt = false;
-
-			requestInterrupt |= DownOrStartPressed && (DownOrStartPressed != downOrStartPressedLastCycle);
-			requestInterrupt |= UpOrSelectPressed && (UpOrSelectPressed != upOrSelectPressedLastCycle);
-			requestInterrupt |= LeftOrButtonBPressed && (LeftOrButtonBPressed != leftOrButtonBPressedLastCycle);
-			requestInterrupt |= RightOrButtonAPressed && (RightOrButtonAPressed != rightOrButtonAPressedLastCycle);
-
-			//FIXME Joypad Interrupt causes weird behaviour
-			//if (requestInterrupt) interrupts.Request(Interrupts.InterruptTypes.Joypad);
-
-			downOrStartPressedLastCycle    = DownOrStartPressed;
-			upOrSelectPressedLastCycle     = UpOrSelectPressed;
-			leftOrButtonBPressedLastCycle  = LeftOrButtonBPressed;
-			rightOrButtonAPressedLastCycle = RightOrButtonAPressed;
 		}
 	}
 }
