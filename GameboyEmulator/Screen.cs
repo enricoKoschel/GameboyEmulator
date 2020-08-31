@@ -47,7 +47,7 @@ namespace GameboyEmulator
 		{
 			return window;
 		}
-		
+
 		private void Initialize()
 		{
 			for (int i = 0; i < SCREEN_GAME_WIDTH; i++)

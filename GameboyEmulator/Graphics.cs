@@ -23,7 +23,7 @@ namespace GameboyEmulator
 		{
 			return screen;
 		}
-		
+
 		public void Update(int cycles)
 		{
 			lcd.Update(cycles);

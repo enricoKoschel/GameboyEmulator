@@ -167,6 +167,7 @@ namespace GameboyEmulator
 				joypad.Update(false);
 				interrupts.Update();
 			}
+
 			joypad.Update(true);
 		}
 
@@ -2474,23 +2475,23 @@ namespace GameboyEmulator
 			{
 				//Non-Zero
 				JumpConditions.Nz =>
-				!ZeroFlag,
+					!ZeroFlag,
 
 				//Zero
 				JumpConditions.Z =>
-				ZeroFlag,
+					ZeroFlag,
 
 				//No Carry
 				JumpConditions.Nc =>
-				!CarryFlag,
+					!CarryFlag,
 
 				//Carry
 				JumpConditions.C =>
-				CarryFlag,
+					CarryFlag,
 
 				//Always Jump
 				JumpConditions.NoCondition =>
-				true,
+					true,
 
 				//Default
 				_ => false
