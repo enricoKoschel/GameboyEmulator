@@ -41,18 +41,20 @@ namespace GameboyEmulator
 		private const int INTERRUPT_ENABLE_REG_ADDRESS   = 0xFFFF;
 
 		//Modules
-		private readonly Cpu cpu;
+		private readonly Cpu                  cpu;
+		private readonly MemoryBankController mbc;
 
 		//File paths
 		private const string BOOT_ROM_FILE_PATH = "../../../roms/boot.gb";
 		private       bool   bootRomEnabled     = false;
 
 		//TODO - Accept game file path as console parameter / make into property
-		private const string GAME_ROM_FILE_PATH = "../../../roms/tetris.gb";
+		private const string GAME_ROM_FILE_PATH = "../../../roms/mario.gb";
 
 		public Memory(Cpu cpu)
 		{
 			this.cpu = cpu;
+			mbc = new MemoryBankController(this);
 
 			videoRam         = new byte[0x2000];
 			cartridgeRam     = new byte[0x2000];
@@ -82,6 +84,9 @@ namespace GameboyEmulator
 
 				cartridgeRom = File.ReadAllBytes(GAME_ROM_FILE_PATH);
 			}
+			
+			//Detect current Memorybanking Mode
+			mbc.DetectBankingMode();
 		}
 
 		private void InitializeRegisters()
@@ -142,9 +147,7 @@ namespace GameboyEmulator
 			if (IsBetween(address, CARTRIDGE_ROM_BASE_ADDRESS, VIDEO_RAM_BASE_ADDRESS))
 			{
 				//Cartridge Rom
-				return cartridgeRom[address];
-
-				//TODO - Implement Banking
+				return address < 0x4000 ? cartridgeRom[address] : cartridgeRom[address + ((mbc.CurrentRomBank - 1) * 0x4000)];
 			}
 
 			if (IsBetween(address, VIDEO_RAM_BASE_ADDRESS, CARTRIDGE_RAM_BASE_ADDRESS))
@@ -207,13 +210,18 @@ namespace GameboyEmulator
 
 			if (IsBetween(address, CARTRIDGE_ROM_BASE_ADDRESS, VIDEO_RAM_BASE_ADDRESS))
 			{
-				//Writing to Cartridge ROM triggers ROMBanking Controller
-				//throw new NotImplementedException("Rom-Banking not implemented yet!"); //TODO - handle Rom-Banking
+				//Writing to Cartridge Rom triggers Memorybanking Controller
+				mbc.HandleBanking(address, data);
 			}
 			else if (IsBetween(address, VIDEO_RAM_BASE_ADDRESS, CARTRIDGE_RAM_BASE_ADDRESS))
 			{
 				//Video Ram
 				videoRam[address - VIDEO_RAM_BASE_ADDRESS] = data;
+			}
+			else if (IsBetween(address, CARTRIDGE_RAM_BASE_ADDRESS, WORK_RAM_BASE_ADDRESS))
+			{
+				//Cartridge Ram
+				cartridgeRam[address - CARTRIDGE_RAM_BASE_ADDRESS] = data;
 			}
 			else if (IsBetween(address, WORK_RAM_BASE_ADDRESS, ECHO_RAM_BASE_ADDRESS))
 			{
@@ -294,7 +302,7 @@ namespace GameboyEmulator
 		/// <summary>
 		/// lowerBound is inclusive, upperBound is exclusive
 		/// </summary>
-		private static bool IsBetween(int number, int lowerBound, int upperBound)
+		public static bool IsBetween(int number, int lowerBound, int upperBound)
 		{
 			return (number >= lowerBound && number < upperBound);
 		}
