@@ -24,11 +24,9 @@
 
 		private MemoryBankControllers currentMemoryBankController;
 		private MemoryBankingModes    currentMemoryBankingMode;
-		private int                   currentRomBank;
 		private int                   currentRamBank;
 
-		public int CurrentRamBank => currentRamBank;
-		public int CurrentRomBank => currentRomBank;
+		public int CurrentRomBank { get; private set; }
 
 		private bool isRamEnabled;
 
@@ -36,7 +34,7 @@
 		{
 			currentMemoryBankController = (MemoryBankControllers)memory.Read(0x147);
 			currentMemoryBankingMode    = MemoryBankingModes.RomBankingMode;
-			currentRomBank              = 1;
+			CurrentRomBank              = 1;
 			currentRamBank              = 0;
 		}
 
@@ -54,16 +52,16 @@
 					else if (Memory.IsBetween(address, 0x2000, 0x4000))
 					{
 						//Change lower 5 bits of current Rombank
-						currentRomBank = (currentRomBank & 0b11100000) | (data & 0b00011111);
-						if (currentRomBank == 0x00 || currentRomBank == 0x20 || currentRomBank == 0x40 ||
-							currentRomBank == 0x60)
-							currentRomBank++;
+						CurrentRomBank = (CurrentRomBank & 0b11100000) | (data & 0b00011111);
+						if (CurrentRomBank == 0x00 || CurrentRomBank == 0x20 || CurrentRomBank == 0x40 ||
+							CurrentRomBank == 0x60)
+							CurrentRomBank++;
 					}
 					else if (Memory.IsBetween(address, 0x4000, 0x6000))
 					{
 						//Change current Rambank or upper 2 bits of current Rombank
 						if (currentMemoryBankingMode == MemoryBankingModes.RomBankingMode)
-							currentRomBank = (currentRomBank & 0b00011111) | (data & 0b01100000);
+							CurrentRomBank = (CurrentRomBank & 0b00011111) | (data & 0b01100000);
 						else
 							currentRamBank = data & 0b00000011;
 					}

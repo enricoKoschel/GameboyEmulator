@@ -54,7 +54,7 @@ namespace GameboyEmulator
 		public Memory(Cpu cpu)
 		{
 			this.cpu = cpu;
-			mbc = new MemoryBankController(this);
+			mbc      = new MemoryBankController(this);
 
 			videoRam         = new byte[0x2000];
 			cartridgeRam     = new byte[0x2000];
@@ -84,7 +84,7 @@ namespace GameboyEmulator
 
 				cartridgeRom = File.ReadAllBytes(GAME_ROM_FILE_PATH);
 			}
-			
+
 			//Detect current Memorybanking Mode
 			mbc.DetectBankingMode();
 		}
@@ -147,7 +147,9 @@ namespace GameboyEmulator
 			if (IsBetween(address, CARTRIDGE_ROM_BASE_ADDRESS, VIDEO_RAM_BASE_ADDRESS))
 			{
 				//Cartridge Rom
-				return address < 0x4000 ? cartridgeRom[address] : cartridgeRom[address + ((mbc.CurrentRomBank - 1) * 0x4000)];
+				return address < 0x4000
+						   ? cartridgeRom[address]
+						   : cartridgeRom[address + ((mbc.CurrentRomBank - 1) * 0x4000)];
 			}
 
 			if (IsBetween(address, VIDEO_RAM_BASE_ADDRESS, CARTRIDGE_RAM_BASE_ADDRESS))

@@ -1,4 +1,5 @@
-﻿using SFML.Graphics;
+﻿using System;
+using SFML.Graphics;
 
 namespace GameboyEmulator
 {
@@ -45,10 +46,15 @@ namespace GameboyEmulator
 			//Background
 			int tileMapY = (lcd.CurrentScanline + lcd.ScrollY) / 8 * 32;
 
-			for (int tileMapX = lcd.ScrollX; tileMapX < lcd.ScrollX + 20; tileMapX++)
+			//If the Screen Overflows at the bottom of the Screen, start at the top again
+			tileMapY %= 0x400;
+
+			for (int screenPixel = 0; screenPixel < 160; screenPixel++)
 			{
-				//If Overflow at the bottom of Screen, start at the Top again
-				tileMapY %= 0x400;
+				int tileMapX = (screenPixel + lcd.ScrollX) / 8;
+
+				//If the Screen Overflows at the right of the Screen, start at the left again
+				tileMapX %= 32;
 
 				ushort tileMapIndex  = (ushort)(lcd.BackgroundTileMapBaseAddress + tileMapY + tileMapX);
 				ushort tileDataIndex = lcd.TileDataBaseAddress;
@@ -58,24 +64,22 @@ namespace GameboyEmulator
 				else
 					tileDataIndex += (ushort)(memory.Read(tileMapIndex) * 16);
 
-				byte currentTileLine = (byte)(((lcd.CurrentScanline + lcd.ScrollY) % 8) * 2);
-				byte tileDataLo      = memory.Read((ushort)(tileDataIndex + currentTileLine));
-				byte tileDataHi      = memory.Read((ushort)(tileDataIndex + currentTileLine + 1));
+				int currentTileLine          = ((lcd.CurrentScanline + lcd.ScrollY) % 8) * 2;
+				int currentTileColumn        = (screenPixel + lcd.ScrollX) % 8;
+				int currentTileColumnReverse = (currentTileColumn - 7) * -1;
 
-				for (int tilePixelIndex = 0; tilePixelIndex < 8; tilePixelIndex++)
-				{
-					int  paletteIndexLo = Cpu.GetBit(tileDataLo, tilePixelIndex) ? 1 : 0;
-					int  paletteIndexHi = Cpu.GetBit(tileDataHi, tilePixelIndex) ? 1 : 0;
-					byte paletteIndex   = (byte)((paletteIndexHi << 1) | paletteIndexLo);
+				byte tileDataLo = memory.Read((ushort)(tileDataIndex + currentTileLine));
+				byte tileDataHi = memory.Read((ushort)(tileDataIndex + currentTileLine + 1));
 
-					int tilePixelIndexReverse = tilePixelIndex - 7;
-					tilePixelIndexReverse *= -1;
-					int bufferXIndex = (tileMapX - lcd.ScrollX) * 8 + tilePixelIndexReverse;
-					int bufferYIndex = lcd.CurrentScanline;
+				int  paletteIndexLo = Cpu.GetBit(tileDataLo, currentTileColumnReverse) ? 1 : 0;
+				int  paletteIndexHi = Cpu.GetBit(tileDataHi, currentTileColumnReverse) ? 1 : 0;
+				byte paletteIndex   = (byte)((paletteIndexHi << 1) | paletteIndexLo);
 
-					screen.Buffer[bufferXIndex, bufferYIndex].FillColor =
-						GetColor(lcd.TilePalette, paletteIndex);
-				}
+				int bufferXIndex = screenPixel;
+				int bufferYIndex = lcd.CurrentScanline;
+
+				screen.Buffer[bufferXIndex, bufferYIndex].FillColor =
+					GetColor(lcd.TilePalette, paletteIndex);
 			}
 
 			//Window
