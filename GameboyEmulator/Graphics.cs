@@ -85,11 +85,12 @@ namespace GameboyEmulator
 		{
 			for (ushort oamSpriteAddress = 0xFE00; oamSpriteAddress < 0xFEA0;)
 			{
-				byte yPosition = memory.Read(oamSpriteAddress++);
-				byte xPosition = memory.Read(oamSpriteAddress++);
+				//Using short to allow for Sprites to touch the Sides of the Screen
+				short yPosition = memory.Read(oamSpriteAddress++);
+				short xPosition = memory.Read(oamSpriteAddress++);
 
 				//Check if Sprite is Off-Screen
-				if (xPosition == 0 || xPosition >= 168 || yPosition == 0 || yPosition >= 160)
+				if (xPosition <= 0 || xPosition >= 168 || yPosition <= 0 || yPosition >= 160)
 				{
 					oamSpriteAddress += 2;
 					continue;
@@ -150,6 +151,10 @@ namespace GameboyEmulator
 
 					int bufferXIndex = xPosition + spriteDataIndexReverse;
 					int bufferYIndex = lcd.CurrentScanline;
+
+					//Don't display Pixel if it's off the Screen
+					if (bufferXIndex >= 160 || bufferXIndex < 0 || bufferYIndex >= 144 || bufferYIndex < 0) continue;
+
 					screen.Buffer[bufferXIndex, bufferYIndex].FillColor = color;
 				}
 			}
