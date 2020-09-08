@@ -82,7 +82,6 @@ namespace GameboyEmulator
 				for (int j = 0; j < SCREEN_GAME_HEIGHT; j++)
 				{
 					Buffer[i, j].FillColor = Colors.white;
-					;
 				}
 			}
 		}

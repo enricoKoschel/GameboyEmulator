@@ -284,7 +284,7 @@ namespace GameboyEmulator
 			{
 				throw new NotImplementedException(
 					$"Write Memory location: 0x{address:X} not implemented yet!"
-				); //TODO - implement write memory
+				);
 			}
 		}
 

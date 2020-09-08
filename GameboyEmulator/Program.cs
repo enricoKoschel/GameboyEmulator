@@ -1,16 +1,31 @@
-﻿namespace GameboyEmulator
+﻿using System;
+using SFML.System;
+using SFML.Window;
+
+namespace GameboyEmulator
 {
 	static class Program
 	{
 		public static void Main(string[] args)
 		{
-			Cpu emulator = new Cpu();
+			Cpu    emulator   = new Cpu();
+			Window window     = emulator.GetGraphics().GetScreen().GetWindow();
+			Clock  frameTime  = new Clock();
+			int    lowestFps  = int.MaxValue;
+			int    highestFps = 0;
 
 			emulator.Start();
 
 			while (emulator.IsRunning)
 			{
+				frameTime.Restart().AsSeconds();
 				emulator.Update();
+
+				int fps                          = Convert.ToInt32(1 / frameTime.ElapsedTime.AsSeconds());
+				if (fps > highestFps) highestFps = fps;
+				if (fps < lowestFps) lowestFps   = fps;
+
+				window.SetTitle($"GameBoy Emulator | FPS - {fps} | Lowest - {lowestFps} | Highest - {highestFps}");
 			}
 		}
 	}
