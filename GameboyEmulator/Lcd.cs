@@ -79,14 +79,14 @@ namespace GameboyEmulator
 
 		public byte WindowX
 		{
-			get => memory.Read(0xFF4B);
-			set => memory.Write(0xFF4B, value);
+			get => (byte)(memory.Read(0xFF4B) - 7);
+			set => memory.Write(0xFF4B, (byte)(value + 7));
 		}
 
 		public byte WindowY
 		{
-			get => (byte)(memory.Read(0xFF4A) - 7);
-			set => memory.Write(0xFF4A, (byte)(value + 7));
+			get => memory.Read(0xFF4A);
+			set => memory.Write(0xFF4A, value);
 		}
 
 		public ushort WindowTileMapBaseAddress => Cpu.GetBit(ControlRegister, 6) ? (ushort)0x9C00 : (ushort)0x9800;
@@ -113,13 +113,13 @@ namespace GameboyEmulator
 		private bool CoincidenceFlag
 		{
 			get => Cpu.GetBit(StatusRegister, 2);
-			set => Cpu.SetBit(StatusRegister, 2, value);
+			set => StatusRegister = Cpu.SetBit(StatusRegister, 2, value);
 		}
 
 		private bool CoincidenceInterruptEnabled
 		{
 			get => Cpu.GetBit(StatusRegister, 6);
-			set => Cpu.SetBit(StatusRegister, 6, value);
+			set => StatusRegister = Cpu.SetBit(StatusRegister, 6, value);
 		}
 
 		private bool vBlankRequested = false;

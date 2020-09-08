@@ -43,38 +43,40 @@ namespace GameboyEmulator
 		private void RenderTiles()
 		{
 			//Background
-			int tileMapY = (lcd.CurrentScanline + lcd.ScrollY) / 8 * 32;
+			int backgroundTileMapY = (lcd.CurrentScanline + lcd.ScrollY) / 8 * 32;
 
 			//If the Screen Overflows at the bottom of the Screen, start at the top again
-			tileMapY %= 0x400;
+			backgroundTileMapY %= 0x400;
 
-			for (int screenPixel = 0; screenPixel < 160; screenPixel++)
+			for (int backgroundPixel = 0; backgroundPixel < 160; backgroundPixel++)
 			{
-				int tileMapX = (screenPixel + lcd.ScrollX) / 8;
+				int backgroundTileMapX = (backgroundPixel + lcd.ScrollX) / 8;
 
 				//If the Screen Overflows at the right of the Screen, start at the left again
-				tileMapX %= 32;
+				backgroundTileMapX %= 32;
 
-				ushort tileMapIndex  = (ushort)(lcd.BackgroundTileMapBaseAddress + tileMapY + tileMapX);
-				ushort tileDataIndex = lcd.TileDataBaseAddress;
+				ushort backgroundTileMapIndex =
+					(ushort)(lcd.BackgroundTileMapBaseAddress + backgroundTileMapY + backgroundTileMapX);
+
+				ushort backgroundTileDataIndex = lcd.TileDataBaseAddress;
 
 				if (lcd.TileDataIsSigned)
-					tileDataIndex += (ushort)(((sbyte)memory.Read(tileMapIndex) + 128) * 16);
+					backgroundTileDataIndex += (ushort)(((sbyte)memory.Read(backgroundTileMapIndex) + 128) * 16);
 				else
-					tileDataIndex += (ushort)(memory.Read(tileMapIndex) * 16);
+					backgroundTileDataIndex += (ushort)(memory.Read(backgroundTileMapIndex) * 16);
 
 				int currentTileLine          = ((lcd.CurrentScanline + lcd.ScrollY) % 8) * 2;
-				int currentTileColumn        = (screenPixel + lcd.ScrollX) % 8;
+				int currentTileColumn        = (backgroundPixel + lcd.ScrollX) % 8;
 				int currentTileColumnReverse = (currentTileColumn - 7) * -1;
 
-				byte tileDataLo = memory.Read((ushort)(tileDataIndex + currentTileLine));
-				byte tileDataHi = memory.Read((ushort)(tileDataIndex + currentTileLine + 1));
+				byte tileDataLo = memory.Read((ushort)(backgroundTileDataIndex + currentTileLine));
+				byte tileDataHi = memory.Read((ushort)(backgroundTileDataIndex + currentTileLine + 1));
 
 				int  paletteIndexLo = Cpu.GetBit(tileDataLo, currentTileColumnReverse) ? 1 : 0;
 				int  paletteIndexHi = Cpu.GetBit(tileDataHi, currentTileColumnReverse) ? 1 : 0;
 				byte paletteIndex   = (byte)((paletteIndexHi << 1) | paletteIndexLo);
 
-				int bufferXIndex = screenPixel;
+				int bufferXIndex = backgroundPixel;
 				int bufferYIndex = lcd.CurrentScanline;
 
 				screen.Buffer[bufferXIndex, bufferYIndex].FillColor =
@@ -82,6 +84,34 @@ namespace GameboyEmulator
 			}
 
 			//Window
+			if (!lcd.WindowEnabled || lcd.WindowY > lcd.CurrentScanline) return;
+
+			int windowTileMapY = (lcd.CurrentScanline - lcd.WindowY) / 8 * 32;
+
+			for (int windowPixel = lcd.WindowX; windowPixel < 160; windowPixel++)
+			{
+				int windowTileMapX = (windowPixel - lcd.WindowX) / 8;
+
+				ushort windowTileMapIndex  = (ushort)(lcd.WindowTileMapBaseAddress + windowTileMapX + windowTileMapY);
+				ushort windowTileDataIndex = (ushort)((((sbyte)memory.Read(windowTileMapIndex) + 128) * 16) + 0x8800);
+				
+				int currentTileLine          = ((lcd.CurrentScanline - lcd.WindowY) % 8) * 2;
+				int currentTileColumn        = (windowPixel - lcd.WindowX) % 8;
+				int currentTileColumnReverse = (currentTileColumn - 7) * -1;
+
+				byte tileDataLo = memory.Read((ushort)(windowTileDataIndex + currentTileLine));
+				byte tileDataHi = memory.Read((ushort)(windowTileDataIndex + currentTileLine + 1));
+
+				int  paletteIndexLo = Cpu.GetBit(tileDataLo, currentTileColumnReverse) ? 1 : 0;
+				int  paletteIndexHi = Cpu.GetBit(tileDataHi, currentTileColumnReverse) ? 1 : 0;
+				byte paletteIndex   = (byte)((paletteIndexHi << 1) | paletteIndexLo);
+
+				int bufferXIndex = windowPixel;
+				int bufferYIndex = lcd.CurrentScanline;
+
+				screen.Buffer[bufferXIndex, bufferYIndex].FillColor =
+					GetColor(lcd.TilePalette, paletteIndex);
+			}
 		}
 
 		private void RenderSprites()
