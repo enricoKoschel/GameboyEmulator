@@ -135,6 +135,7 @@ namespace GameboyEmulator
 		//Flags
 		private InterruptStatus enableInterrupts = InterruptStatus.False;
 		private HaltModes       haltMode         = HaltModes.NotHalted;
+		private int waitNopAmount;
 
 		public void Start()
 		{
@@ -173,6 +174,12 @@ namespace GameboyEmulator
 
 		private int ExecuteOpcode()
 		{
+			if (waitNopAmount > 0)
+			{
+				waitNopAmount--;
+				return 4;
+			}
+			
 			Debug.totalExecutedOpcodes++;
 
 			if (haltMode != HaltModes.NotHalted && haltMode != HaltModes.HaltBug && interrupts.HasPendingInterrupts)
@@ -253,6 +260,9 @@ namespace GameboyEmulator
 				case 0x0F:
 					aRegister = RotateRightIntoCarry(aRegister, true);
 					return 4;
+				//STOP
+				case 0x10:
+					throw new NotImplementedException("STOP Opcode not Implemented yet");
 				//LD DE,nn
 				case 0x11:
 					DeRegister = Load16BitImmediate();
@@ -1002,6 +1012,8 @@ namespace GameboyEmulator
 				//JP NC,nn
 				case 0xD2:
 					return JumpImmediate(JumpConditions.Nc);
+				//Invalid Opcode
+				//0xD3
 				//CALL NC,nn
 				case 0xD4:
 					return CallSubroutine(JumpConditions.Nc);
@@ -1025,6 +1037,8 @@ namespace GameboyEmulator
 				//JP C,nn
 				case 0xDA:
 					return JumpImmediate(JumpConditions.C);
+				//Invalid Opcode
+				//0xDB
 				//CALL C,nn
 				case 0xDC:
 					return CallSubroutine(JumpConditions.C);
@@ -1045,6 +1059,10 @@ namespace GameboyEmulator
 				//LD (0xFF00+C),A
 				case 0xE2:
 					return WriteIoPortsCRegisterOffset(aRegister);
+				//Invalid Opcode
+				//0xE3
+				////Invalid Opcode
+				//0xE4
 				//PUSH HL
 				case 0xE5:
 					return PushStack(HlRegister);
@@ -1067,6 +1085,12 @@ namespace GameboyEmulator
 				case 0xEA:
 					memory.Write(Load16BitImmediate(), aRegister);
 					return 16;
+				//Invalid Opcode
+				//0xEB
+				//Invalid Opcode
+				//0xEC
+				//Invalid Opcode
+				//0xED
 				//XOR n
 				case 0xEE:
 					XorIntoA(Load8BitImmediate());
@@ -1089,7 +1113,10 @@ namespace GameboyEmulator
 				//DI
 				case 0xF3:
 					interrupts.masterInterruptEnable = false;
+					enableInterrupts                 = InterruptStatus.False;
 					return 4;
+				//Invalid Opcode
+				//0xF4
 				//PUSH AF
 				case 0xF5:
 					return PushStack(AfRegister);
@@ -1116,6 +1143,10 @@ namespace GameboyEmulator
 				case 0xFB:
 					enableInterrupts = InterruptStatus.NextCycle;
 					return 4;
+				//Invalid Opcode
+				//0xFC
+				//Invalid Opcode
+				//0xFD
 				//CP n
 				case 0xFE:
 					SubtractByteFromAReg(Load8BitImmediate(), true);
@@ -1126,7 +1157,7 @@ namespace GameboyEmulator
 
 				//Invalid Opcode
 				default:
-					throw new NotImplementedException($"Opcode 0x{opcode:X} not implemented yet!");
+					throw new NotImplementedException($"Invalid Opcode 0x{opcode:X} encountered at 0x{(programCounter - 1):X}!");
 			}
 		}
 
@@ -2660,6 +2691,7 @@ namespace GameboyEmulator
 		{
 			PushStack(programCounter);
 			programCounter = address;
+			waitNopAmount = 5;
 		}
 
 		//Halt/Stop functions

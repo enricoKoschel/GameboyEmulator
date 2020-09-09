@@ -114,24 +114,24 @@
 			switch (interrupt)
 			{
 				case InterruptTypes.VBlank:
-					cpu.ServiceInterrupt(0x40);
 					VBlankRequested = false;
+					cpu.ServiceInterrupt(0x40);
 					break;
 				case InterruptTypes.LcdStat:
-					cpu.ServiceInterrupt(0x48);
 					LcdStatRequested = false;
+					cpu.ServiceInterrupt(0x48);
 					break;
 				case InterruptTypes.Timer:
-					cpu.ServiceInterrupt(0x50);
 					TimerRequested = false;
+					cpu.ServiceInterrupt(0x50);
 					break;
 				case InterruptTypes.Serial:
-					cpu.ServiceInterrupt(0x58);
 					SerialRequested = false;
+					cpu.ServiceInterrupt(0x58);
 					break;
 				case InterruptTypes.Joypad:
-					cpu.ServiceInterrupt(0x60);
 					JoypadRequested = false;
+					cpu.ServiceInterrupt(0x60);
 					break;
 			}
 		}
