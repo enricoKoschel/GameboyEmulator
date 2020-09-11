@@ -135,7 +135,7 @@ namespace GameboyEmulator
 		//Flags
 		private InterruptStatus enableInterrupts = InterruptStatus.False;
 		private HaltModes       haltMode         = HaltModes.NotHalted;
-		private int waitNopAmount;
+		private int             waitNopAmount;
 
 		public void Start()
 		{
@@ -179,7 +179,7 @@ namespace GameboyEmulator
 				waitNopAmount--;
 				return 4;
 			}
-			
+
 			Debug.totalExecutedOpcodes++;
 
 			if (haltMode != HaltModes.NotHalted && haltMode != HaltModes.HaltBug && interrupts.HasPendingInterrupts)
@@ -1157,7 +1157,9 @@ namespace GameboyEmulator
 
 				//Invalid Opcode
 				default:
-					throw new NotImplementedException($"Invalid Opcode 0x{opcode:X} encountered at 0x{(programCounter - 1):X}!");
+					throw new NotImplementedException(
+						$"Invalid Opcode 0x{opcode:X} encountered at 0x{(programCounter - 1):X}!"
+					);
 			}
 		}
 
@@ -2691,7 +2693,7 @@ namespace GameboyEmulator
 		{
 			PushStack(programCounter);
 			programCounter = address;
-			waitNopAmount = 5;
+			waitNopAmount  = 5;
 		}
 
 		//Halt/Stop functions
@@ -2706,7 +2708,7 @@ namespace GameboyEmulator
 
 			return 4;
 		}
-		
+
 		//Module Functions
 		public Graphics GetGraphics()
 		{

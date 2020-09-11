@@ -79,8 +79,7 @@ namespace GameboyEmulator
 				int bufferXIndex = backgroundPixel;
 				int bufferYIndex = lcd.CurrentScanline;
 
-				screen.Buffer[bufferXIndex, bufferYIndex].FillColor =
-					GetColor(lcd.TilePalette, paletteIndex);
+				screen.UpdateBuffer(bufferXIndex, bufferYIndex, GetColor(lcd.TilePalette, paletteIndex));
 			}
 
 			//Window
@@ -94,7 +93,7 @@ namespace GameboyEmulator
 
 				ushort windowTileMapIndex  = (ushort)(lcd.WindowTileMapBaseAddress + windowTileMapX + windowTileMapY);
 				ushort windowTileDataIndex = (ushort)((((sbyte)memory.Read(windowTileMapIndex) + 128) * 16) + 0x8800);
-				
+
 				int currentTileLine          = ((lcd.CurrentScanline - lcd.WindowY) % 8) * 2;
 				int currentTileColumn        = (windowPixel - lcd.WindowX) % 8;
 				int currentTileColumnReverse = (currentTileColumn - 7) * -1;
@@ -109,8 +108,7 @@ namespace GameboyEmulator
 				int bufferXIndex = windowPixel;
 				int bufferYIndex = lcd.CurrentScanline;
 
-				screen.Buffer[bufferXIndex, bufferYIndex].FillColor =
-					GetColor(lcd.TilePalette, paletteIndex);
+				screen.UpdateBuffer(bufferXIndex, bufferYIndex, GetColor(lcd.TilePalette, paletteIndex));
 			}
 		}
 
@@ -188,7 +186,7 @@ namespace GameboyEmulator
 					//Don't display Pixel if it's off the Screen
 					if (bufferXIndex >= 160 || bufferXIndex < 0 || bufferYIndex >= 144 || bufferYIndex < 0) continue;
 
-					screen.Buffer[bufferXIndex, bufferYIndex].FillColor = color;
+					screen.UpdateBuffer(bufferXIndex, bufferYIndex, color);
 				}
 			}
 		}

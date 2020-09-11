@@ -155,16 +155,6 @@ namespace GameboyEmulator
 			interrupts.Request(Interrupts.InterruptTypes.LcdStat);
 		}
 
-		public void UpdateDisabled()
-		{
-			drawScanlineCounter = 0;
-			CurrentScanline     = 0;
-			Mode                = 1;
-
-			screen.Clear();
-			screen.DrawFrame();
-		}
-
 		private void SetStatus()
 		{
 			if (CurrentScanline >= 144)
