@@ -134,7 +134,7 @@ namespace GameboyEmulator
 
 		//Flags
 		private InterruptStatus enableInterrupts = InterruptStatus.False;
-		private HaltMode       haltMode         = HaltMode.NotHalted;
+		private HaltMode        haltMode         = HaltMode.NotHalted;
 		private int             waitNopAmount;
 
 		public void Start()
@@ -193,6 +193,13 @@ namespace GameboyEmulator
 				programCounter -= 1;
 				haltMode       =  HaltMode.NotHalted;
 			}
+
+			Opcode a = new Opcode("LD BC,u16", 1, 12, 12);
+			a.SetFunction(() => { 
+				BcRegister = Load16BitImmediate();
+				a.ExecutedLast               = true;
+			});
+			a.Execute();
 
 			switch (opcode)
 			{
