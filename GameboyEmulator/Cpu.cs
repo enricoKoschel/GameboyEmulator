@@ -180,8 +180,6 @@ namespace GameboyEmulator
 				return 4;
 			}
 
-			Debug.totalExecutedOpcodes++;
-
 			if (haltMode != HaltModes.NotHalted && haltMode != HaltModes.HaltBug && interrupts.HasPendingInterrupts)
 				haltMode = HaltModes.NotHalted;
 

@@ -8,6 +8,8 @@ namespace GameboyEmulator
 	{
 		public static void Main(string[] args)
 		{
+			Logger.LogMessage("Program started");
+
 			Cpu    emulator   = new Cpu();
 			Window window     = emulator.GetGraphics().GetScreen().GetWindow();
 			Clock  frameTime  = new Clock();
@@ -18,7 +20,7 @@ namespace GameboyEmulator
 
 			while (emulator.IsRunning)
 			{
-				frameTime.Restart().AsSeconds();
+				frameTime.Restart();
 				emulator.Update();
 
 				int fps                          = Convert.ToInt32(1 / frameTime.ElapsedTime.AsSeconds());
@@ -27,6 +29,8 @@ namespace GameboyEmulator
 
 				window.SetTitle($"GameBoy Emulator | FPS - {fps} | Lowest - {lowestFps} | Highest - {highestFps}");
 			}
+
+			Logger.LogMessage("Program terminated");
 		}
 	}
 }
