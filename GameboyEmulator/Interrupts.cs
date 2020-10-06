@@ -2,7 +2,7 @@
 {
 	class Interrupts
 	{
-		public enum InterruptTypes
+		public enum InterruptType
 		{
 			VBlank,
 			LcdStat,
@@ -73,23 +73,23 @@
 
 		public bool masterInterruptEnable = true;
 
-		public void Request(InterruptTypes interrupt)
+		public void Request(InterruptType interrupt)
 		{
 			switch (interrupt)
 			{
-				case InterruptTypes.VBlank:
+				case InterruptType.VBlank:
 					VBlankRequested = true;
 					break;
-				case InterruptTypes.LcdStat:
+				case InterruptType.LcdStat:
 					LcdStatRequested = true;
 					break;
-				case InterruptTypes.Timer:
+				case InterruptType.Timer:
 					TimerRequested = true;
 					break;
-				case InterruptTypes.Serial:
+				case InterruptType.Serial:
 					SerialRequested = true;
 					break;
-				case InterruptTypes.Joypad:
+				case InterruptType.Joypad:
 					JoypadRequested = true;
 					break;
 			}
@@ -100,36 +100,36 @@
 			if (!masterInterruptEnable || InterruptFlagRegister == 0 || InterruptEnableRegister == 0) return;
 
 			//Ordered in increasing Priority so that highest Priority always get's executed
-			if (JoypadEnabled && JoypadRequested) Service(InterruptTypes.Joypad);
-			if (SerialEnabled && SerialRequested) Service(InterruptTypes.Serial);
-			if (TimerEnabled && TimerRequested) Service(InterruptTypes.Timer);
-			if (LcdStatEnabled && LcdStatRequested) Service(InterruptTypes.LcdStat);
-			if (VBlankEnabled && VBlankRequested) Service(InterruptTypes.VBlank);
+			if (JoypadEnabled && JoypadRequested) Service(InterruptType.Joypad);
+			if (SerialEnabled && SerialRequested) Service(InterruptType.Serial);
+			if (TimerEnabled && TimerRequested) Service(InterruptType.Timer);
+			if (LcdStatEnabled && LcdStatRequested) Service(InterruptType.LcdStat);
+			if (VBlankEnabled && VBlankRequested) Service(InterruptType.VBlank);
 		}
 
-		private void Service(InterruptTypes interrupt)
+		private void Service(InterruptType interrupt)
 		{
 			masterInterruptEnable = false;
 
 			switch (interrupt)
 			{
-				case InterruptTypes.VBlank:
+				case InterruptType.VBlank:
 					VBlankRequested = false;
 					cpu.ServiceInterrupt(0x40);
 					break;
-				case InterruptTypes.LcdStat:
+				case InterruptType.LcdStat:
 					LcdStatRequested = false;
 					cpu.ServiceInterrupt(0x48);
 					break;
-				case InterruptTypes.Timer:
+				case InterruptType.Timer:
 					TimerRequested = false;
 					cpu.ServiceInterrupt(0x50);
 					break;
-				case InterruptTypes.Serial:
+				case InterruptType.Serial:
 					SerialRequested = false;
 					cpu.ServiceInterrupt(0x58);
 					break;
-				case InterruptTypes.Joypad:
+				case InterruptType.Joypad:
 					JoypadRequested = false;
 					cpu.ServiceInterrupt(0x60);
 					break;

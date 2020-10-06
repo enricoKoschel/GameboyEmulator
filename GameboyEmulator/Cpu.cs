@@ -4,7 +4,7 @@ namespace GameboyEmulator
 {
 	class Cpu
 	{
-		private enum JumpConditions
+		private enum JumpCondition
 		{
 			Nz,
 			Z,
@@ -20,7 +20,7 @@ namespace GameboyEmulator
 			False
 		}
 
-		private enum HaltModes
+		private enum HaltMode
 		{
 			HaltedImeTrue,
 			HaltedImeFalse,
@@ -134,7 +134,7 @@ namespace GameboyEmulator
 
 		//Flags
 		private InterruptStatus enableInterrupts = InterruptStatus.False;
-		private HaltModes       haltMode         = HaltModes.NotHalted;
+		private HaltMode       haltMode         = HaltMode.NotHalted;
 		private int             waitNopAmount;
 
 		public void Start()
@@ -180,18 +180,18 @@ namespace GameboyEmulator
 				return 4;
 			}
 
-			if (haltMode != HaltModes.NotHalted && haltMode != HaltModes.HaltBug && interrupts.HasPendingInterrupts)
-				haltMode = HaltModes.NotHalted;
+			if (haltMode != HaltMode.NotHalted && haltMode != HaltMode.HaltBug && interrupts.HasPendingInterrupts)
+				haltMode = HaltMode.NotHalted;
 
-			if (haltMode == HaltModes.HaltedImeFalse || haltMode == HaltModes.HaltedImeTrue)
+			if (haltMode == HaltMode.HaltedImeFalse || haltMode == HaltMode.HaltedImeTrue)
 				return 4;
 
 			byte opcode = Load8BitImmediate();
-			if (haltMode == HaltModes.HaltBug)
+			if (haltMode == HaltMode.HaltBug)
 			{
 				//If Halt Bug occurs, the Program Counter does not get increased after fetching Opcode 
 				programCounter -= 1;
-				haltMode       =  HaltModes.NotHalted;
+				haltMode       =  HaltMode.NotHalted;
 			}
 
 			switch (opcode)
@@ -291,7 +291,7 @@ namespace GameboyEmulator
 					return 4;
 				//JR n
 				case 0x18:
-					return JumpRelative(JumpConditions.NoCondition);
+					return JumpRelative(JumpCondition.NoCondition);
 				//ADD HL,DE
 				case 0x19:
 					HlRegister = Add16BitRegisters(HlRegister, DeRegister);
@@ -322,7 +322,7 @@ namespace GameboyEmulator
 					return 4;
 				//JR NZ,n
 				case 0x20:
-					return JumpRelative(JumpConditions.Nz);
+					return JumpRelative(JumpCondition.Nz);
 				//LD HL,nn
 				case 0x21:
 					HlRegister = Load16BitImmediate();
@@ -351,7 +351,7 @@ namespace GameboyEmulator
 					return DecimalAdjustARegister();
 				//JR Z,n
 				case 0x28:
-					return JumpRelative(JumpConditions.Z);
+					return JumpRelative(JumpCondition.Z);
 				//ADD HL,HL
 				case 0x29:
 					HlRegister = Add16BitRegisters(HlRegister, HlRegister);
@@ -381,7 +381,7 @@ namespace GameboyEmulator
 					return ComplementARegister();
 				//JR NC,n
 				case 0x30:
-					return JumpRelative(JumpConditions.Nc);
+					return JumpRelative(JumpCondition.Nc);
 				//LD SP,nn
 				case 0x31:
 					stackPointer = Load16BitImmediate();
@@ -410,7 +410,7 @@ namespace GameboyEmulator
 					return SetCarryFlagOpcode();
 				//JR C,n
 				case 0x38:
-					return JumpRelative(JumpConditions.C);
+					return JumpRelative(JumpCondition.C);
 				//ADD HL,SP
 				case 0x39:
 					HlRegister = Add16BitRegisters(HlRegister, stackPointer);
@@ -951,20 +951,20 @@ namespace GameboyEmulator
 					return 4;
 				//RET NZ
 				case 0xC0:
-					return ReturnSubroutine(JumpConditions.Nz);
+					return ReturnSubroutine(JumpCondition.Nz);
 				//POP BC
 				case 0xC1:
 					BcRegister = PopStack();
 					return 12;
 				//JP NZ,nn
 				case 0xC2:
-					return JumpImmediate(JumpConditions.Nz);
+					return JumpImmediate(JumpCondition.Nz);
 				//JP nn
 				case 0xC3:
-					return JumpImmediate(JumpConditions.NoCondition);
+					return JumpImmediate(JumpCondition.NoCondition);
 				//CALL NZ,nn
 				case 0xC4:
-					return CallSubroutine(JumpConditions.Nz);
+					return CallSubroutine(JumpCondition.Nz);
 				//PUSH BC
 				case 0xC5:
 					return PushStack(BcRegister);
@@ -977,22 +977,22 @@ namespace GameboyEmulator
 					return ResetOpcode(0x00);
 				//RET Z
 				case 0xC8:
-					return ReturnSubroutine(JumpConditions.Z);
+					return ReturnSubroutine(JumpCondition.Z);
 				//RET
 				case 0xC9:
-					return ReturnSubroutine(JumpConditions.NoCondition);
+					return ReturnSubroutine(JumpCondition.NoCondition);
 				//JP Z,nn
 				case 0xCA:
-					return JumpImmediate(JumpConditions.Z);
+					return JumpImmediate(JumpCondition.Z);
 				//Extended Opcode
 				case 0xCB:
 					return ExecuteExtendedOpcode();
 				//CALL Z,nn
 				case 0xCC:
-					return CallSubroutine(JumpConditions.Z);
+					return CallSubroutine(JumpCondition.Z);
 				//CALL nn
 				case 0xCD:
-					return CallSubroutine(JumpConditions.NoCondition);
+					return CallSubroutine(JumpCondition.NoCondition);
 				//ADC A,n
 				case 0xCE:
 					AddByteToAReg(Load8BitImmediate(), CarryFlag);
@@ -1002,19 +1002,19 @@ namespace GameboyEmulator
 					return ResetOpcode(0x08);
 				//RET NC
 				case 0xD0:
-					return ReturnSubroutine(JumpConditions.Nc);
+					return ReturnSubroutine(JumpCondition.Nc);
 				//POP DE
 				case 0xD1:
 					DeRegister = PopStack();
 					return 12;
 				//JP NC,nn
 				case 0xD2:
-					return JumpImmediate(JumpConditions.Nc);
+					return JumpImmediate(JumpCondition.Nc);
 				//Invalid Opcode
 				//0xD3
 				//CALL NC,nn
 				case 0xD4:
-					return CallSubroutine(JumpConditions.Nc);
+					return CallSubroutine(JumpCondition.Nc);
 				//PUSH DE
 				case 0xD5:
 					return PushStack(DeRegister);
@@ -1027,19 +1027,19 @@ namespace GameboyEmulator
 					return ResetOpcode(0x10);
 				//RET C
 				case 0xD8:
-					return ReturnSubroutine(JumpConditions.C);
+					return ReturnSubroutine(JumpCondition.C);
 				//RETI
 				case 0xD9:
 					enableInterrupts = InterruptStatus.ThisCycle;
-					return ReturnSubroutine(JumpConditions.NoCondition);
+					return ReturnSubroutine(JumpCondition.NoCondition);
 				//JP C,nn
 				case 0xDA:
-					return JumpImmediate(JumpConditions.C);
+					return JumpImmediate(JumpCondition.C);
 				//Invalid Opcode
 				//0xDB
 				//CALL C,nn
 				case 0xDC:
-					return CallSubroutine(JumpConditions.C);
+					return CallSubroutine(JumpCondition.C);
 				//SBC A,n
 				case 0xDE:
 					SubtractByteFromAReg(Load8BitImmediate(), false, CarryFlag);
@@ -2479,7 +2479,7 @@ namespace GameboyEmulator
 		}
 
 		//Jump functions
-		private int JumpRelative(JumpConditions condition)
+		private int JumpRelative(JumpCondition condition)
 		{
 			//Signed relative Jump amount
 			sbyte relativeJumpAmount = (sbyte)Load8BitImmediate();
@@ -2490,7 +2490,7 @@ namespace GameboyEmulator
 			return 12;
 		}
 
-		private int JumpImmediate(JumpConditions condition)
+		private int JumpImmediate(JumpCondition condition)
 		{
 			ushort jumpAddress = Load16BitImmediate();
 
@@ -2500,28 +2500,28 @@ namespace GameboyEmulator
 			return 16;
 		}
 
-		private bool ShouldJump(JumpConditions condition)
+		private bool ShouldJump(JumpCondition condition)
 		{
 			return condition switch
 			{
 				//Non-Zero
-				JumpConditions.Nz =>
+				JumpCondition.Nz =>
 					!ZeroFlag,
 
 				//Zero
-				JumpConditions.Z =>
+				JumpCondition.Z =>
 					ZeroFlag,
 
 				//No Carry
-				JumpConditions.Nc =>
+				JumpCondition.Nc =>
 					!CarryFlag,
 
 				//Carry
-				JumpConditions.C =>
+				JumpCondition.C =>
 					CarryFlag,
 
 				//Always Jump
-				JumpConditions.NoCondition =>
+				JumpCondition.NoCondition =>
 					true,
 
 				//Default
@@ -2529,7 +2529,7 @@ namespace GameboyEmulator
 			};
 		}
 
-		private int CallSubroutine(JumpConditions condition)
+		private int CallSubroutine(JumpCondition condition)
 		{
 			ushort jumpAddress = Load16BitImmediate();
 
@@ -2540,9 +2540,9 @@ namespace GameboyEmulator
 			return 24;
 		}
 
-		private int ReturnSubroutine(JumpConditions condition)
+		private int ReturnSubroutine(JumpCondition condition)
 		{
-			if (condition == JumpConditions.NoCondition)
+			if (condition == JumpCondition.NoCondition)
 			{
 				//Special Case for unconditional return
 				programCounter = PopStack();
@@ -2698,11 +2698,11 @@ namespace GameboyEmulator
 		private int HaltCpu()
 		{
 			if (interrupts.masterInterruptEnable)
-				haltMode = HaltModes.HaltedImeTrue;
+				haltMode = HaltMode.HaltedImeTrue;
 			else if (!interrupts.HasPendingInterrupts)
-				haltMode = HaltModes.HaltedImeFalse;
+				haltMode = HaltMode.HaltedImeFalse;
 			else
-				haltMode = HaltModes.HaltBug;
+				haltMode = HaltMode.HaltBug;
 
 			return 4;
 		}

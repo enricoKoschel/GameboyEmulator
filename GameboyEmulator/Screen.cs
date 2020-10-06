@@ -5,12 +5,12 @@ using SFML.Window;
 
 namespace GameboyEmulator
 {
-	readonly struct Colors
+	readonly struct Color
 	{
-		public static Color black     = new Color(8, 24, 32);
-		public static Color darkGray  = new Color(52, 104, 86);
-		public static Color lightGray = new Color(136, 192, 112);
-		public static Color white     = new Color(224, 248, 208);
+		public static SFML.Graphics.Color black     = new SFML.Graphics.Color(8, 24, 32);
+		public static SFML.Graphics.Color darkGray  = new SFML.Graphics.Color(52, 104, 86);
+		public static SFML.Graphics.Color lightGray = new SFML.Graphics.Color(136, 192, 112);
+		public static SFML.Graphics.Color white     = new SFML.Graphics.Color(224, 248, 208);
 	}
 
 	class Screen
@@ -47,7 +47,7 @@ namespace GameboyEmulator
 			window.Closed += OnClosed;
 		}
 
-		public void UpdateBuffer(int x, int y, Color color)
+		public void UpdateBuffer(int x, int y, SFML.Graphics.Color color)
 		{
 			int index = (x * 4) + y * SCREEN_GAME_WIDTH * 4;
 
@@ -85,19 +85,19 @@ namespace GameboyEmulator
 				//4******3
 
 				vertexArray[i + 0] = new Vertex(
-					new Vector2f(leftSide, topSide), Color.Blue
+					new Vector2f(leftSide, topSide), SFML.Graphics.Color.Blue
 				);
 
 				vertexArray[i + 1] = new Vertex(
-					new Vector2f(leftSide + SCREEN_SCALE, topSide), Color.Blue
+					new Vector2f(leftSide + SCREEN_SCALE, topSide), SFML.Graphics.Color.Blue
 				);
 
 				vertexArray[i + 2] = new Vertex(
-					new Vector2f(leftSide + SCREEN_SCALE, topSide + SCREEN_SCALE), Color.Blue
+					new Vector2f(leftSide + SCREEN_SCALE, topSide + SCREEN_SCALE), SFML.Graphics.Color.Blue
 				);
 
 				vertexArray[i + 3] = new Vertex(
-					new Vector2f(leftSide, topSide + SCREEN_SCALE), Color.Blue
+					new Vector2f(leftSide, topSide + SCREEN_SCALE), SFML.Graphics.Color.Blue
 				);
 			}
 		}

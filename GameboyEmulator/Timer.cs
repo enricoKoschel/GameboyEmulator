@@ -80,7 +80,7 @@ namespace GameboyEmulator
 			{
 				//Timer Overflow, reset to Value in Timer Modulo and request Interrupt
 				TimerRegister = TimerModulo;
-				interrupts.Request(Interrupts.InterruptTypes.Timer);
+				interrupts.Request(Interrupts.InterruptType.Timer);
 			}
 			else
 				TimerRegister++;

@@ -88,7 +88,7 @@ namespace GameboyEmulator
 
 				//Only request Interrupt if Button was pressed this Frame
 				if (ButtonPressedThisFrame && (ButtonPressedThisFrame != buttonPressedLastFrame))
-					interrupts.Request(Interrupts.InterruptTypes.Joypad);
+					interrupts.Request(Interrupts.InterruptType.Joypad);
 
 				buttonPressedLastFrame = ButtonPressedThisFrame;
 			}

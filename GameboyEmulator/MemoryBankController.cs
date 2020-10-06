@@ -2,13 +2,13 @@
 {
 	class MemoryBankController
 	{
-		private enum MemoryBankControllers
+		private enum BankControllerType
 		{
 			RomOnly = 0x00,
 			Mbc1    = 0x01
 		}
 
-		private enum MemoryBankingModes
+		private enum MemoryBankingMode
 		{
 			RomBankingMode = 0,
 			RamBankingMode = 1
@@ -22,8 +22,8 @@
 			this.memory = memory;
 		}
 
-		private MemoryBankControllers currentMemoryBankController;
-		private MemoryBankingModes    currentMemoryBankingMode;
+		private BankControllerType currentBankControllerType;
+		private MemoryBankingMode    currentMemoryBankingMode;
 		private int                   currentRamBank;
 
 		public int CurrentRomBank { get; private set; }
@@ -32,17 +32,17 @@
 
 		public void DetectBankingMode()
 		{
-			currentMemoryBankController = (MemoryBankControllers)memory.Read(0x147);
-			currentMemoryBankingMode    = MemoryBankingModes.RomBankingMode;
+			currentBankControllerType = (BankControllerType)memory.Read(0x147);
+			currentMemoryBankingMode    = MemoryBankingMode.RomBankingMode;
 			CurrentRomBank              = 1;
 			currentRamBank              = 0;
 		}
 
 		public void HandleBanking(ushort address, byte data)
 		{
-			switch (currentMemoryBankController)
+			switch (currentBankControllerType)
 			{
-				case MemoryBankControllers.Mbc1:
+				case BankControllerType.Mbc1:
 				{
 					if (Memory.IsBetween(address, 0x0000, 0x2000))
 					{
@@ -60,7 +60,7 @@
 					else if (Memory.IsBetween(address, 0x4000, 0x6000))
 					{
 						//Change current Rambank or upper 2 bits of current Rombank
-						if (currentMemoryBankingMode == MemoryBankingModes.RomBankingMode)
+						if (currentMemoryBankingMode == MemoryBankingMode.RomBankingMode)
 							CurrentRomBank = (CurrentRomBank & 0b00011111) | (data & 0b01100000);
 						else
 							currentRamBank = data & 0b00000011;
@@ -68,7 +68,7 @@
 					else if (Memory.IsBetween(address, 0x6000, 0x8000))
 					{
 						//Change Memory Banking Mode
-						currentMemoryBankingMode = (MemoryBankingModes)data;
+						currentMemoryBankingMode = (MemoryBankingMode)data;
 					}
 
 					break;

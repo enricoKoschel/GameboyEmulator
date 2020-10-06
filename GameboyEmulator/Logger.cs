@@ -6,7 +6,7 @@ namespace GameboyEmulator
 {
 	public static class Logger
 	{
-		public enum LogLevels
+		public enum LogLevel
 		{
 			Info,
 			Warn,
@@ -26,7 +26,7 @@ namespace GameboyEmulator
 			logFile.AutoFlush = true;
 		}
 
-		public static void LogMessage(string message, LogLevels loglevel = LogLevels.Info)
+		public static void LogMessage(string message, LogLevel loglevel = LogLevel.Info)
 		{
 			logFile.WriteLine($"[{CurrentTime}][{LogLevelToString(loglevel)}] {message}");
 		}
@@ -45,13 +45,13 @@ namespace GameboyEmulator
 			return new StreamWriter(File.Create(uniqueLogFilePath));
 		}
 
-		private static string LogLevelToString(LogLevels logLevel)
+		private static string LogLevelToString(LogLevel logLevel)
 		{
 			return logLevel switch
 			{
-				LogLevels.Info => "Info",
-				LogLevels.Warn => "Warn",
-				LogLevels.Error => "Error",
+				LogLevel.Info => "Info",
+				LogLevel.Warn => "Warn",
+				LogLevel.Error => "Error",
 				_ => throw new ArgumentOutOfRangeException(nameof(logLevel), logLevel, "Invalid Log Level")
 			};
 		}

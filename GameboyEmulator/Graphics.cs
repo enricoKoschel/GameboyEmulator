@@ -169,8 +169,8 @@ namespace GameboyEmulator
 					//Transparent Pixel
 					if (paletteIndex == 0) continue;
 
-					byte  palette = memory.Read(paletteAddress);
-					Color color   = GetColor(palette, paletteIndex);
+					byte                palette = memory.Read(paletteAddress);
+					SFML.Graphics.Color color   = GetColor(palette, paletteIndex);
 
 					int spriteDataIndexReverse = spriteDataIndex;
 
@@ -191,7 +191,7 @@ namespace GameboyEmulator
 			}
 		}
 
-		private static Color GetColor(byte palette, byte paletteIndex)
+		private static SFML.Graphics.Color GetColor(byte palette, byte paletteIndex)
 		{
 			int colorIdLo = paletteIndex * 2;
 			int colorIdHi = colorIdLo + 1;
@@ -201,10 +201,10 @@ namespace GameboyEmulator
 
 			return colorId switch
 			{
-				0 => Colors.white,
-				1 => Colors.lightGray,
-				2 => Colors.darkGray,
-				_ => Colors.black
+				0 => Color.white,
+				1 => Color.lightGray,
+				2 => Color.darkGray,
+				_ => Color.black
 			};
 		}
 	}

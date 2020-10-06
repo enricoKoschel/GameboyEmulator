@@ -152,7 +152,7 @@ namespace GameboyEmulator
 
 			if (!CoincidenceInterruptEnabled) return;
 
-			interrupts.Request(Interrupts.InterruptTypes.LcdStat);
+			interrupts.Request(Interrupts.InterruptType.LcdStat);
 		}
 
 		private void SetStatus()
@@ -164,7 +164,7 @@ namespace GameboyEmulator
 
 				if (!vBlankRequested)
 				{
-					interrupts.Request(Interrupts.InterruptTypes.VBlank);
+					interrupts.Request(Interrupts.InterruptType.VBlank);
 					vBlankRequested = true;
 				}
 
