@@ -43,6 +43,10 @@ namespace GameboyEmulator
 			graphics   = new Graphics(memory, interrupts);
 			joypad     = new Joypad(memory, interrupts, graphics);
 			timer      = new Timer(memory, interrupts);
+
+			//Initialize Opcodes
+			InitializeOpcodes();
+			InitializeExtendedOpcodes();
 		}
 
 		//Registers
@@ -172,6 +176,26 @@ namespace GameboyEmulator
 			joypad.Update(true);
 		}
 
+		private readonly Opcode[] opcodes         = new Opcode[0xFF];
+		private readonly Opcode[] extendedOpcodes = new Opcode[0xFF];
+
+		//Opcodes
+		private void InitializeOpcodes()
+		{
+			opcodes[0x00] = new Opcode("NOP", 1, 4, 4, () => true);
+			opcodes[0x01] = new Opcode(
+				"LD BC,u16", 3, 12, 12, () =>
+				{
+					BcRegister = Load16BitImmediate();
+					return true;
+				}
+			);
+		}
+
+		private void InitializeExtendedOpcodes()
+		{
+		}
+
 		private int ExecuteOpcode()
 		{
 			if (waitNopAmount > 0)
@@ -194,12 +218,13 @@ namespace GameboyEmulator
 				haltMode       =  HaltMode.NotHalted;
 			}
 
-			Opcode a = new Opcode("LD BC,u16", 1, 12, 12);
-			a.SetFunction(() => { 
-				BcRegister = Load16BitImmediate();
-				a.ExecutedLast               = true;
-			});
-			a.Execute();
+			if (opcode == 0 || opcode == 1)
+			{
+				Opcode currentOpcode = opcodes[opcode];
+				Logger.LogMessage($"Executing Opcode '{currentOpcode.Mnemonic}' at PC '{programCounter}'");
+				currentOpcode.Execute();
+				return currentOpcode.ClockCyclesOfLastExec;
+			}
 
 			switch (opcode)
 			{

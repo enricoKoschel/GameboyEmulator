@@ -1,37 +1,33 @@
 ﻿using System;
-using System.Reflection;
 
 namespace GameboyEmulator
 {
 	public class Opcode
 	{
-		public string Mnemonic                  { get; }
-		public int    NumberOfParameters        { get; }
-		public int    NumberOfClockCyclesExec   { get; }
-		public int    NumberOfClockCyclesNoExec { get; }
+		public string Mnemonic                      { get; }
+		public int    LengthInBytes                 { get; }
+		public int    NrOfClockCyclesConditionTrue  { get; }
+		public int    NrOfClockCyclesConditionFalse { get; }
+		public int    ClockCyclesOfLastExec         { get; private set; }
 
-		public bool ExecutedLast { get; set; }
-
-		private Action function;
+		private readonly Func<bool> function;
 
 		public Opcode(
-			string mnemonic, int numberOfParameters, int numberOfClockCyclesExec, int numberOfClockCyclesNoExec
+			string     mnemonic, int lengthInBytes, int nrOfClockCyclesConditionTrue, int nrOfClockCyclesConditionFalse,
+			Func<bool> function
 		)
 		{
-			Mnemonic                  = mnemonic;
-			NumberOfParameters        = numberOfParameters;
-			NumberOfClockCyclesExec   = numberOfClockCyclesExec;
-			NumberOfClockCyclesNoExec = numberOfClockCyclesNoExec;
-		}
+			Mnemonic                      = mnemonic;
+			LengthInBytes                 = lengthInBytes;
+			NrOfClockCyclesConditionTrue  = nrOfClockCyclesConditionTrue;
+			NrOfClockCyclesConditionFalse = nrOfClockCyclesConditionFalse;
 
-		public void SetFunction(Action function)
-		{
 			this.function = function;
 		}
 
 		public void Execute()
 		{
-			function?.Invoke();
+			ClockCyclesOfLastExec = function.Invoke() ? NrOfClockCyclesConditionTrue : NrOfClockCyclesConditionFalse;
 		}
 	}
 }
