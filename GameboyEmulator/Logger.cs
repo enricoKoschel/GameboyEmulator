@@ -15,7 +15,7 @@ namespace GameboyEmulator
 
 		private static readonly StreamWriter logFile;
 
-		private static string CurrentTime              => DateTime.Now.ToString(CultureInfo.CurrentCulture);
+		private static string CurrentTime              => DateTime.Now.ToString("HH:mm:ss.fff");
 		private static string CurrentTimeFileFormatted => DateTime.Now.ToString("dd.MM.yyyy_HH_mm");
 
 		private const string LOG_DIRECTORY_PATH = "../../../logs/";

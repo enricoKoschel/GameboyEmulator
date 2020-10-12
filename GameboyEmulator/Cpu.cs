@@ -221,7 +221,7 @@ namespace GameboyEmulator
 			if (opcode == 0 || opcode == 1)
 			{
 				Opcode currentOpcode = opcodes[opcode];
-				Logger.LogMessage($"Executing Opcode '{currentOpcode.Mnemonic}' at PC '{programCounter}'");
+				Logger.LogMessage($"Executing '{currentOpcode.Mnemonic}' at PC '{programCounter:X}'");
 				currentOpcode.Execute();
 				return currentOpcode.ClockCyclesOfLastExec;
 			}
