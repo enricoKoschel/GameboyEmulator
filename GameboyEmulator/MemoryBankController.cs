@@ -23,8 +23,8 @@
 		}
 
 		private BankControllerType currentBankControllerType;
-		private MemoryBankingMode    currentMemoryBankingMode;
-		private int                   currentRamBank;
+		private MemoryBankingMode  currentMemoryBankingMode;
+		private int                currentRamBank;
 
 		public int CurrentRomBank { get; private set; }
 
@@ -33,9 +33,9 @@
 		public void DetectBankingMode()
 		{
 			currentBankControllerType = (BankControllerType)memory.Read(0x147);
-			currentMemoryBankingMode    = MemoryBankingMode.RomBankingMode;
-			CurrentRomBank              = 1;
-			currentRamBank              = 0;
+			currentMemoryBankingMode  = MemoryBankingMode.RomBankingMode;
+			CurrentRomBank            = 1;
+			currentRamBank            = 0;
 		}
 
 		public void HandleBanking(ushort address, byte data)

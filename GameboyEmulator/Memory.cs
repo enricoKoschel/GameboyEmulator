@@ -49,8 +49,9 @@ namespace GameboyEmulator
 		private       bool   bootRomEnabled     = false;
 
 		//TODO - Accept game file path as console parameter / make into property
-		private const string GAME_ROM_FILE_PATH = "../../../roms/mario.gb";
-		//private const string GAME_ROM_FILE_PATH = "../../../roms/test/halt_bug.gb";
+		//private const string GAME_ROM_FILE_PATH = "../../../roms/mario.gb";
+		private const string GAME_ROM_FILE_PATH = "../../../roms/test/ppu/dmg-acid2.gb";
+		//private const string GAME_ROM_FILE_PATH = "../../../roms/test/ppu/lycscx.gb";
 
 		public Memory(Cpu cpu)
 		{

@@ -22,7 +22,7 @@ namespace GameboyEmulator
 		private const int SCREEN_DRAW_HEIGHT = SCREEN_GAME_HEIGHT * SCREEN_SCALE;
 
 		private readonly RenderWindow window;
-		
+
 		private readonly VertexBuffer vertexBuffer;
 		private readonly Vertex[]     vertexArray;
 
@@ -105,9 +105,9 @@ namespace GameboyEmulator
 		public void DrawFrame()
 		{
 			if (!window.IsOpen) throw new InvalidOperationException("Cannot draw Screen when Window is closed!");
-			
+
 			window.DispatchEvents();
-			
+
 			vertexBuffer.Update(vertexArray);
 			vertexBuffer.Draw(window, RenderStates.Default);
 

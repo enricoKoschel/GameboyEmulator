@@ -134,7 +134,7 @@ namespace GameboyEmulator
 
 		//Flags
 		private InterruptStatus enableInterrupts = InterruptStatus.False;
-		private HaltMode       haltMode         = HaltMode.NotHalted;
+		private HaltMode        haltMode         = HaltMode.NotHalted;
 		private int             waitNopAmount;
 
 		public void Start()

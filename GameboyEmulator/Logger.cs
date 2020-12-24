@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Globalization;
 using System.IO;
 
 namespace GameboyEmulator
@@ -15,7 +14,7 @@ namespace GameboyEmulator
 
 		private static readonly StreamWriter logFile;
 
-		private static string CurrentTime              => DateTime.Now.ToString(CultureInfo.CurrentCulture);
+		private static string CurrentTime              => DateTime.Now.ToString("HH:mm:ss.fff");
 		private static string CurrentTimeFileFormatted => DateTime.Now.ToString("dd.MM.yyyy_HH_mm");
 
 		private const string LOG_DIRECTORY_PATH = "../../../logs/";
@@ -49,10 +48,10 @@ namespace GameboyEmulator
 		{
 			return logLevel switch
 			{
-				LogLevel.Info => "Info",
-				LogLevel.Warn => "Warn",
+				LogLevel.Info  => "Info",
+				LogLevel.Warn  => "Warn",
 				LogLevel.Error => "Error",
-				_ => throw new ArgumentOutOfRangeException(nameof(logLevel), logLevel, "Invalid Log Level")
+				_              => throw new ArgumentOutOfRangeException(nameof(logLevel), logLevel, "Invalid Log Level")
 			};
 		}
 	}
