@@ -122,8 +122,8 @@ namespace GameboyEmulator
 			set => StatusRegister = Cpu.SetBit(StatusRegister, 6, value);
 		}
 
-		private bool vBlankRequested = false;
-		private bool lycRequested = false;
+		private bool vBlankRequested;
+		private bool lycRequested;
 
 		public void Update(int cycles)
 		{
@@ -136,7 +136,7 @@ namespace GameboyEmulator
 			{
 				//Increase Scanline every 456 Clockcycles, only draw if not in VBlank
 				if (CurrentScanline < 144) shouldDrawScanline = true;
-				lycRequested = false;
+				lycRequested    = false;
 				CoincidenceFlag = false;
 
 				shouldIncreaseScanline = true;
@@ -154,12 +154,11 @@ namespace GameboyEmulator
 			CoincidenceFlag = true;
 
 			if (!CoincidenceInterruptEnabled) return;
-			
-			if (!lycRequested)
-			{
-				interrupts.Request(Interrupts.InterruptType.LcdStat);
-				lycRequested = true;
-			}
+
+			if (lycRequested) return;
+
+			interrupts.Request(Interrupts.InterruptType.LcdStat);
+			lycRequested = true;
 		}
 
 		private void SetStatus()

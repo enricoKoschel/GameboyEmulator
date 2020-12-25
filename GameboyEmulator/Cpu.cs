@@ -180,9 +180,6 @@ namespace GameboyEmulator
 				return 4;
 			}
 
-			if (haltMode != HaltMode.NotHalted && haltMode != HaltMode.HaltBug && interrupts.HasPendingInterrupts)
-				haltMode = HaltMode.NotHalted;
-
 			if (haltMode == HaltMode.HaltedImeFalse || haltMode == HaltMode.HaltedImeTrue)
 				return 4;
 
@@ -2557,6 +2554,8 @@ namespace GameboyEmulator
 
 		private int ResetOpcode(byte address)
 		{
+			if (haltMode != HaltMode.NotHalted && haltMode != HaltMode.HaltBug) haltMode = HaltMode.NotHalted;
+
 			PushStack(programCounter);
 
 			programCounter = address;
@@ -2689,8 +2688,8 @@ namespace GameboyEmulator
 		//Interrupt functions
 		public void ServiceInterrupt(ushort address)
 		{
-			if (haltMode != HaltMode.NotHalted && haltMode != HaltMode.HaltBug)
-				haltMode = HaltMode.NotHalted;
+			if (haltMode != HaltMode.NotHalted && haltMode != HaltMode.HaltBug) haltMode = HaltMode.NotHalted;
+
 			PushStack(programCounter);
 			programCounter = address;
 			waitNopAmount  = 5;

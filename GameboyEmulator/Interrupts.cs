@@ -99,13 +99,12 @@
 		{
 			if (!masterInterruptEnable || InterruptFlagRegister == 0 || InterruptEnableRegister == 0) return;
 
-			//Ordered in increasing Priority so that highest Priority always get's executed
+			//Ordered in decreasing Priority so that highest Priority always get's executed
 			if (VBlankEnabled && VBlankRequested) Service(InterruptType.VBlank);
 			else if (LcdStatEnabled && LcdStatRequested) Service(InterruptType.LcdStat);
 			else if (TimerEnabled && TimerRequested) Service(InterruptType.Timer);
 			else if (SerialEnabled && SerialRequested) Service(InterruptType.Serial);
 			else if (JoypadEnabled && JoypadRequested) Service(InterruptType.Joypad);
-
 		}
 
 		private void Service(InterruptType interrupt)
