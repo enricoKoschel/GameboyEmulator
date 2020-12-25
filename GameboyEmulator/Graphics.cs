@@ -20,6 +20,8 @@ namespace GameboyEmulator
 
 		public bool IsScreenOpen => screen.IsOpen;
 
+		private int internalWindowCounter;
+
 		public Screen GetScreen()
 		{
 			return screen;
@@ -31,7 +33,7 @@ namespace GameboyEmulator
 
 			if (lcd.shouldDrawScanline) DrawScanline();
 
-			if (lcd.shouldIncreaseScanline) lcd.CurrentScanline++;
+			if (lcd.shouldIncreaseScanline && lcd.CurrentScanline++ == 0) internalWindowCounter = 0;
 		}
 
 		private void DrawScanline()
@@ -85,9 +87,9 @@ namespace GameboyEmulator
 			}
 
 			//Window
-			if (!lcd.WindowEnabled || lcd.WindowY > lcd.CurrentScanline) return;
+			if (!lcd.WindowEnabled || lcd.WindowY > lcd.CurrentScanline || lcd.WindowX > 159) return;
 
-			int windowTileMapY = (lcd.CurrentScanline - lcd.WindowY) / 8 * 32;
+			int windowTileMapY = internalWindowCounter++ / 8 * 32;
 
 			for (int windowPixel = lcd.WindowX; windowPixel < 160; windowPixel++)
 			{

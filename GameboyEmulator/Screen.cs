@@ -128,6 +128,11 @@ namespace GameboyEmulator
 			window.Display();
 		}
 
+		public void Clear(SFML.Graphics.Color color)
+		{
+			for (int i = 0; i < NUMBER_OF_VERTICES; i++) vertexArray[i].Color = color;
+		}
+
 		//Event handlers
 		private static void OnClosed(object sender, EventArgs e)
 		{
