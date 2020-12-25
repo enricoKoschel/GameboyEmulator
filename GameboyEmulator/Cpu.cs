@@ -2689,6 +2689,8 @@ namespace GameboyEmulator
 		//Interrupt functions
 		public void ServiceInterrupt(ushort address)
 		{
+			if (haltMode != HaltMode.NotHalted && haltMode != HaltMode.HaltBug)
+				haltMode = HaltMode.NotHalted;
 			PushStack(programCounter);
 			programCounter = address;
 			waitNopAmount  = 5;
