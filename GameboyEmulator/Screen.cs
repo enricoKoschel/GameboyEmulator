@@ -26,6 +26,8 @@ namespace GameboyEmulator
 		private readonly VertexBuffer vertexBuffer;
 		private readonly Vertex[]     vertexArray;
 
+		private readonly bool[,] zBuffer;
+
 		public Screen()
 		{
 			vertexArray = new Vertex[NUMBER_OF_VERTICES];
@@ -33,6 +35,8 @@ namespace GameboyEmulator
 				NUMBER_OF_VERTICES, PrimitiveType.Quads, VertexBuffer.UsageSpecifier.Stream
 			);
 
+			zBuffer = new bool[SCREEN_GAME_WIDTH, SCREEN_GAME_HEIGHT];
+			
 			window = new RenderWindow(
 				new VideoMode(SCREEN_DRAW_WIDTH, SCREEN_DRAW_HEIGHT), "GameBoy Emulator", Styles.Close
 			);
@@ -47,7 +51,7 @@ namespace GameboyEmulator
 			window.Closed += OnClosed;
 		}
 
-		public void UpdateBuffer(int x, int y, SFML.Graphics.Color color)
+		public void UpdatePixelBuffer(int x, int y, SFML.Graphics.Color color)
 		{
 			int index = (x * 4) + y * SCREEN_GAME_WIDTH * 4;
 
@@ -57,6 +61,16 @@ namespace GameboyEmulator
 			vertexArray[index + 3].Color = color;
 		}
 
+		public void UpdateZBuffer(int x, int y, bool behindSprite)
+		{
+			zBuffer[x, y] = behindSprite;
+		}
+
+		public bool GetZBufferAt(int x, int y)
+		{
+			return zBuffer[x, y];
+		}
+		
 		public bool IsOpen => window.IsOpen;
 
 		public Window GetWindow()

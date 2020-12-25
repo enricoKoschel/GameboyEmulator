@@ -80,7 +80,8 @@ namespace GameboyEmulator
 				int bufferXIndex = backgroundPixel;
 				int bufferYIndex = lcd.CurrentScanline;
 
-				screen.UpdateBuffer(bufferXIndex, bufferYIndex, GetColor(lcd.TilePalette, paletteIndex));
+				screen.UpdateZBuffer(bufferXIndex, bufferYIndex, paletteIndex == 0);
+				screen.UpdatePixelBuffer(bufferXIndex, bufferYIndex, GetColor(lcd.TilePalette, paletteIndex));
 			}
 
 			//Window
@@ -92,8 +93,14 @@ namespace GameboyEmulator
 			{
 				int windowTileMapX = (windowPixel - lcd.WindowX) / 8;
 
-				ushort windowTileMapIndex  = (ushort)(lcd.WindowTileMapBaseAddress + windowTileMapX + windowTileMapY);
-				ushort windowTileDataIndex = (ushort)((((sbyte)memory.Read(windowTileMapIndex) + 128) * 16) + 0x8800);
+				ushort windowTileMapIndex = (ushort)(lcd.WindowTileMapBaseAddress + windowTileMapX + windowTileMapY);
+
+				ushort windowTileDataIndex = lcd.TileDataBaseAddress;
+
+				if (lcd.TileDataIsSigned)
+					windowTileDataIndex += (ushort)(((sbyte)memory.Read(windowTileMapIndex) + 128) * 16);
+				else
+					windowTileDataIndex += (ushort)(memory.Read(windowTileMapIndex) * 16);
 
 				int currentTileLine          = ((lcd.CurrentScanline - lcd.WindowY) % 8) * 2;
 				int currentTileColumn        = (windowPixel - lcd.WindowX) % 8;
@@ -109,7 +116,8 @@ namespace GameboyEmulator
 				int bufferXIndex = windowPixel;
 				int bufferYIndex = lcd.CurrentScanline;
 
-				screen.UpdateBuffer(bufferXIndex, bufferYIndex, GetColor(lcd.TilePalette, paletteIndex));
+				screen.UpdateZBuffer(bufferXIndex, bufferYIndex, paletteIndex == 0);
+				screen.UpdatePixelBuffer(bufferXIndex, bufferYIndex, GetColor(lcd.TilePalette, paletteIndex));
 			}
 		}
 
@@ -192,7 +200,13 @@ namespace GameboyEmulator
 					//Don't display Pixel if it's off the Screen
 					if (bufferXIndex >= 160 || bufferXIndex < 0 || bufferYIndex >= 144 || bufferYIndex < 0) continue;
 
-					screen.UpdateBuffer(bufferXIndex, bufferYIndex, color);
+					if (spriteBehindBackground)
+					{
+						//Sprite only shows if BG Color is 0
+						if (!screen.GetZBufferAt(bufferXIndex, bufferYIndex)) continue;
+					}
+
+					screen.UpdatePixelBuffer(bufferXIndex, bufferYIndex, color);
 				}
 			}
 		}
