@@ -115,6 +115,8 @@ namespace GameboyEmulator
 
 		private void RenderSprites()
 		{
+			int numberOfSpritesThisLine = 0;
+
 			for (ushort oamSpriteAddress = 0xFE00; oamSpriteAddress < 0xFEA0;)
 			{
 				//Using short to allow for Sprites to touch the Sides of the Screen
@@ -141,6 +143,9 @@ namespace GameboyEmulator
 
 				//Check if Sprite is visible
 				if (lcd.CurrentScanline < yPosition || lcd.CurrentScanline >= yPosition + lcd.SpriteSize) continue;
+
+				//Only 10 Sprites per Scanline
+				if (++numberOfSpritesThisLine > 10) return;
 
 				int spriteLine = lcd.CurrentScanline - yPosition;
 

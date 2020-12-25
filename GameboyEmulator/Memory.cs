@@ -52,6 +52,7 @@ namespace GameboyEmulator
 		//private const string GAME_ROM_FILE_PATH = "../../../roms/mario.gb";
 		private const string GAME_ROM_FILE_PATH = "../../../roms/test/ppu/dmg-acid2.gb";
 		//private const string GAME_ROM_FILE_PATH = "../../../roms/test/ppu/lycscx.gb";
+		//private const string GAME_ROM_FILE_PATH = "../../../roms/demos/pocket.gb";
 
 		public Memory(Cpu cpu)
 		{
