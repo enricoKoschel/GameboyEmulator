@@ -1,10 +1,31 @@
-﻿using System;
-using SFML.Graphics;
+﻿using System.Collections.Generic;
+using System.Linq;
 
 namespace GameboyEmulator
 {
 	class Graphics
 	{
+		private readonly struct Sprite
+		{
+			public readonly ushort oamAddress;
+			public readonly short  x;
+			public readonly short  y;
+			public readonly byte   tileNumber;
+			public readonly byte   attributes;
+
+			public Sprite(ushort oamAddress, short x, short y, byte tileNumber, byte attributes)
+			{
+				this.oamAddress = oamAddress;
+
+				//Using short to allow for Sprites to touch the Sides of the Screen
+				this.x = x;
+				this.y = y;
+
+				this.tileNumber = tileNumber;
+				this.attributes = attributes;
+			}
+		}
+
 		//Modules
 		private readonly Lcd    lcd;
 		private readonly Screen screen;
@@ -125,37 +146,40 @@ namespace GameboyEmulator
 
 		private void RenderSprites()
 		{
-			int numberOfSpritesThisLine = 0;
+			List<Sprite> sprites = new List<Sprite>();
 
-			for (ushort oamSpriteAddress = 0xFE00; oamSpriteAddress < 0xFEA0;)
+			for (ushort i = 0; i < 40 && sprites.Count < 10; i++)
 			{
-				//Using short to allow for Sprites to touch the Sides of the Screen
-				short yPosition = memory.Read(oamSpriteAddress++);
-				short xPosition = memory.Read(oamSpriteAddress++);
+				ushort oamSpriteAddress = (ushort)(0xFE00 + i * 4);
+				short  yPosition        = (short)(memory.Read(oamSpriteAddress) - 16);
 
-				//Check if Sprite is Off-Screen
-				if (xPosition <= 0 || xPosition >= 168 || yPosition <= 0 || yPosition >= 160)
-				{
-					oamSpriteAddress += 2;
-					continue;
-				}
+				//Check if Sprite is visible and on current Scanline
+				if (lcd.CurrentScanline < yPosition || lcd.CurrentScanline >= yPosition + lcd.SpriteSize) continue;
 
-				xPosition -= 8;
-				yPosition -= 16;
+				ushort spriteAddress = oamSpriteAddress++;
+				short  xPosition     = (short)(memory.Read(oamSpriteAddress++) - 8);
+				byte   tileNumber    = memory.Read(oamSpriteAddress++);
+				byte   attributes    = memory.Read(oamSpriteAddress);
 
-				byte tileNumber = memory.Read(oamSpriteAddress++);
-				byte attributes = memory.Read(oamSpriteAddress++);
+				sprites.Add(new Sprite(spriteAddress, xPosition, yPosition, tileNumber, attributes));
+			}
+
+			//Sort Sprites by x-coordinate in descending order
+			//If Sprites have the same x-coordinate, they are sorted by the Address in OAM in descending order
+			sprites = sprites.OrderByDescending(s => s.x).ThenByDescending(s => s.oamAddress).ToList();
+
+			//Draw Sprites
+			foreach (Sprite sprite in sprites)
+			{
+				short xPosition  = sprite.x;
+				short yPosition  = sprite.y;
+				byte  tileNumber = sprite.tileNumber;
+				byte  attributes = sprite.attributes;
 
 				bool usingPalette0          = !Cpu.GetBit(attributes, 4);
 				bool xFlip                  = Cpu.GetBit(attributes, 5);
 				bool yFlip                  = Cpu.GetBit(attributes, 6);
 				bool spriteBehindBackground = Cpu.GetBit(attributes, 7);
-
-				//Check if Sprite is visible
-				if (lcd.CurrentScanline < yPosition || lcd.CurrentScanline >= yPosition + lcd.SpriteSize) continue;
-
-				//Only 10 Sprites per Scanline
-				if (++numberOfSpritesThisLine > 10) return;
 
 				int spriteLine = lcd.CurrentScanline - yPosition;
 
