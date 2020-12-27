@@ -161,6 +161,8 @@ namespace GameboyEmulator
 				byte   tileNumber    = memory.Read(oamSpriteAddress++);
 				byte   attributes    = memory.Read(oamSpriteAddress);
 
+				if (lcd.SpriteSize == 16) tileNumber &= 0xFE;
+
 				sprites.Add(new Sprite(spriteAddress, xPosition, yPosition, tileNumber, attributes));
 			}
 
@@ -185,7 +187,7 @@ namespace GameboyEmulator
 
 				if (yFlip)
 				{
-					spriteLine -= 7;
+					spriteLine -= lcd.SpriteSize - 1;
 					spriteLine *= -1;
 				}
 
