@@ -122,8 +122,29 @@ namespace GameboyEmulator
 			set => StatusRegister = Cpu.SetBit(StatusRegister, 6, value);
 		}
 
+		private bool Mode2InterruptEnabled
+		{
+			get => Cpu.GetBit(StatusRegister, 5);
+			set => StatusRegister = Cpu.SetBit(StatusRegister, 5, value);
+		}
+
+		private bool Mode1InterruptEnabled
+		{
+			get => Cpu.GetBit(StatusRegister, 4);
+			set => StatusRegister = Cpu.SetBit(StatusRegister, 4, value);
+		}
+
+		private bool Mode0InterruptEnabled
+		{
+			get => Cpu.GetBit(StatusRegister, 3);
+			set => StatusRegister = Cpu.SetBit(StatusRegister, 3, value);
+		}
+
 		private bool vBlankRequested;
-		private bool lycRequested;
+		private bool coincidenceRequested;
+		private bool mode2Requested;
+		private bool mode1Requested;
+		private bool mode0Requested;
 
 		public void Update(int cycles)
 		{
@@ -136,8 +157,9 @@ namespace GameboyEmulator
 			{
 				//Increase Scanline every 456 Clockcycles, only draw if not in VBlank
 				if (CurrentScanline < 144) shouldDrawScanline = true;
-				lycRequested    = false;
-				CoincidenceFlag = false;
+
+				coincidenceRequested = false;
+				CoincidenceFlag      = false;
 
 				shouldIncreaseScanline = true;
 				drawScanlineCounter    = 0;
@@ -155,10 +177,10 @@ namespace GameboyEmulator
 
 			if (!CoincidenceInterruptEnabled) return;
 
-			if (lycRequested) return;
+			if (coincidenceRequested) return;
 
 			interrupts.Request(Interrupts.InterruptType.LcdStat);
-			lycRequested = true;
+			coincidenceRequested = true;
 		}
 
 		private void SetStatus()
@@ -167,6 +189,16 @@ namespace GameboyEmulator
 			{
 				//VBlank
 				Mode = 1;
+
+				//TODO Stat Interrupts still untested
+				mode2Requested = false;
+				mode0Requested = false;
+
+				if (Mode1InterruptEnabled && !mode1Requested)
+				{
+					interrupts.Request(Interrupts.InterruptType.LcdStat);
+					mode1Requested = true;
+				}
 
 				if (!vBlankRequested)
 				{
@@ -190,6 +222,15 @@ namespace GameboyEmulator
 				{
 					//Accessing OAM
 					Mode = 2;
+
+					//TODO Stat Interrupts still untested
+					mode1Requested = false;
+					mode0Requested = false;
+
+					if (!Mode2InterruptEnabled || mode2Requested) return;
+
+					interrupts.Request(Interrupts.InterruptType.LcdStat);
+					mode2Requested = true;
 				}
 				else if (drawScanlineCounter < MODE_3_TIME)
 				{
@@ -200,6 +241,15 @@ namespace GameboyEmulator
 				{
 					//HBlank
 					Mode = 0;
+
+					//TODO Stat Interrupts still untested
+					mode2Requested = false;
+					mode1Requested = false;
+
+					if (!Mode0InterruptEnabled || mode0Requested) return;
+
+					interrupts.Request(Interrupts.InterruptType.LcdStat);
+					mode0Requested = true;
 				}
 			}
 		}

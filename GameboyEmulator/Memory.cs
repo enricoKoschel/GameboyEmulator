@@ -50,7 +50,8 @@ namespace GameboyEmulator
 
 		//TODO - Accept game file path as console parameter / make into property
 		//private const string GAME_ROM_FILE_PATH = "../../../roms/mario.gb";
-		private const string GAME_ROM_FILE_PATH = "../../../roms/test/ppu/dmg-acid2.gb";
+		//private const string GAME_ROM_FILE_PATH = "../../../roms/test/ppu/dmg-acid2.gb";
+		private const string GAME_ROM_FILE_PATH = "../../../roms/test/tearoom/m2_win_en_toggle.gb";
 		//private const string GAME_ROM_FILE_PATH = "../../../roms/test/ppu/lycscx.gb";
 		//private const string GAME_ROM_FILE_PATH = "../../../roms/demos/pocket.gb";
 
