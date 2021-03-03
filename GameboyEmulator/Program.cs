@@ -24,8 +24,8 @@ namespace GameboyEmulator
 				emulator.Update();
 
 				int fps                          = Convert.ToInt32(1 / frameTime.ElapsedTime.AsSeconds());
-				if (fps > highestFps) highestFps = fps;
-				if (fps < lowestFps) lowestFps   = fps;
+				highestFps = Math.Max(highestFps, fps);
+				lowestFps  = Math.Min(lowestFps, fps);
 
 				window.SetTitle($"GameBoy Emulator | FPS - {fps} | Lowest - {lowestFps} | Highest - {highestFps}");
 			}
