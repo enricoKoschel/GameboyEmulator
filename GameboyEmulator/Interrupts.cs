@@ -99,7 +99,7 @@
 		{
 			if (!masterInterruptEnable || InterruptFlagRegister == 0 || InterruptEnableRegister == 0) return;
 
-			//Ordered in decreasing Priority so that highest Priority always get's executed
+			//Ordered in decreasing Priority so that highest Priority always gets executed
 			if (VBlankEnabled && VBlankRequested) Service(InterruptType.VBlank);
 			else if (LcdStatEnabled && LcdStatRequested) Service(InterruptType.LcdStat);
 			else if (TimerEnabled && TimerRequested) Service(InterruptType.Timer);

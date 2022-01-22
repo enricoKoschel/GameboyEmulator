@@ -2189,8 +2189,6 @@ namespace GameboyEmulator
 					aRegister = SetBit(aRegister, 7, true);
 					return 8;
 			}
-
-			return 0;
 		}
 
 		//Word functions

@@ -18,7 +18,7 @@ namespace GameboyEmulator
 
 		//Constants
 		private const int MODE_2_TIME = 80;
-		private const int MODE_3_TIME = 252;
+		private const int MODE_3_TIME = 390; //Maybe 390? Was 252 before
 
 		public const ushort SPRITE_PALETTE_0_ADDRESS = 0xFF48;
 		public const ushort SPRITE_PALETTE_1_ADDRESS = 0xFF49;
@@ -236,6 +236,10 @@ namespace GameboyEmulator
 				{
 					//Accessing VRAM
 					Mode = 3;
+
+					mode0Requested = false;
+					mode1Requested = false;
+					mode2Requested = false;
 				}
 				else
 				{
