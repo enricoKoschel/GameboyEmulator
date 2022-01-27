@@ -36,7 +36,7 @@ namespace GameboyEmulator
 			);
 
 			zBuffer = new bool[SCREEN_GAME_WIDTH, SCREEN_GAME_HEIGHT];
-			
+
 			window = new RenderWindow(
 				new VideoMode(SCREEN_DRAW_WIDTH, SCREEN_DRAW_HEIGHT), "GameBoy Emulator", Styles.Close
 			);
@@ -53,7 +53,7 @@ namespace GameboyEmulator
 
 		public void UpdatePixelBuffer(int x, int y, SFML.Graphics.Color color)
 		{
-			int index = (x * 4) + y * SCREEN_GAME_WIDTH * 4;
+			int index = x * 4 + y * SCREEN_GAME_WIDTH * 4;
 
 			vertexArray[index + 0].Color = color;
 			vertexArray[index + 1].Color = color;
@@ -70,7 +70,7 @@ namespace GameboyEmulator
 		{
 			return zBuffer[x, y];
 		}
-		
+
 		public bool IsOpen => window.IsOpen;
 
 		public Window GetWindow()
