@@ -8,7 +8,7 @@ namespace GameboyEmulator
 	{
 		public static void Main(string[] args)
 		{
-			Logger.LogMessage("Program started");   
+			Logger.LogMessage("Program started");
 
 			Cpu    emulator   = new Cpu();
 			Window window     = emulator.GetGraphics().GetScreen().GetWindow();
