@@ -29,16 +29,36 @@ namespace GameboyEmulator
 		private readonly byte[] highRam;
 		private          byte   interruptEnableRegister;
 
-		private const int CARTRIDGE_ROM_BASE_ADDRESS     = 0x0000;
-		private const int VIDEO_RAM_BASE_ADDRESS         = 0x8000;
-		private const int CARTRIDGE_RAM_BASE_ADDRESS     = 0xA000;
-		private const int WORK_RAM_BASE_ADDRESS          = 0xC000;
-		private const int ECHO_RAM_BASE_ADDRESS          = 0xE000;
+		private const int CARTRIDGE_ROM_BASE_ADDRESS = 0x0000;
+		private const int CARTRIDGE_ROM_LAST_ADDRESS = 0x7FFF;
+
+		private const int VIDEO_RAM_BASE_ADDRESS = 0x8000;
+		private const int VIDEO_RAM_LAST_ADDRESS = 0x9FFF;
+
+		private const int CARTRIDGE_RAM_BASE_ADDRESS = 0xA000;
+		private const int CARTRIDGE_RAM_LAST_ADDRESS = 0xBFFF;
+
+		private const int WORK_RAM_BASE_ADDRESS = 0xC000;
+		private const int WORK_RAM_LAST_ADDRESS = 0xDFFF;
+
+		private const int ECHO_RAM_BASE_ADDRESS = 0xE000;
+		private const int ECHO_RAM_LAST_ADDRESS = 0xFDFF;
+
 		private const int SPRITE_ATTRIBUTES_BASE_ADDRESS = 0xFE00;
-		private const int UNUSED_BASE_ADDRESS            = 0xFEA0;
-		private const int IO_PORTS_BASE_ADDRESS          = 0xFF00;
-		private const int HIGH_RAM_BASE_ADDRESS          = 0xFF80;
-		private const int INTERRUPT_ENABLE_REG_ADDRESS   = 0xFFFF;
+		private const int SPRITE_ATTRIBUTES_LAST_ADDRESS = 0xFE9F;
+
+		private const int UNUSED_BASE_ADDRESS = 0xFEA0;
+		private const int UNUSED_LAST_ADDRESS = 0xFEFF;
+
+		private const int IO_PORTS_BASE_ADDRESS = 0xFF00;
+		private const int IO_PORTS_LAST_ADDRESS = 0xFF7F;
+
+		private const int HIGH_RAM_BASE_ADDRESS = 0xFF80;
+		private const int HIGH_RAM_LAST_ADDRESS = 0xFFFE;
+
+		private const int INTERRUPT_ENABLE_REG_ADDRESS = 0xFFFF;
+
+		private const ushort DMA_FINISH_ADDRESS = 0xFEA0;
 
 		//Modules
 		private readonly Cpu                  cpu;
@@ -142,107 +162,72 @@ namespace GameboyEmulator
 
 		public byte Read(ushort address)
 		{
-			if (IsBetween(address, UNUSED_BASE_ADDRESS, IO_PORTS_BASE_ADDRESS))
-			{
-				//Unused Memory / Out of Bounds
-				return 0xFF;
-			}
+			if (IsInRange(address, CARTRIDGE_ROM_BASE_ADDRESS, CARTRIDGE_ROM_LAST_ADDRESS))
+				return cartridgeRom[mbc.ConvertAddressInRomBank(address)];
 
-			if (IsBetween(address, CARTRIDGE_ROM_BASE_ADDRESS, VIDEO_RAM_BASE_ADDRESS))
-			{
-				//Cartridge Rom
-				return address < 0x4000
-						   ? cartridgeRom[address]
-						   : cartridgeRom[address + (mbc.CurrentRomBank - 1) * 0x4000];
-			}
-
-			if (IsBetween(address, VIDEO_RAM_BASE_ADDRESS, CARTRIDGE_RAM_BASE_ADDRESS))
-			{
-				//Video Ram
+			if (IsInRange(address, VIDEO_RAM_BASE_ADDRESS, VIDEO_RAM_LAST_ADDRESS))
 				return videoRam[address - VIDEO_RAM_BASE_ADDRESS];
-			}
 
-			if (IsBetween(address, CARTRIDGE_RAM_BASE_ADDRESS, WORK_RAM_BASE_ADDRESS))
-			{
-				//Cartridge Ram
+			//TODO implement cartridge ram banking
+			if (IsInRange(address, CARTRIDGE_RAM_BASE_ADDRESS, CARTRIDGE_RAM_LAST_ADDRESS))
 				return cartridgeRam[address - CARTRIDGE_RAM_BASE_ADDRESS];
-			}
 
-			if (IsBetween(address, WORK_RAM_BASE_ADDRESS, ECHO_RAM_BASE_ADDRESS))
-			{
-				//Work Ram
+			if (IsInRange(address, WORK_RAM_BASE_ADDRESS, WORK_RAM_LAST_ADDRESS))
 				return workRam[address - WORK_RAM_BASE_ADDRESS];
-			}
 
-			if (IsBetween(address, ECHO_RAM_BASE_ADDRESS, SPRITE_ATTRIBUTES_BASE_ADDRESS))
-			{
-				//Echo Ram - Same as Work Ram
+			//Echo ram is identical to work ram
+			if (IsInRange(address, ECHO_RAM_BASE_ADDRESS, ECHO_RAM_LAST_ADDRESS))
 				return workRam[address - ECHO_RAM_BASE_ADDRESS];
-			}
 
-			if (IsBetween(address, SPRITE_ATTRIBUTES_BASE_ADDRESS, UNUSED_BASE_ADDRESS))
-			{
-				//Sprite Attributes
+			if (IsInRange(address, SPRITE_ATTRIBUTES_BASE_ADDRESS, SPRITE_ATTRIBUTES_LAST_ADDRESS))
 				return spriteAttributes[address - SPRITE_ATTRIBUTES_BASE_ADDRESS];
-			}
 
-			if (IsBetween(address, IO_PORTS_BASE_ADDRESS, HIGH_RAM_BASE_ADDRESS))
+			//Unused Memory / Out of Bounds
+			if (IsInRange(address, UNUSED_BASE_ADDRESS, UNUSED_LAST_ADDRESS))
+				return 0xFF;
+
+			if (IsInRange(address, IO_PORTS_BASE_ADDRESS, IO_PORTS_LAST_ADDRESS))
 				return ioPorts[address - IO_PORTS_BASE_ADDRESS];
 
-			if (IsBetween(address, HIGH_RAM_BASE_ADDRESS, INTERRUPT_ENABLE_REG_ADDRESS))
-			{
-				//High Ram
+			if (IsInRange(address, HIGH_RAM_BASE_ADDRESS, HIGH_RAM_LAST_ADDRESS))
 				return highRam[address - HIGH_RAM_BASE_ADDRESS];
-			}
 
 			if (address == INTERRUPT_ENABLE_REG_ADDRESS)
-			{
-				//Interrupt Enable Register
 				return interruptEnableRegister;
-			}
 
-			throw new NotImplementedException($"Read Memory location: 0x{address:X} not implemented yet!");
+			throw new ArgumentOutOfRangeException(nameof(address), address, "Address out of range!");
 		}
 
 		public void Write(ushort address, byte data, bool dontReset = false)
 		{
-			if (IsBetween(address, UNUSED_BASE_ADDRESS, IO_PORTS_BASE_ADDRESS))
+			//Writing to Cartridge Rom triggers Memorybanking Controller
+			if (IsInRange(address, CARTRIDGE_ROM_BASE_ADDRESS, CARTRIDGE_ROM_LAST_ADDRESS))
+				mbc.HandleBanking(address, data);
+
+			else if (IsInRange(address, VIDEO_RAM_BASE_ADDRESS, VIDEO_RAM_LAST_ADDRESS))
+				videoRam[address - VIDEO_RAM_BASE_ADDRESS] = data;
+
+			//TODO implement cartridge ram banking
+			else if (IsInRange(address, CARTRIDGE_RAM_BASE_ADDRESS, CARTRIDGE_RAM_LAST_ADDRESS))
+				cartridgeRam[address - CARTRIDGE_RAM_BASE_ADDRESS] = data;
+
+			else if (IsInRange(address, WORK_RAM_BASE_ADDRESS, WORK_RAM_LAST_ADDRESS))
+				workRam[address - WORK_RAM_BASE_ADDRESS] = data;
+
+			//Echo ram is identical to work ram
+			else if (IsInRange(address, ECHO_RAM_BASE_ADDRESS, ECHO_RAM_LAST_ADDRESS))
+				workRam[address - ECHO_RAM_BASE_ADDRESS] = data;
+
+			else if (IsInRange(address, SPRITE_ATTRIBUTES_BASE_ADDRESS, SPRITE_ATTRIBUTES_LAST_ADDRESS))
+				spriteAttributes[address - SPRITE_ATTRIBUTES_BASE_ADDRESS] = data;
+
+			//Unused Memory / Out of Bounds
+			else if (IsInRange(address, UNUSED_BASE_ADDRESS, UNUSED_LAST_ADDRESS))
 			{
-				//Unused Memory / Out of Bounds
-				return;
+				/*Empty*/
 			}
 
-			if (IsBetween(address, CARTRIDGE_ROM_BASE_ADDRESS, VIDEO_RAM_BASE_ADDRESS))
-			{
-				//Writing to Cartridge Rom triggers Memorybanking Controller
-				mbc.HandleBanking(address, data);
-			}
-			else if (IsBetween(address, VIDEO_RAM_BASE_ADDRESS, CARTRIDGE_RAM_BASE_ADDRESS))
-			{
-				//Video Ram
-				videoRam[address - VIDEO_RAM_BASE_ADDRESS] = data;
-			}
-			else if (IsBetween(address, CARTRIDGE_RAM_BASE_ADDRESS, WORK_RAM_BASE_ADDRESS))
-			{
-				//Cartridge Ram
-				cartridgeRam[address - CARTRIDGE_RAM_BASE_ADDRESS] = data;
-			}
-			else if (IsBetween(address, WORK_RAM_BASE_ADDRESS, ECHO_RAM_BASE_ADDRESS))
-			{
-				//Work Ram
-				workRam[address - WORK_RAM_BASE_ADDRESS] = data;
-			}
-			else if (IsBetween(address, ECHO_RAM_BASE_ADDRESS, SPRITE_ATTRIBUTES_BASE_ADDRESS))
-			{
-				//Echo Ram - Same as Work RAM
-				workRam[address - ECHO_RAM_BASE_ADDRESS] = data;
-			}
-			else if (IsBetween(address, SPRITE_ATTRIBUTES_BASE_ADDRESS, UNUSED_BASE_ADDRESS))
-			{
-				//Sprite Attributes
-				spriteAttributes[address - SPRITE_ATTRIBUTES_BASE_ADDRESS] = data;
-			}
-			else if (IsBetween(address, IO_PORTS_BASE_ADDRESS, HIGH_RAM_BASE_ADDRESS))
+			else if (IsInRange(address, IO_PORTS_BASE_ADDRESS, IO_PORTS_LAST_ADDRESS))
 			{
 				//Special Addresses
 				switch (address)
@@ -258,6 +243,8 @@ namespace GameboyEmulator
 				}
 
 				//IO Ports
+				//During normal Gameboy operation, some registers get reset when written to
+				//The dontReset flag is for internal use, when these registers have to be written to
 				if (dontReset)
 					ioPorts[address - IO_PORTS_BASE_ADDRESS] = data;
 				else
@@ -273,40 +260,31 @@ namespace GameboyEmulator
 					};
 				}
 			}
-			else if (IsBetween(address, HIGH_RAM_BASE_ADDRESS, INTERRUPT_ENABLE_REG_ADDRESS))
-			{
-				//High Ram
+
+			else if (IsInRange(address, HIGH_RAM_BASE_ADDRESS, HIGH_RAM_LAST_ADDRESS))
 				highRam[address - HIGH_RAM_BASE_ADDRESS] = data;
-			}
+
 			else if (address == INTERRUPT_ENABLE_REG_ADDRESS)
 				interruptEnableRegister = data;
+
 			else
-			{
-				throw new NotImplementedException(
-					$"Write Memory location: 0x{address:X} not implemented yet!"
-				);
-			}
+				throw new ArgumentOutOfRangeException(nameof(address), address, "Address out of range!");
 		}
 
 		private void DirectMemoryAccess(byte sourceAddressLo)
 		{
 			if (sourceAddressLo > 0xF1) return;
 
-			ushort       sourceAddress      = (ushort)(sourceAddressLo * 0x100);
-			ushort       destinationAddress = 0xFE00;
-			const ushort finishAddress      = 0xFEA0;
+			ushort sourceAddress      = (ushort)(sourceAddressLo * 0x100);
+			ushort destinationAddress = 0xFE00;
 
-			while (destinationAddress < finishAddress)
+			while (destinationAddress < DMA_FINISH_ADDRESS)
 				Write(destinationAddress++, Read(sourceAddress++));
 		}
 
-		//Utility functions
-		/// <summary>
-		/// lowerBound is inclusive, upperBound is exclusive
-		/// </summary>
-		public static bool IsBetween(int number, int lowerBound, int upperBound)
+		public static bool IsInRange(int number, int lowerBoundInclusive, int upperBoundInclusive)
 		{
-			return number >= lowerBound && number < upperBound;
+			return number >= lowerBoundInclusive && number <= upperBoundInclusive;
 		}
 	}
 }

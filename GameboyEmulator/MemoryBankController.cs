@@ -54,12 +54,12 @@ namespace GameboyEmulator
 			{
 				case BankControllerType.Mbc1:
 				{
-					if (Memory.IsBetween(address, 0x0000, 0x2000))
+					if (Memory.IsInRange(address, 0x0000, 0x1FFF))
 					{
 						//Ram Enable
 						isRamEnabled = (data & 0x0F) == 0xA;
 					}
-					else if (Memory.IsBetween(address, 0x2000, 0x4000))
+					else if (Memory.IsInRange(address, 0x2000, 0x3FFF))
 					{
 						//Change lower 5 bits of current Rombank
 						CurrentRomBank = (CurrentRomBank & 0b11100000) | (data & 0b00011111);
@@ -67,7 +67,7 @@ namespace GameboyEmulator
 							CurrentRomBank == 0x60)
 							CurrentRomBank++;
 					}
-					else if (Memory.IsBetween(address, 0x4000, 0x6000))
+					else if (Memory.IsInRange(address, 0x4000, 0x5FFF))
 					{
 						//Change current Rambank or upper 2 bits of current Rombank
 						if (currentMemoryBankingMode == MemoryBankingMode.RomBankingMode)
@@ -75,7 +75,7 @@ namespace GameboyEmulator
 						else
 							currentRamBank = data & 0b00000011;
 					}
-					else if (Memory.IsBetween(address, 0x6000, 0x8000))
+					else if (Memory.IsInRange(address, 0x6000, 0x7FFF))
 					{
 						//Change Memory Banking Mode
 						currentMemoryBankingMode = (MemoryBankingMode)data;
@@ -84,6 +84,14 @@ namespace GameboyEmulator
 					break;
 				}
 			}
+		}
+
+		public ushort ConvertAddressInRomBank(ushort address)
+		{
+			//TODO adapt to all mbcs
+			if (address < 0x4000) return address;
+
+			return (ushort)(address + (CurrentRomBank - 1) * 0x4000);
 		}
 	}
 }
