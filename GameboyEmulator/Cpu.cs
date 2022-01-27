@@ -1153,7 +1153,7 @@ namespace GameboyEmulator
 				//Invalid Opcode
 				default:
 					throw new NotImplementedException(
-						$"Invalid Opcode 0x{opcode:X} encountered at 0x{(programCounter - 1):X}!"
+						$"Invalid Opcode 0x{opcode:X} encountered at 0x{programCounter - 1:X}!"
 					);
 			}
 		}
@@ -2212,14 +2212,14 @@ namespace GameboyEmulator
 		{
 			if (bit > 7 || bit < 0) throw new IndexOutOfRangeException($"Cannot access Bit {bit} of a Byte!");
 
-			return ToBool(((data >> bit) & 1));
+			return ToBool((data >> bit) & 1);
 		}
 
 		private static bool GetBit(ushort data, int bit)
 		{
 			if (bit > 15 || bit < 0) throw new IndexOutOfRangeException($"Cannot access Bit {bit} of a Word!");
 
-			return ToBool(((data >> bit) & 1));
+			return ToBool((data >> bit) & 1);
 		}
 
 		public static byte SetBit(byte data, int bit, bool state)
@@ -2612,7 +2612,7 @@ namespace GameboyEmulator
 		private void AddByteToAReg(byte data, bool withCarry = false)
 		{
 			bool halfCarry = ToBool(((aRegister & 0xF) + (data & 0xF) + (withCarry ? 1 : 0)) & 0x10);
-			bool carryFlag = (aRegister + data + (withCarry ? 1 : 0)) > 255;
+			bool carryFlag = aRegister + data + (withCarry ? 1 : 0) > 255;
 
 			aRegister += (byte)(data + (withCarry ? 1 : 0));
 
@@ -2622,7 +2622,7 @@ namespace GameboyEmulator
 		private ushort Add16BitRegisters(ushort data1, ushort data2)
 		{
 			bool halfCarry = ToBool(((data1 & 0xFFF) + (data2 & 0xFFF)) & 0x1000);
-			bool carry     = (data1 + data2) > 0xFFFF;
+			bool carry     = data1 + data2 > 0xFFFF;
 
 			SetFlags(null, false, halfCarry, carry);
 
@@ -2633,9 +2633,9 @@ namespace GameboyEmulator
 		{
 			int correction = 0;
 
-			if (HalfCarryFlag || (!SubtractFlag && ((aRegister & 0xF) > 9))) correction |= 6;
+			if (HalfCarryFlag || !SubtractFlag && (aRegister & 0xF) > 9) correction |= 6;
 
-			if (CarryFlag || (!SubtractFlag && aRegister > 0x99))
+			if (CarryFlag || !SubtractFlag && aRegister > 0x99)
 			{
 				correction |= 0x60;
 				CarryFlag  =  true;
@@ -2656,7 +2656,7 @@ namespace GameboyEmulator
 			sbyte dataS = (sbyte)dataU;
 
 			bool halfCarry = ToBool(((stackPointer & 0xF) + (dataU & 0xF)) & 0x10);
-			bool carry     = ((stackPointer & 0xFF) + dataU) > 0xFF;
+			bool carry     = (stackPointer & 0xFF) + dataU > 0xFF;
 
 			SetFlags(false, false, halfCarry, carry);
 

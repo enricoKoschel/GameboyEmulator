@@ -89,7 +89,7 @@ namespace GameboyEmulator
 				else
 					backgroundTileDataIndex += (ushort)(memory.Read(backgroundTileMapIndex) * 16);
 
-				int currentTileLine          = ((lcd.CurrentScanline + lcd.ScrollY) % 8) * 2;
+				int currentTileLine          = (lcd.CurrentScanline + lcd.ScrollY) % 8 * 2;
 				int currentTileColumn        = (backgroundPixel + lcd.ScrollX) % 8;
 				int currentTileColumnReverse = (currentTileColumn - 7) * -1;
 
@@ -125,7 +125,7 @@ namespace GameboyEmulator
 				else
 					windowTileDataIndex += (ushort)(memory.Read(windowTileMapIndex) * 16);
 
-				int currentTileLine          = ((lcd.CurrentScanline - lcd.WindowY) % 8) * 2;
+				int currentTileLine          = (lcd.CurrentScanline - lcd.WindowY) % 8 * 2;
 				int currentTileColumn        = (windowPixel - lcd.WindowX) % 8;
 				int currentTileColumnReverse = (currentTileColumn - 7) * -1;
 
@@ -226,7 +226,7 @@ namespace GameboyEmulator
 					int bufferYIndex = lcd.CurrentScanline;
 
 					//Don't display Pixel if it's off the Screen
-					if (bufferXIndex >= 160 || bufferXIndex < 0 || bufferYIndex >= 144 || bufferYIndex < 0) continue;
+					if (bufferXIndex >= 160 || bufferXIndex < 0 || bufferYIndex >= 144) continue;
 
 					if (spriteBehindBackground)
 					{

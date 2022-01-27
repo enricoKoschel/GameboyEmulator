@@ -49,9 +49,9 @@ namespace GameboyEmulator
 		private       bool   bootRomEnabled     = false;
 
 		//TODO - Accept game file path as console parameter / make into property
-		//private const string GAME_ROM_FILE_PATH = "../../../roms/mario.gb";
+		private const string GAME_ROM_FILE_PATH = "../../../roms/mario.gb";
 		//private const string GAME_ROM_FILE_PATH = "../../../roms/test/ppu/dmg-acid2.gb";
-		private const string GAME_ROM_FILE_PATH = "../../../roms/test/tearoom/m2_win_en_toggle.gb";
+		//private const string GAME_ROM_FILE_PATH = "../../../roms/test/tearoom/m2_win_en_toggle.gb";
 		//private const string GAME_ROM_FILE_PATH = "../../../roms/test/ppu/lycscx.gb";
 		//private const string GAME_ROM_FILE_PATH = "../../../roms/demos/pocket.gb";
 
@@ -153,7 +153,7 @@ namespace GameboyEmulator
 				//Cartridge Rom
 				return address < 0x4000
 						   ? cartridgeRom[address]
-						   : cartridgeRom[address + ((mbc.CurrentRomBank - 1) * 0x4000)];
+						   : cartridgeRom[address + (mbc.CurrentRomBank - 1) * 0x4000];
 			}
 
 			if (IsBetween(address, VIDEO_RAM_BASE_ADDRESS, CARTRIDGE_RAM_BASE_ADDRESS))
@@ -187,9 +187,7 @@ namespace GameboyEmulator
 			}
 
 			if (IsBetween(address, IO_PORTS_BASE_ADDRESS, HIGH_RAM_BASE_ADDRESS))
-			{
 				return ioPorts[address - IO_PORTS_BASE_ADDRESS];
-			}
 
 			if (IsBetween(address, HIGH_RAM_BASE_ADDRESS, INTERRUPT_ENABLE_REG_ADDRESS))
 			{
@@ -281,9 +279,7 @@ namespace GameboyEmulator
 				highRam[address - HIGH_RAM_BASE_ADDRESS] = data;
 			}
 			else if (address == INTERRUPT_ENABLE_REG_ADDRESS)
-			{
 				interruptEnableRegister = data;
-			}
 			else
 			{
 				throw new NotImplementedException(
@@ -310,7 +306,7 @@ namespace GameboyEmulator
 		/// </summary>
 		public static bool IsBetween(int number, int lowerBound, int upperBound)
 		{
-			return (number >= lowerBound && number < upperBound);
+			return number >= lowerBound && number < upperBound;
 		}
 	}
 }
