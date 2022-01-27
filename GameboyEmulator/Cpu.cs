@@ -257,7 +257,7 @@ namespace GameboyEmulator
 					return 4;
 				//STOP
 				case 0x10:
-					throw new NotImplementedException("STOP Opcode not Implemented yet");
+					throw new NotImplementedException("STOP Opcode not implemented yet");
 				//LD DE,nn
 				case 0x11:
 					DeRegister = Load16BitImmediate();

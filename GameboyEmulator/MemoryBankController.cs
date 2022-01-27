@@ -1,4 +1,6 @@
-﻿namespace GameboyEmulator
+﻿using System;
+
+namespace GameboyEmulator
 {
 	class MemoryBankController
 	{
@@ -33,9 +35,14 @@
 		public void DetectBankingMode()
 		{
 			currentBankControllerType = (BankControllerType)memory.Read(0x147);
-			currentMemoryBankingMode  = MemoryBankingMode.RomBankingMode;
-			CurrentRomBank            = 1;
-			currentRamBank            = 0;
+			if (!Enum.IsDefined(typeof(BankControllerType), currentBankControllerType))
+				throw new NotImplementedException(
+					$"Invalid memory bank controller with id '{currentBankControllerType}'"
+				);
+
+			currentMemoryBankingMode = MemoryBankingMode.RomBankingMode;
+			CurrentRomBank           = 1;
+			currentRamBank           = 0;
 		}
 
 		public void HandleBanking(ushort address, byte data)
