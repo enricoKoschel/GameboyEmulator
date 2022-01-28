@@ -17,7 +17,8 @@ namespace GameboyEmulator
 		private static string CurrentTime              => DateTime.Now.ToString("HH:mm:ss.fff");
 		private static string CurrentTimeFileFormatted => DateTime.Now.ToString("dd.MM.yyyy_HH_mm");
 
-		private const string LOG_DIRECTORY_PATH = "../../../logs/";
+		private const string LOG_DIRECTORY_PATH     = "../../../logs/";
+		private const bool   ENABLE_CONSOLE_LOGGING = true;
 
 		static Logger()
 		{
@@ -25,9 +26,13 @@ namespace GameboyEmulator
 			logFile.AutoFlush = true;
 		}
 
-		public static void LogMessage(string message, LogLevel loglevel = LogLevel.Info)
+		public static void LogMessage(string message, bool logToConsole = false, LogLevel loglevel = LogLevel.Info)
 		{
-			logFile.WriteLine($"[{CurrentTime}][{LogLevelToString(loglevel)}] {message}");
+			string logMessage = $"[{CurrentTime}][{LogLevelToString(loglevel)}] {message}";
+
+			if (logToConsole && ENABLE_CONSOLE_LOGGING) Console.WriteLine(logMessage);
+
+			logFile.WriteLine(logMessage);
 		}
 
 		private static StreamWriter CreateLogFile()
