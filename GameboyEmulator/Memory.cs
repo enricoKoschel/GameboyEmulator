@@ -22,7 +22,7 @@ namespace GameboyEmulator
 		private          byte[] cartridgeRomWithBanks;
 		private          byte[] cartridgeRom;
 		private readonly byte[] videoRam;
-		private readonly byte[] cartridgeRam;
+		private          byte[] cartridgeRam;
 		private readonly byte[] workRam;
 		private readonly byte[] spriteAttributes;
 		private readonly byte[] ioPorts;
@@ -81,11 +81,16 @@ namespace GameboyEmulator
 			mbc      = new MemoryBankController(this);
 
 			videoRam         = new byte[0x2000];
-			cartridgeRam     = new byte[0x2000];
 			workRam          = new byte[0x2000];
 			spriteAttributes = new byte[0x100];
 			ioPorts          = new byte[0x80];
 			highRam          = new byte[0x7F];
+		}
+
+		private void AllocateCartridgeRam(byte numberOfRamBanks)
+		{
+			if (numberOfRamBanks > 0)
+				cartridgeRam = new byte[numberOfRamBanks * 0x2000];
 		}
 
 		public void LoadGame()
@@ -112,6 +117,8 @@ namespace GameboyEmulator
 
 			//Detect current Memorybanking Mode
 			mbc.DetectBankingMode();
+
+			AllocateCartridgeRam(mbc.GetNumberOfRamBanks());
 		}
 
 		private void InitializeRegisters()
@@ -169,9 +176,12 @@ namespace GameboyEmulator
 			if (IsInRange(address, VIDEO_RAM_BASE_ADDRESS, VIDEO_RAM_LAST_ADDRESS))
 				return videoRam[address - VIDEO_RAM_BASE_ADDRESS];
 
-			//TODO implement cartridge ram banking
 			if (IsInRange(address, CARTRIDGE_RAM_BASE_ADDRESS, CARTRIDGE_RAM_LAST_ADDRESS))
-				return cartridgeRam[address - CARTRIDGE_RAM_BASE_ADDRESS];
+			{
+				return cartridgeRam != null
+						   ? cartridgeRam[mbc.ConvertAddressInRamBank(address) - CARTRIDGE_RAM_BASE_ADDRESS]
+						   : (byte)0x00;
+			}
 
 			if (IsInRange(address, WORK_RAM_BASE_ADDRESS, WORK_RAM_LAST_ADDRESS))
 				return workRam[address - WORK_RAM_BASE_ADDRESS];
@@ -208,9 +218,11 @@ namespace GameboyEmulator
 			else if (IsInRange(address, VIDEO_RAM_BASE_ADDRESS, VIDEO_RAM_LAST_ADDRESS))
 				videoRam[address - VIDEO_RAM_BASE_ADDRESS] = data;
 
-			//TODO implement cartridge ram banking
 			else if (IsInRange(address, CARTRIDGE_RAM_BASE_ADDRESS, CARTRIDGE_RAM_LAST_ADDRESS))
-				cartridgeRam[address - CARTRIDGE_RAM_BASE_ADDRESS] = data;
+			{
+				if (cartridgeRam != null)
+					cartridgeRam[mbc.ConvertAddressInRamBank(address) - CARTRIDGE_RAM_BASE_ADDRESS] = data;
+			}
 
 			else if (IsInRange(address, WORK_RAM_BASE_ADDRESS, WORK_RAM_LAST_ADDRESS))
 				workRam[address - WORK_RAM_BASE_ADDRESS] = data;
