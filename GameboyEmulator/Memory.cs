@@ -90,6 +90,7 @@ namespace GameboyEmulator
 
 		public void LoadGame()
 		{
+			//TODO refactor this method
 			if (bootRomEnabled)
 			{
 				cartridgeRom = File.ReadAllBytes(BOOT_ROM_FILE_PATH);
