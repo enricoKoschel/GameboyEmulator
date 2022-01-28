@@ -168,17 +168,17 @@ namespace GameboyEmulator
 			cartridgeRom = cartridgeRomWithBanks;
 		}
 
-		public byte Read(ushort address)
+		public byte Read(ushort address, bool noRomBanking = false)
 		{
 			if (IsInRange(address, CARTRIDGE_ROM_BASE_ADDRESS, CARTRIDGE_ROM_LAST_ADDRESS))
-				return cartridgeRom[mbc.ConvertAddressInRomBank(address)];
+				return noRomBanking ? cartridgeRom[address] : cartridgeRom[mbc.ConvertAddressInRomBank(address)];
 
 			if (IsInRange(address, VIDEO_RAM_BASE_ADDRESS, VIDEO_RAM_LAST_ADDRESS))
 				return videoRam[address - VIDEO_RAM_BASE_ADDRESS];
 
 			if (IsInRange(address, CARTRIDGE_RAM_BASE_ADDRESS, CARTRIDGE_RAM_LAST_ADDRESS))
 			{
-				return cartridgeRam != null
+				return cartridgeRam != null && mbc.GetIsRamEnabled()
 						   ? cartridgeRam[mbc.ConvertAddressInRamBank(address) - CARTRIDGE_RAM_BASE_ADDRESS]
 						   : (byte)0x00;
 			}
@@ -220,7 +220,7 @@ namespace GameboyEmulator
 
 			else if (IsInRange(address, CARTRIDGE_RAM_BASE_ADDRESS, CARTRIDGE_RAM_LAST_ADDRESS))
 			{
-				if (cartridgeRam != null)
+				if (cartridgeRam != null && mbc.GetIsRamEnabled())
 					cartridgeRam[mbc.ConvertAddressInRamBank(address) - CARTRIDGE_RAM_BASE_ADDRESS] = data;
 			}
 

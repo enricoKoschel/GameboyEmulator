@@ -64,8 +64,8 @@ namespace GameboyEmulator
 
 		private enum MemoryBankingMode
 		{
-			RomBankingMode = 0,
-			RamBankingMode = 1
+			SimpleRomBanking        = 0,
+			AdvancedRomOrRamBanking = 1
 		}
 
 		//Modules
@@ -81,13 +81,14 @@ namespace GameboyEmulator
 		private byte               numberOfRomBanks;
 		private byte               numberOfRamBanks;
 		private byte               currentRamBank;
+		private byte               currentRamBankHidden;
 		private byte               currentRomBank;
 
 		private bool isRamEnabled;
 
 		public void DetectBankingMode()
 		{
-			currentBankControllerType = (BankControllerType)memory.Read(0x147);
+			currentBankControllerType = (BankControllerType)memory.Read(0x147, true);
 			if (!Enum.IsDefined(typeof(BankControllerType), currentBankControllerType))
 			{
 				throw new NotImplementedException(
@@ -95,13 +96,13 @@ namespace GameboyEmulator
 				);
 			}
 
-			byte numberOfRomBanksRaw = memory.Read(0x148);
+			byte numberOfRomBanksRaw = memory.Read(0x148, true);
 			if (numberOfRomBanksRaw > 0x08)
 				throw new InvalidDataException("Cartridge has invalid number of ROM banks!");
 
 			numberOfRomBanks = (byte)Math.Pow(2, numberOfRomBanksRaw + 1);
 
-			byte numberOfRamBanksRaw = memory.Read(0x149);
+			byte numberOfRamBanksRaw = memory.Read(0x149, true);
 			if (numberOfRamBanksRaw == 0x00 || numberOfRamBanksRaw == 0x01)
 				numberOfRamBanks = 0;
 			else if (numberOfRamBanksRaw < 0x06)
@@ -109,12 +110,13 @@ namespace GameboyEmulator
 			else
 				throw new InvalidDataException("Cartridge has invalid number of RAM banks!");
 
-			currentMemoryBankingMode = MemoryBankingMode.RomBankingMode;
+			currentMemoryBankingMode = MemoryBankingMode.SimpleRomBanking;
 
 			isRamEnabled = false;
 
-			currentRomBank = 1;
-			currentRamBank = 0;
+			currentRomBank       = 1;
+			currentRamBank       = 0;
+			currentRamBankHidden = 0;
 		}
 
 		public void HandleBanking(ushort address, byte data)
@@ -123,7 +125,12 @@ namespace GameboyEmulator
 			{
 				case BankControllerType.Mbc1:
 				{
-					HandleBankingMbc1(address, data);
+					HandleBankingMbc1(address, data, false);
+					break;
+				}
+				case BankControllerType.Mbc1Ram:
+				{
+					HandleBankingMbc1(address, data, true);
 					break;
 				}
 				default:
@@ -135,53 +142,102 @@ namespace GameboyEmulator
 			}
 		}
 
-		private void HandleBankingMbc1(ushort address, byte data)
+		private void HandleBankingMbc1(ushort address, byte data, bool hasRam)
 		{
-			if (Memory.IsInRange(address, 0x0000, 0x1FFF))
-			{
-				//Ram Enable
+			//Create mask for rom bank number, so that only the necessary amount of bits are used
+			int  numberOfBitsForRomBank = (int)Math.Ceiling(Math.Log2(numberOfRomBanks));
+			byte romBankBitMask         = (byte)(0xFF >> (8 - numberOfBitsForRomBank));
+
+			//Ensure that not more than 5 bits are used
+			romBankBitMask &= 0b00011111;
+
+			if (hasRam && Memory.IsInRange(address, 0x0000, 0x1FFF))
 				isRamEnabled = (data & 0x0F) == 0xA;
-			}
-			else if (Memory.IsInRange(address, 0x2000, 0x3FFF))
+
+			if (Memory.IsInRange(address, 0x2000, 0x3FFF))
 			{
-				//Change lower 5 bits of current Rombank
-				currentRomBank = (byte)((currentRomBank & 0b11100000) | (data & 0b00011111));
-				if (currentRomBank == 0x00 || currentRomBank == 0x20 || currentRomBank == 0x40 ||
-					currentRomBank == 0x60)
-					currentRomBank++;
+				//Set up to the lower 5 bits of current rom bank number
+				currentRomBank = (byte)(data & romBankBitMask);
 			}
 			else if (Memory.IsInRange(address, 0x4000, 0x5FFF))
 			{
-				//Change current Rambank or upper 2 bits of current Rombank
-				if (currentMemoryBankingMode == MemoryBankingMode.RomBankingMode)
-					currentRomBank = (byte)((currentRomBank & 0b00011111) | (data & 0b01100000));
-				else
+				//Set bits 5 and 6 of current rom bank number if enough banks are available
+				if (numberOfRomBanks >= 64)
+					currentRomBank = (byte)((currentRomBank & 0b00011111) | ((data & 0b00000011) << 5));
+
+				//Set current hidden ram bank number if enough banks are available
+				if (currentMemoryBankingMode == MemoryBankingMode.SimpleRomBanking && numberOfRamBanks >= 4)
+					currentRamBankHidden = (byte)(data & 0b00000011);
+
+				//Set current ram bank number if enough banks are available
+				if (currentMemoryBankingMode == MemoryBankingMode.AdvancedRomOrRamBanking && numberOfRamBanks >= 4)
 					currentRamBank = (byte)(data & 0b00000011);
 			}
 			else if (Memory.IsInRange(address, 0x6000, 0x7FFF))
 			{
 				//Change Memory Banking Mode
-				currentMemoryBankingMode = (MemoryBankingMode)data;
+				switch (data)
+				{
+					case 0:
+						currentMemoryBankingMode = MemoryBankingMode.SimpleRomBanking;
+						currentRamBank           = 0;
+						break;
+					case 1:
+						currentMemoryBankingMode = MemoryBankingMode.AdvancedRomOrRamBanking;
+						currentRamBank           = currentRamBankHidden; //TODO maybe only do this if ram is enabled?
+						break;
+					default:
+						throw new InvalidDataException("Invalid memory banking mode!");
+				}
 			}
+
+			if (currentRomBank == 0x00 || currentRomBank == 0x20 || currentRomBank == 0x40 ||
+				currentRomBank == 0x60)
+				currentRomBank++;
 		}
 
 		public ushort ConvertAddressInRomBank(ushort address)
 		{
-			//TODO adapt to all mbcs
-			if (address < 0x4000) return address;
+			switch (currentBankControllerType)
+			{
+				case BankControllerType.Mbc1:
+				case BankControllerType.Mbc1Ram:
+				{
+					if (currentMemoryBankingMode == MemoryBankingMode.AdvancedRomOrRamBanking)
+					{
+						if (address < 0x4000)
+							return (ushort)(address + (currentRomBank & 0b01100000) * 0x4000);
 
-			return (ushort)(address + (currentRomBank - 1) * 0x4000);
+						return (ushort)(address + ((currentRomBank & 0b00011111) - 1) * 0x4000);
+					}
+
+					if (address < 0x4000) return address;
+
+					return (ushort)(address + (currentRomBank - 1) * 0x4000);
+				}
+				default:
+				{
+					throw new NotImplementedException(
+						$"Memory Bank Controller '{currentBankControllerType.ToString()}' is not implemented yet!"
+					);
+				}
+			}
 		}
 
 		public ushort ConvertAddressInRamBank(ushort address)
 		{
 			//TODO adapt to all mbcs
-			return address;
+			return (ushort)(address + 0x2000 * currentRamBank);
 		}
 
 		public byte GetNumberOfRamBanks()
 		{
 			return numberOfRamBanks;
+		}
+
+		public bool GetIsRamEnabled()
+		{
+			return isRamEnabled;
 		}
 	}
 }
