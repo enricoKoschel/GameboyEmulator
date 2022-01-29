@@ -69,7 +69,7 @@ namespace GameboyEmulator
 		private       bool   bootRomEnabled     = false;
 
 		//TODO - Accept game file path as console parameter / make into property
-		private const string GAME_ROM_FILE_PATH = "../../../roms/marsio.gb";
+		private const string GAME_ROM_FILE_PATH = "../../../roms/donkeykongland.gb";
 		//private const string GAME_ROM_FILE_PATH = "../../../roms/test/ppu/dmg-acid2.gb";
 		//private const string GAME_ROM_FILE_PATH = "../../../roms/test/tearoom/m2_win_en_toggle.gb";
 		//private const string GAME_ROM_FILE_PATH = "../../../roms/test/ppu/lycscx.gb";
@@ -141,7 +141,7 @@ namespace GameboyEmulator
 			}
 
 			//Detect current Memorybanking Mode
-			mbc.DetectBankingMode();
+			mbc.InitialiseBanking();
 
 			AllocateCartridgeRam(mbc.GetNumberOfRamBanks());
 

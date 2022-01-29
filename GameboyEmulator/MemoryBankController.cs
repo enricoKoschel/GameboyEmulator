@@ -86,7 +86,7 @@ namespace GameboyEmulator
 
 		private bool isRamEnabled;
 
-		public void DetectBankingMode()
+		public void InitialiseBanking()
 		{
 			currentBankControllerType = (BankControllerType)memory.Read(0x147, true);
 			if (!Enum.IsDefined(typeof(BankControllerType), currentBankControllerType))
@@ -101,7 +101,8 @@ namespace GameboyEmulator
 			}
 
 			Logger.LogMessage(
-				$"Memory bank controller '{currentBankControllerType.ToString()}' was determined.", Logger.LogLevel.Info
+				$"Memory bank controller '{currentBankControllerType.ToString()}' was determined.",
+				Logger.LogLevel.Info, true
 			);
 
 			byte numberOfRomBanksRaw = memory.Read(0x148, true);
@@ -112,6 +113,8 @@ namespace GameboyEmulator
 			}
 
 			numberOfRomBanks = (byte)Math.Pow(2, numberOfRomBanksRaw + 1);
+
+			Logger.LogMessage($"{numberOfRomBanks} ROM bank(s) was/were determined.", Logger.LogLevel.Info, true);
 
 			byte numberOfRamBanksRaw = memory.Read(0x149, true);
 			if (numberOfRamBanksRaw == 0x00 || numberOfRamBanksRaw == 0x01)
@@ -124,6 +127,8 @@ namespace GameboyEmulator
 				throw new InvalidDataException("Cartridge has invalid number of RAM banks!");
 			}
 
+			Logger.LogMessage($"{numberOfRamBanks} RAM bank(s) was/were determined.", Logger.LogLevel.Info, true);
+
 			currentMemoryBankingMode = MemoryBankingMode.SimpleRomBanking;
 
 			isRamEnabled = false;
@@ -135,6 +140,8 @@ namespace GameboyEmulator
 
 		public void HandleBanking(ushort address, byte data)
 		{
+			byte previousRomBank = currentRomBank;
+
 			switch (currentBankControllerType)
 			{
 				case BankControllerType.Mbc1:
@@ -143,6 +150,7 @@ namespace GameboyEmulator
 					break;
 				}
 				case BankControllerType.Mbc1Ram:
+				case BankControllerType.Mbc1RamBattery:
 				{
 					HandleBankingMbc1(address, data, true);
 					break;
@@ -158,6 +166,15 @@ namespace GameboyEmulator
 						$"Memory Bank Controller '{currentBankControllerType.ToString()}' is not implemented yet!"
 					);
 				}
+			}
+
+			if (previousRomBank != currentRomBank)
+			{
+				Logger.LogMessage(
+					$"Rom bank was changed from '0x{previousRomBank:X}' to '0x{currentRomBank:X}'",
+					Logger.LogLevel.Info,
+					true
+				);
 			}
 		}
 
@@ -220,8 +237,13 @@ namespace GameboyEmulator
 		{
 			switch (currentBankControllerType)
 			{
+				case BankControllerType.RomOnly:
+				{
+					return address;
+				}
 				case BankControllerType.Mbc1:
 				case BankControllerType.Mbc1Ram:
+				case BankControllerType.Mbc1RamBattery:
 				{
 					if (currentMemoryBankingMode == MemoryBankingMode.AdvancedRomOrRamBanking)
 					{
