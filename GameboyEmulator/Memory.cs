@@ -69,7 +69,7 @@ namespace GameboyEmulator
 		private       bool   bootRomEnabled     = false;
 
 		//TODO - Accept game file path as console parameter / make into property
-		private const string GAME_ROM_FILE_PATH = "../../../roms/mario.gb";
+		private const string GAME_ROM_FILE_PATH = "../../../roms/marsio.gb";
 		//private const string GAME_ROM_FILE_PATH = "../../../roms/test/ppu/dmg-acid2.gb";
 		//private const string GAME_ROM_FILE_PATH = "../../../roms/test/tearoom/m2_win_en_toggle.gb";
 		//private const string GAME_ROM_FILE_PATH = "../../../roms/test/ppu/lycscx.gb";
@@ -98,12 +98,29 @@ namespace GameboyEmulator
 			//TODO refactor this method
 			if (bootRomEnabled)
 			{
-				cartridgeRom = File.ReadAllBytes(BOOT_ROM_FILE_PATH);
+				try
+				{
+					cartridgeRom = File.ReadAllBytes(BOOT_ROM_FILE_PATH);
+				}
+				catch (Exception e)
+				{
+					Logger.LogMessage($"Boot rom '{BOOT_ROM_FILE_PATH}' could not be opened!", Logger.LogLevel.Error);
+					throw new Exception("", e);
+				}
+
 
 				//Resize for Cartridge Header
 				Array.Resize(ref cartridgeRom, 0x150);
 
-				cartridgeRomWithBanks = File.ReadAllBytes(GAME_ROM_FILE_PATH);
+				try
+				{
+					cartridgeRomWithBanks = File.ReadAllBytes(GAME_ROM_FILE_PATH);
+				}
+				catch (Exception e)
+				{
+					Logger.LogMessage($"Game rom '{GAME_ROM_FILE_PATH}' could not be opened!", Logger.LogLevel.Error);
+					throw new Exception("", e);
+				}
 
 				//Copy Cartridge Header
 				for (int i = 0x100; i < 0x150; i++) cartridgeRom[i] = cartridgeRomWithBanks[i];
@@ -112,13 +129,23 @@ namespace GameboyEmulator
 			{
 				InitializeRegisters();
 
-				cartridgeRom = File.ReadAllBytes(GAME_ROM_FILE_PATH);
+				try
+				{
+					cartridgeRom = File.ReadAllBytes(GAME_ROM_FILE_PATH);
+				}
+				catch (Exception e)
+				{
+					Logger.LogMessage($"Game rom '{GAME_ROM_FILE_PATH}' could not be opened!", Logger.LogLevel.Error);
+					throw new Exception("", e);
+				}
 			}
 
 			//Detect current Memorybanking Mode
 			mbc.DetectBankingMode();
 
 			AllocateCartridgeRam(mbc.GetNumberOfRamBanks());
+
+			Logger.LogMessage("Game was loaded.", Logger.LogLevel.Info);
 		}
 
 		private void InitializeRegisters()
@@ -166,6 +193,8 @@ namespace GameboyEmulator
 		{
 			//Overwrite Boot rom with Game rom, thus disabling it
 			cartridgeRom = cartridgeRomWithBanks;
+
+			Logger.LogMessage("Boot rom was disabled.", Logger.LogLevel.Info);
 		}
 
 		public byte Read(ushort address, bool noRomBanking = false)

@@ -26,7 +26,7 @@ namespace GameboyEmulator
 			logFile.AutoFlush = true;
 		}
 
-		public static void LogMessage(string message, LogLevel loglevel = LogLevel.Info, bool logToConsole = false)
+		public static void LogMessage(string message, LogLevel loglevel, bool logToConsole = false)
 		{
 			string logMessage = $"[{CurrentTime}][{LogLevelToString(loglevel)}] {message}";
 

@@ -91,14 +91,25 @@ namespace GameboyEmulator
 			currentBankControllerType = (BankControllerType)memory.Read(0x147, true);
 			if (!Enum.IsDefined(typeof(BankControllerType), currentBankControllerType))
 			{
-				throw new NotImplementedException(
+				Logger.LogMessage(
+					$"Invalid memory bank controller with id '{currentBankControllerType}'", Logger.LogLevel.Error
+				);
+
+				throw new InvalidDataException(
 					$"Invalid memory bank controller with id '{currentBankControllerType}'"
 				);
 			}
 
+			Logger.LogMessage(
+				$"Memory bank controller '{currentBankControllerType.ToString()}' was determined.", Logger.LogLevel.Info
+			);
+
 			byte numberOfRomBanksRaw = memory.Read(0x148, true);
 			if (numberOfRomBanksRaw > 0x08)
+			{
+				Logger.LogMessage("Cartridge has invalid number of ROM banks!", Logger.LogLevel.Error);
 				throw new InvalidDataException("Cartridge has invalid number of ROM banks!");
+			}
 
 			numberOfRomBanks = (byte)Math.Pow(2, numberOfRomBanksRaw + 1);
 
@@ -108,7 +119,10 @@ namespace GameboyEmulator
 			else if (numberOfRamBanksRaw < 0x06)
 				numberOfRamBanks = (byte)(numberOfRamBanksRaw - 1);
 			else
+			{
+				Logger.LogMessage("Cartridge has invalid number of RAM banks!", Logger.LogLevel.Error);
 				throw new InvalidDataException("Cartridge has invalid number of RAM banks!");
+			}
 
 			currentMemoryBankingMode = MemoryBankingMode.SimpleRomBanking;
 
@@ -135,6 +149,11 @@ namespace GameboyEmulator
 				}
 				default:
 				{
+					Logger.LogMessage(
+						$"Memory Bank Controller '{currentBankControllerType.ToString()}' is not implemented yet!",
+						Logger.LogLevel.Error
+					);
+
 					throw new NotImplementedException(
 						$"Memory Bank Controller '{currentBankControllerType.ToString()}' is not implemented yet!"
 					);
@@ -187,6 +206,7 @@ namespace GameboyEmulator
 						currentRamBank           = currentRamBankHidden; //TODO maybe only do this if ram is enabled?
 						break;
 					default:
+						Logger.LogMessage("Invalid memory banking mode!", Logger.LogLevel.Error);
 						throw new InvalidDataException("Invalid memory banking mode!");
 				}
 			}
@@ -217,6 +237,11 @@ namespace GameboyEmulator
 				}
 				default:
 				{
+					Logger.LogMessage(
+						$"Memory Bank Controller '{currentBankControllerType.ToString()}' is not implemented yet!",
+						Logger.LogLevel.Error
+					);
+
 					throw new NotImplementedException(
 						$"Memory Bank Controller '{currentBankControllerType.ToString()}' is not implemented yet!"
 					);

@@ -34,7 +34,10 @@ namespace GameboyEmulator
 			set
 			{
 				if (value > 0x3)
+				{
+					Logger.LogMessage("LCD Mode cannot be larger than 3!", Logger.LogLevel.Error);
 					throw new ArgumentOutOfRangeException(nameof(value), "LCD Mode cannot be larger than 3!");
+				}
 
 				StatusRegister &= 0b11111100;
 				StatusRegister |= value;

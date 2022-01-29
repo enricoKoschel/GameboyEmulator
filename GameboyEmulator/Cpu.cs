@@ -257,6 +257,7 @@ namespace GameboyEmulator
 					return 4;
 				//STOP
 				case 0x10:
+					Logger.LogMessage("STOP Opcode not implemented yet", Logger.LogLevel.Error);
 					throw new NotImplementedException("STOP Opcode not implemented yet");
 				//LD DE,nn
 				case 0x11:
@@ -1152,6 +1153,10 @@ namespace GameboyEmulator
 
 				//Invalid Opcode
 				default:
+					Logger.LogMessage(
+						$"Invalid Opcode 0x{opcode:X} encountered at 0x{programCounter - 1:X}!", Logger.LogLevel.Error
+					);
+
 					throw new NotImplementedException(
 						$"Invalid Opcode 0x{opcode:X} encountered at 0x{programCounter - 1:X}!"
 					);
@@ -2210,21 +2215,27 @@ namespace GameboyEmulator
 		//Bit-wise functions
 		public static bool GetBit(byte data, int bit)
 		{
-			if (bit > 7 || bit < 0) throw new IndexOutOfRangeException($"Cannot access Bit {bit} of a Byte!");
+			if (bit >= 0 && bit <= 7) return ToBool((data >> bit) & 1);
 
-			return ToBool((data >> bit) & 1);
+			Logger.LogMessage($"Cannot access Bit {bit} of a Byte!", Logger.LogLevel.Error);
+			throw new IndexOutOfRangeException($"Cannot access Bit {bit} of a Byte!");
 		}
 
 		private static bool GetBit(ushort data, int bit)
 		{
-			if (bit > 15 || bit < 0) throw new IndexOutOfRangeException($"Cannot access Bit {bit} of a Word!");
+			if (bit >= 0 && bit <= 15) return ToBool((data >> bit) & 1);
 
-			return ToBool((data >> bit) & 1);
+			Logger.LogMessage($"Cannot access Bit {bit} of a Word!", Logger.LogLevel.Error);
+			throw new IndexOutOfRangeException($"Cannot access Bit {bit} of a Word!");
 		}
 
 		public static byte SetBit(byte data, int bit, bool state)
 		{
-			if (bit > 7 || bit < 0) throw new IndexOutOfRangeException($"Cannot access Bit {bit} of a Byte!");
+			if (bit > 7 || bit < 0)
+			{
+				Logger.LogMessage($"Cannot access Bit {bit} of a Byte!", Logger.LogLevel.Error);
+				throw new IndexOutOfRangeException($"Cannot access Bit {bit} of a Byte!");
+			}
 
 			byte mask = (byte)(1 << bit);
 
@@ -2233,13 +2244,16 @@ namespace GameboyEmulator
 			else
 				data &= (byte)~mask;
 
-
 			return data;
 		}
 
 		private static ushort SetBit(ushort data, int bit, bool state)
 		{
-			if (bit > 15 || bit < 0) throw new IndexOutOfRangeException($"Cannot access Bit {bit} of a Word!");
+			if (bit > 15 || bit < 0)
+			{
+				Logger.LogMessage($"Cannot access Bit {bit} of a Word!", Logger.LogLevel.Error);
+				throw new IndexOutOfRangeException($"Cannot access Bit {bit} of a Word!");
+			}
 
 			byte mask = (byte)(1 << bit);
 

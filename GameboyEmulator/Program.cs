@@ -8,7 +8,7 @@ namespace GameboyEmulator
 	{
 		public static void Main(string[] args)
 		{
-			Logger.LogMessage("Program started");
+			Logger.LogMessage("Program started", Logger.LogLevel.Info);
 
 			Cpu    emulator   = new Cpu();
 			Window window     = emulator.GetGraphics().GetScreen().GetWindow();
@@ -30,7 +30,7 @@ namespace GameboyEmulator
 				window.SetTitle($"GameBoy Emulator | FPS - {fps} | Lowest - {lowestFps} | Highest - {highestFps}");
 			}
 
-			Logger.LogMessage("Program terminated");
+			Logger.LogMessage("Program terminated without errors", Logger.LogLevel.Info);
 		}
 	}
 }

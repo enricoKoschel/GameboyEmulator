@@ -41,7 +41,11 @@ namespace GameboyEmulator
 			set
 			{
 				if (value > 0x3)
+				{
+					Logger.LogMessage("Frequency cannot be larger than 3!", Logger.LogLevel.Error);
 					throw new ArgumentOutOfRangeException(nameof(value), "Frequency cannot be larger than 3!");
+				}
+
 
 				TimerControl &= 0b11111100;
 				TimerControl |= value;

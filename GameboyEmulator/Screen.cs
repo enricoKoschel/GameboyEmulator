@@ -118,7 +118,11 @@ namespace GameboyEmulator
 
 		public void DrawFrame()
 		{
-			if (!window.IsOpen) throw new InvalidOperationException("Cannot draw Screen when Window is closed!");
+			if (!window.IsOpen)
+			{
+				Logger.LogMessage("Cannot draw Screen when Window is closed!", Logger.LogLevel.Error);
+				throw new InvalidOperationException("Cannot draw Screen when Window is closed!");
+			}
 
 			window.DispatchEvents();
 
