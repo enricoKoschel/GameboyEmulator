@@ -20,6 +20,7 @@
     - [misc (CGB)](#misc-cgb)
       - [Bits](#bits)
       - [PPU](#ppu-1)
+  - [Tearoom tests](#tearoom-tests)
   - [Extra](#extra)
 
 ## [Blargg tests][blargg_tests]
@@ -226,6 +227,42 @@
 | ------------------ | ----- |
 | vblank_stat_intr-C | :x:  |
 
+## [Tearoom tests][tearoom_tests]
+
+| Test                              | State |
+| --------------------------------- | ----- | 
+| m2_win_en_toggle                  | :x:  |
+| m3_bgp_change                     | :x:  |
+| m3_bgp_change_sprites             | :x:  |
+| m3_lcdc_bg_en_change              | :x:  |
+| m3_lcdc_bg_en_change2             | :x:  |
+| m3_lcdc_bg_map_change             | :x:  |
+| m3_lcdc_bg_map_change2            | :x:  |
+| m3_lcdc_obj_en_change             | :x:  |
+| m3_lcdc_obj_en_change_variant     | :x:  |
+| m3_lcdc_obj_size_change           | :x:  |
+| m3_lcdc_obj_size_change_scx       | :x:  |
+| m3_lcdc_tile_sel_change           | :x:  |
+| m3_lcdc_tile_sel_change2          | :x:  |
+| m3_lcdc_tile_sel_win_change       | :x:  |
+| m3_lcdc_tile_sel_win_change2      | :x:  |
+| m3_lcdc_win_en_change_multiple    | :x:  |
+| m3_lcdc_win_en_change_multiple_wx | :x:  |
+| m3_lcdc_win_map_change            | :x:  |
+| m3_lcdc_win_map_change2           | :x:  |
+| m3_obp0_change                    | :x:  |
+| m3_scx_high_5_bits                | :x:  |
+| m3_scx_high_5_bits_change2        | :x:  |
+| m3_scx_low_3_bits                 | :x:  |
+| m3_scy_change                     | :x:  |
+| m3_scy_change2                    | :x:  |
+| m3_window_timing                  | :x:  |
+| m3_window_timing_wx_0             | :x:  |
+| m3_wx_4_change                    | :x:  |
+| m3_wx_4_change_sprites            | :x:  |
+| m3_wx_5_change                    | :x:  |
+| m3_wx_6_change                    | :x:  |
+
 ## Extra
 These are valuable tests, they come in a single rom, so they were grouped into
 a single table
@@ -242,4 +279,5 @@ a single table
 [mooneye_tests]: https://github.com/Gekkio/mooneye-gb/tree/master/tests
 [rtc3test]: https://github.com/aaaaaa123456789/rtc3test
 [bullyGB]: https://github.com/Hacktix/BullyGB
+[tearoom_tests]: https://github.com/mattcurrie/mealybug-tearoom-tests
 [dmg_acid2]: https://github.com/mattcurrie/dmg-acid2
