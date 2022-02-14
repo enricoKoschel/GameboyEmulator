@@ -201,13 +201,6 @@ namespace GameboyEmulator
 
 		private void HandleBankingMbc1(ushort address, byte data, bool hasRam)
 		{
-			//Create mask for rom bank number, so that only the necessary amount of bits are used
-			int  numberOfBitsForRomBank = (int)Math.Ceiling(Math.Log2(numberOfRomBanks));
-			byte romBankBitMask         = (byte)(0xFF >> (8 - numberOfBitsForRomBank));
-
-			//Ensure that not more than 5 bits are used
-			romBankBitMask &= 0b00011111;
-
 			if (hasRam && Memory.IsInRange(address, 0x0000, 0x1FFF))
 			{
 				isRamEnabled = (data & 0x0F) == 0xA;
@@ -221,12 +214,12 @@ namespace GameboyEmulator
 			else if (Memory.IsInRange(address, 0x2000, 0x3FFF))
 			{
 				//Set up to the lower 5 bits of current rom bank number
-				currentRomBank = (byte)(data & romBankBitMask);
+				currentRomBank = (byte)(data & 0b00011111);
 			}
 			else if (Memory.IsInRange(address, 0x4000, 0x5FFF))
 			{
 				//Set bits 5 and 6 of current rom bank number if enough banks are available
-				if (numberOfRomBanks >= 64)
+				if (currentMemoryBankingMode == MemoryBankingMode.SimpleRomBanking && numberOfRomBanks >= 64)
 					currentRomBank = (byte)((currentRomBank & 0b00011111) | ((data & 0b00000011) << 5));
 
 				//Set current ram bank number if enough banks are available
@@ -259,7 +252,7 @@ namespace GameboyEmulator
 				currentRomBank++;
 		}
 
-		public ushort ConvertAddressInRomBank(ushort address)
+		public uint ConvertAddressInRomBank(ushort address)
 		{
 			switch (currentBankControllerType)
 			{
@@ -271,17 +264,19 @@ namespace GameboyEmulator
 				case BankControllerType.Mbc1Ram:
 				case BankControllerType.Mbc1RamBattery:
 				{
+					byte currentActualRomBank = (byte)(currentRomBank & (numberOfRomBanks - 1));
+
 					if (currentMemoryBankingMode == MemoryBankingMode.AdvancedRomOrRamBanking)
 					{
 						if (address < 0x4000)
-							return (ushort)(address + (currentRomBank & 0b01100000) * 0x4000);
+							return (ushort)(address + (currentActualRomBank & 0b01100000) * 0x4000);
 
-						return (ushort)(address + ((currentRomBank & 0b00011111) - 1) * 0x4000);
+						return (uint)(address + ((currentActualRomBank & 0b00011111) - 1) * 0x4000);
 					}
 
 					if (address < 0x4000) return address;
 
-					return (ushort)(address + (currentRomBank - 1) * 0x4000);
+					return (uint)(address + (currentActualRomBank - 1) * 0x4000);
 				}
 				default:
 				{
@@ -297,10 +292,12 @@ namespace GameboyEmulator
 			}
 		}
 
-		public ushort ConvertAddressInRamBank(ushort address)
+		public uint ConvertAddressInRamBank(ushort address)
 		{
 			//TODO adapt to all mbcs
-			return (ushort)(address + 0x2000 * currentRamBank);
+			if (currentMemoryBankingMode == MemoryBankingMode.SimpleRomBanking) return address;
+
+			return (uint)(address + 0x2000 * currentRamBank);
 		}
 
 		public byte GetNumberOfRamBanks()
