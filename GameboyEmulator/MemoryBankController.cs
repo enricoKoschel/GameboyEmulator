@@ -114,20 +114,33 @@ namespace GameboyEmulator
 
 			numberOfRomBanks = (byte)Math.Pow(2, numberOfRomBanksRaw + 1);
 
-			Logger.LogMessage($"{numberOfRomBanks} ROM bank(s) was/were determined.", Logger.LogLevel.Info, true);
+			Logger.LogMessage($"{numberOfRomBanks} ROM bank(s) determined.", Logger.LogLevel.Info, true);
 
 			byte numberOfRamBanksRaw = memory.Read(0x149, true);
-			if (numberOfRamBanksRaw == 0x00 || numberOfRamBanksRaw == 0x01)
-				numberOfRamBanks = 0;
-			else if (numberOfRamBanksRaw < 0x06)
-				numberOfRamBanks = (byte)(numberOfRamBanksRaw - 1);
-			else
+			switch (numberOfRamBanksRaw)
 			{
-				Logger.LogMessage("Cartridge has invalid number of RAM banks!", Logger.LogLevel.Error);
-				throw new InvalidDataException("Cartridge has invalid number of RAM banks!");
+				case 0x00:
+				case 0x01:
+					numberOfRamBanks = 0;
+					break;
+				case 0x02:
+					numberOfRamBanks = 1;
+					break;
+				case 0x03:
+					numberOfRamBanks = 4;
+					break;
+				case 0x04:
+					numberOfRamBanks = 16;
+					break;
+				case 0x05:
+					numberOfRamBanks = 8;
+					break;
+				default:
+					Logger.LogMessage("Cartridge has invalid number of RAM banks!", Logger.LogLevel.Error);
+					throw new InvalidDataException("Cartridge has invalid number of RAM banks!");
 			}
 
-			Logger.LogMessage($"{numberOfRamBanks} RAM bank(s) was/were determined.", Logger.LogLevel.Info, true);
+			Logger.LogMessage($"{numberOfRamBanks} RAM bank(s) determined.", Logger.LogLevel.Info, true);
 
 			currentMemoryBankingMode = MemoryBankingMode.SimpleRomBanking;
 
@@ -188,9 +201,16 @@ namespace GameboyEmulator
 			romBankBitMask &= 0b00011111;
 
 			if (hasRam && Memory.IsInRange(address, 0x0000, 0x1FFF))
+			{
 				isRamEnabled = (data & 0x0F) == 0xA;
 
-			if (Memory.IsInRange(address, 0x2000, 0x3FFF))
+				Logger.LogMessage(
+					$"Cartridge ram was {(isRamEnabled ? "enabled" : "disabled")}",
+					Logger.LogLevel.Info,
+					true
+				);
+			}
+			else if (Memory.IsInRange(address, 0x2000, 0x3FFF))
 			{
 				//Set up to the lower 5 bits of current rom bank number
 				currentRomBank = (byte)(data & romBankBitMask);
@@ -217,10 +237,16 @@ namespace GameboyEmulator
 					case 0:
 						currentMemoryBankingMode = MemoryBankingMode.SimpleRomBanking;
 						currentRamBank           = 0;
+
+						Logger.LogMessage("Change banking mode to 0", Logger.LogLevel.Info, true);
+
 						break;
 					case 1:
 						currentMemoryBankingMode = MemoryBankingMode.AdvancedRomOrRamBanking;
 						currentRamBank           = currentRamBankHidden; //TODO maybe only do this if ram is enabled?
+
+						Logger.LogMessage("Change banking mode to 1", Logger.LogLevel.Info, true);
+
 						break;
 					default:
 						Logger.LogMessage("Invalid memory banking mode!", Logger.LogLevel.Error);

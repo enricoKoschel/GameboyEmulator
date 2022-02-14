@@ -69,11 +69,8 @@ namespace GameboyEmulator
 		private       bool   bootRomEnabled     = false;
 
 		//TODO - Accept game file path as console parameter / make into property
-		private const string GAME_ROM_FILE_PATH = "../../../roms/donkeykongland.gb";
-		//private const string GAME_ROM_FILE_PATH = "../../../roms/test/ppu/dmg-acid2.gb";
-		//private const string GAME_ROM_FILE_PATH = "../../../roms/test/tearoom/m2_win_en_toggle.gb";
-		//private const string GAME_ROM_FILE_PATH = "../../../roms/test/ppu/lycscx.gb";
-		//private const string GAME_ROM_FILE_PATH = "../../../roms/demos/pocket.gb";
+		//private const string GAME_ROM_FILE_PATH = "../../../roms/zelda.gb";
+		private const string GAME_ROM_FILE_PATH = "../../../roms/test/Mooneye/emulator-only/mbc1/bits_bank2.gb";
 
 		public Memory(Cpu cpu)
 		{
@@ -208,7 +205,7 @@ namespace GameboyEmulator
 			if (IsInRange(address, CARTRIDGE_RAM_BASE_ADDRESS, CARTRIDGE_RAM_LAST_ADDRESS))
 			{
 				return cartridgeRam != null && mbc.GetIsRamEnabled()
-						   ? cartridgeRam[mbc.ConvertAddressInRamBank(address) - CARTRIDGE_RAM_BASE_ADDRESS]
+						   ? cartridgeRam[mbc.ConvertAddressInRamBank((ushort)(address - CARTRIDGE_RAM_BASE_ADDRESS))]
 						   : (byte)0x00;
 			}
 
@@ -250,7 +247,7 @@ namespace GameboyEmulator
 			else if (IsInRange(address, CARTRIDGE_RAM_BASE_ADDRESS, CARTRIDGE_RAM_LAST_ADDRESS))
 			{
 				if (cartridgeRam != null && mbc.GetIsRamEnabled())
-					cartridgeRam[mbc.ConvertAddressInRamBank(address) - CARTRIDGE_RAM_BASE_ADDRESS] = data;
+					cartridgeRam[mbc.ConvertAddressInRamBank((ushort)(address - CARTRIDGE_RAM_BASE_ADDRESS))] = data;
 			}
 
 			else if (IsInRange(address, WORK_RAM_BASE_ADDRESS, WORK_RAM_LAST_ADDRESS))

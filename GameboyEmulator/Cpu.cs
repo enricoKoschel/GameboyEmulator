@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 
 namespace GameboyEmulator
 {
@@ -1157,7 +1158,7 @@ namespace GameboyEmulator
 						$"Invalid Opcode 0x{opcode:X} encountered at 0x{programCounter - 1:X}!", Logger.LogLevel.Error
 					);
 
-					throw new NotImplementedException(
+					throw new InvalidDataException(
 						$"Invalid Opcode 0x{opcode:X} encountered at 0x{programCounter - 1:X}!"
 					);
 			}
