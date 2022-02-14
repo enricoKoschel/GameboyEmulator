@@ -164,7 +164,7 @@
 | bits_bank1        | ✅     |
 | bits_bank2        | ✅     |
 | bits_mode         | ✅     |
-| bits_ramg         | ❌     |
+| bits_ramg         | ✅     |
 | rom_512kb         | ❌     |
 | rom_1Mb           | ❌     |
 | rom_2Mb           | ❌     |

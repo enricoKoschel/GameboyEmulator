@@ -206,7 +206,7 @@ namespace GameboyEmulator
 			{
 				return cartridgeRam != null && mbc.GetIsRamEnabled()
 						   ? cartridgeRam[mbc.ConvertAddressInRamBank((ushort)(address - CARTRIDGE_RAM_BASE_ADDRESS))]
-						   : (byte)0x00;
+						   : (byte)0xFF;
 			}
 
 			if (IsInRange(address, WORK_RAM_BASE_ADDRESS, WORK_RAM_LAST_ADDRESS))
