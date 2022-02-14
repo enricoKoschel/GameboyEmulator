@@ -81,7 +81,6 @@ namespace GameboyEmulator
 		private byte               numberOfRomBanks;
 		private byte               numberOfRamBanks;
 		private byte               currentRamBank;
-		private byte               currentRamBankHidden;
 		private byte               currentRomBank;
 
 		private bool isRamEnabled;
@@ -146,14 +145,14 @@ namespace GameboyEmulator
 
 			isRamEnabled = false;
 
-			currentRomBank       = 1;
-			currentRamBank       = 0;
-			currentRamBankHidden = 0;
+			currentRomBank = 1;
+			currentRamBank = 0;
 		}
 
 		public void HandleBanking(ushort address, byte data)
 		{
 			byte previousRomBank = currentRomBank;
+			byte previousRamBank = currentRamBank;
 
 			switch (currentBankControllerType)
 			{
@@ -185,6 +184,15 @@ namespace GameboyEmulator
 			{
 				Logger.LogMessage(
 					$"Rom bank was changed from '0x{previousRomBank:X}' to '0x{currentRomBank:X}'",
+					Logger.LogLevel.Info,
+					true
+				);
+			}
+
+			if (previousRamBank != currentRamBank)
+			{
+				Logger.LogMessage(
+					$"Ram bank was changed from '0x{previousRamBank:X}' to '0x{currentRamBank:X}'",
 					Logger.LogLevel.Info,
 					true
 				);
@@ -221,10 +229,6 @@ namespace GameboyEmulator
 				if (numberOfRomBanks >= 64)
 					currentRomBank = (byte)((currentRomBank & 0b00011111) | ((data & 0b00000011) << 5));
 
-				//Set current hidden ram bank number if enough banks are available
-				if (currentMemoryBankingMode == MemoryBankingMode.SimpleRomBanking && numberOfRamBanks >= 4)
-					currentRamBankHidden = (byte)(data & 0b00000011);
-
 				//Set current ram bank number if enough banks are available
 				if (currentMemoryBankingMode == MemoryBankingMode.AdvancedRomOrRamBanking && numberOfRamBanks >= 4)
 					currentRamBank = (byte)(data & 0b00000011);
@@ -236,15 +240,11 @@ namespace GameboyEmulator
 				{
 					case 0:
 						currentMemoryBankingMode = MemoryBankingMode.SimpleRomBanking;
-						currentRamBank           = 0;
-
 						Logger.LogMessage("Change banking mode to 0", Logger.LogLevel.Info, true);
 
 						break;
 					case 1:
 						currentMemoryBankingMode = MemoryBankingMode.AdvancedRomOrRamBanking;
-						currentRamBank           = currentRamBankHidden; //TODO maybe only do this if ram is enabled?
-
 						Logger.LogMessage("Change banking mode to 1", Logger.LogLevel.Info, true);
 
 						break;
