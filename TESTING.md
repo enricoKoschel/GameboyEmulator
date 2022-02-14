@@ -1,283 +1,287 @@
 # Tests
 
 - [Tests](#tests)
-  - [Blargg tests](#blargg-tests)
-  - [Scribble tests](#scribble-tests)
-  - [Mooneye tests](#mooneye-tests)
-    - [Acceptance](#acceptance)
-      - [Bits (unusable bits in memory and registers)](#bits-unusable-bits-in-memory-and-registers)
-      - [Instructions](#instructions)
-      - [Interrupt handling](#interrupt-handling)
-      - [OAM DMA](#oam-dma)
-      - [PPU](#ppu)
-      - [Serial](#serial)
-      - [Timer](#timer)
-    - [emulator-only](#emulator-only)
-      - [MBC1](#mbc1)
-      - [MBC2](#mbc2)
-      - [MBC5](#mbc5)
-    - [manual](#manual)
-    - [misc (CGB)](#misc-cgb)
-      - [Bits](#bits)
-      - [PPU](#ppu-1)
-  - [Tearoom tests](#tearoom-tests)
-  - [Extra](#extra)
+    - [Blargg tests](#blargg-testsblargg_tests)
+    - [Scribble tests](#scribble-testsscribbltests)
+    - [Mooneye tests](#mooneye-testsmooneye_tests)
+        - [Acceptance](#acceptance)
+            - [Bits (unusable bits in memory and registers)](#bits-unusable-bits-in-memory-and-registers)
+            - [Instructions](#instructions)
+            - [Interrupt handling](#interrupt-handling)
+            - [OAM DMA](#oam-dma)
+            - [PPU](#ppu-ppu-1)
+            - [Serial](#serial)
+            - [Timer](#timer)
+        - [emulator-only](#emulator-only)
+            - [MBC1](#mbc1)
+            - [MBC2](#mbc2)
+            - [MBC5](#mbc5)
+        - [manual](#manual)
+        - [misc (CGB)](#misc-cgb)
+            - [Bits](#bits)
+            - [PPU](#ppu-ppu-1)
+    - [Tearoom tests](#tearoom-teststearoom_tests)
+    - [Extra](#extra)
 
 ## [Blargg tests][blargg_tests]
 
 | Test         | State |
-| ------------ | ----- |
-| cpu_instrs   | :x:  |
-| instr_timing | :x:  |
-| halt_bug     | :x:  |
-| mem_timing-2 | :x:  |
-| dmg_sound    | :x:  |
-| cgb_sound    | :x:  |
-| oam_bug      | :x:  |
+|--------------|-------|
+| cpu_instrs   | ❌     |
+| instr_timing | ❌     |
+| halt_bug     | ❌     |
+| mem_timing-2 | ❌     |
+| dmg_sound    | ❌     |
+| cgb_sound    | ❌     |
+| oam_bug      | ❌     |
 
 ## [Scribble tests][scribbltests]
 
-| Test         | State |
-| ------------ | ----- |
-| fairylake    | :x:  |
-| lycscx       | :x:  |
-| lycscy       | :x:  |
-| palettely    | :x:  |
-| scxly        | :x:  |
-| statcount    | :x:  |
-| winpos       | :x:  |
+| Test      | State |
+|-----------|-------|
+| fairylake | ❌     |
+| lycscx    | ❌     |
+| lycscy    | ❌     |
+| palettely | ❌     |
+| scxly     | ❌     |
+| statcount | ❌     |
+| winpos    | ❌     |
 
 ## [Mooneye tests][mooneye_tests]
 
 ### Acceptance
 
 | Test                    | State |
-| ----------------------- | ----- |
-| add_sp_e_timing         | :x:  |
-| boot_div-dmgABCmgb      | :x:  |
-| boot_hwio-dmgABCmgb     | :x:  |
-| boot_regs-dmgABC        | :x:  |
-| call_timing             | :x:  |
-| call_timing2            | :x:  |
-| call_cc_timing          | :x:  |
-| call_cc_timing2         | :x:  |
-| di_timing GS            | :x:  |
-| div_timing              | :x:  |
-| ei_sequence             | :x:  |
-| ei_timing               | :x:  |
-| halt_ime0_ei            | :x:  |
-| halt_ime0_nointr_timing | :x:  |
-| halt_ime1_timing        | :x:  |
-| halt_ime1_timing2-GS    | :x:  |
-| if_ie_registers         | :x:  |
-| intr_timing             | :x:  |
-| jp_timing               | :x:  |
-| jp_cc_timing            | :x:  |
-| ld_hl_sp_e_timing       | :x:  |
-| oam_dma_restart         | :x:  |
-| oam_dma_start           | :x:  |
-| oam_dma_timing          | :x:  |
-| pop_timing              | :x:  |
-| push_timing             | :x:  |
-| rapid_di_ei             | :x:  |
-| ret_timing              | :x:  |
-| ret_cc_timing           | :x:  |
-| reti_timing             | :x:  |
-| reti_intr_timing        | :x:  |
-| rst_timing              | :x:  |
+|-------------------------|-------|
+| add_sp_e_timing         | ❌     |
+| boot_div-dmgABCmgb      | ❌     |
+| boot_hwio-dmgABCmgb     | ❌     |
+| boot_regs-dmgABC        | ❌     |
+| call_timing             | ❌     |
+| call_timing2            | ❌     |
+| call_cc_timing          | ❌     |
+| call_cc_timing2         | ❌     |
+| di_timing GS            | ❌     |
+| div_timing              | ❌     |
+| ei_sequence             | ❌     |
+| ei_timing               | ❌     |
+| halt_ime0_ei            | ❌     |
+| halt_ime0_nointr_timing | ❌     |
+| halt_ime1_timing        | ❌     |
+| halt_ime1_timing2-GS    | ❌     |
+| if_ie_registers         | ❌     |
+| intr_timing             | ❌     |
+| jp_timing               | ❌     |
+| jp_cc_timing            | ❌     |
+| ld_hl_sp_e_timing       | ❌     |
+| oam_dma_restart         | ❌     |
+| oam_dma_start           | ❌     |
+| oam_dma_timing          | ❌     |
+| pop_timing              | ❌     |
+| push_timing             | ❌     |
+| rapid_di_ei             | ❌     |
+| ret_timing              | ❌     |
+| ret_cc_timing           | ❌     |
+| reti_timing             | ❌     |
+| reti_intr_timing        | ❌     |
+| rst_timing              | ❌     |
 
 #### Bits (unusable bits in memory and registers)
 
 | Test           | State |
-| -------------- | ----- |
-| mem_oam        | :x:  |
-| reg_f          | :x:  |
-| unused_hwio-GS | :x:  |
+|----------------|-------|
+| mem_oam        | ❌     |
+| reg_f          | ❌     |
+| unused_hwio-GS | ❌     |
 
 #### Instructions
 
 | Test | State |
-| ---- | ----- |
-| daa  | :x:  |
+|------|-------|
+| daa  | ❌     |
 
 #### Interrupt handling
 
-| Test                        | State |
-| --------------------------- | ----- |
-| ie_push                     | :x:  |
+| Test    | State |
+|---------|-------|
+| ie_push | ❌     |
 
 #### OAM DMA
 
-| Test       | State     |
-| ---------- | --------- |
-| basic      | :x:      |
-| reg_read   | :x:      |
-| sources-GS | :x:/:x:* |
+| Test       | State |
+|------------|-------|
+| basic      | ❌     |
+| reg_read   | ❌     |
+| sources-GS | ❌     |
 
-#### PPU
+#### PPU {#ppu-1}
 
 | Test                        | State |
-| --------------------------- | ----- |
-| hblank_ly_scx_timing-GS     | :x:   |
-| intr_1_2_timing-GS          | :x:  |
-| intr_2_0_timing             | :x:  |
-| intr_2_mode0_timing         | :x:   |
-| intr_2_mode3_timing         | :x:   |
-| intr_2_oam_ok_timing        | :x:  |
-| intr_2_mode0_timing_sprites | :x:   |
-| lcdon_timing-GS             | :x:   |
-| lcdon_write_timing-GS       | :x:   |
-| stat_irq_blocking           | :x:  |
-| stat_lyc_onoff              | :x:  |
-| vblank_stat_intr-GS         | :x:  |
+|-----------------------------|-------|
+| hblank_ly_scx_timing-GS     | ❌     |
+| intr_1_2_timing-GS          | ❌     |
+| intr_2_0_timing             | ❌     |
+| intr_2_mode0_timing         | ❌     |
+| intr_2_mode3_timing         | ❌     |
+| intr_2_oam_ok_timing        | ❌     |
+| intr_2_mode0_timing_sprites | ❌     |
+| lcdon_timing-GS             | ❌     |
+| lcdon_write_timing-GS       | ❌     |
+| stat_irq_blocking           | ❌     |
+| stat_lyc_onoff              | ❌     |
+| vblank_stat_intr-GS         | ❌     |
 
-#### Serial 
+#### Serial
 
-| Test                       | State |
-| -------------------------- | ----- |
-| boot_sclk_align-dmgABCmgb  | :x:  |
-
+| Test                      | State |
+|---------------------------|-------|
+| boot_sclk_align-dmgABCmgb | ❌     |
 
 #### Timer
 
 | Test                 | State |
-| -------------------- | ----- |
-| div_write            | :x:  |
-| rapid_toggle         | :x:  |
-| tim00_div_trigger    | :x:  |
-| tim00                | :x:  |
-| tim01_div_trigger    | :x:  |
-| tim01                | :x:  |
-| tim10_div_trigger    | :x:  |
-| tim10                | :x:  |
-| tim11_div_trigger    | :x:  |
-| tim11                | :x:  |
-| tima_reload          | :x:  |
-| tima_write_reloading | :x:  |
-| tma_write_reloading  | :x:  |
+|----------------------|-------|
+| div_write            | ❌     |
+| rapid_toggle         | ❌     |
+| tim00_div_trigger    | ❌     |
+| tim00                | ❌     |
+| tim01_div_trigger    | ❌     |
+| tim01                | ❌     |
+| tim10_div_trigger    | ❌     |
+| tim10                | ❌     |
+| tim11_div_trigger    | ❌     |
+| tim11                | ❌     |
+| tima_reload          | ❌     |
+| tima_write_reloading | ❌     |
+| tma_write_reloading  | ❌     |
 
 ### emulator-only
 
 #### MBC1
 
 | Test              | State |
-| ----------------- | ----- |
-| bits_bank1        | :x:  |
-| bits_bank2        | :x:  |
-| bits_mode         | :x:  |
-| bits_ramg         | :x:  |
-| rom_512kb         | :x:  |
-| rom_1Mb           | :x:  |
-| rom_2Mb           | :x:  |
-| rom_4Mb           | :x:  |
-| rom_8Mb           | :x:  |
-| rom_16Mb          | :x:  |
-| ram_64kb          | :x:  |
-| ram_256kb         | :x:  |
-| multicart_rom_8Mb | :x:  |
+|-------------------|-------|
+| bits_bank1        | ✅     |
+| bits_bank2        | ✅     |
+| bits_mode         | ❌     |
+| bits_ramg         | ❌     |
+| rom_512kb         | ❌     |
+| rom_1Mb           | ❌     |
+| rom_2Mb           | ❌     |
+| rom_4Mb           | ❌     |
+| rom_8Mb           | ❌     |
+| rom_16Mb          | ❌     |
+| ram_64kb          | ❌     |
+| ram_256kb         | ❌     |
+| multicart_rom_8Mb | ❌     |
 
 #### MBC2
 
-| Test              | State |
-| ----------------- | ----- |
-| bits_ramg         | :x:  |
-| bits_romb         | :x:  |
-| bits_unused       | :x:  |
-| rom_512kb         | :x:  |
-| rom_1Mb           | :x:  |
-| rom_2Mb           | :x:  |
-| ram               | :x:  |
+| Test        | State |
+|-------------|-------|
+| bits_ramg   | ❌     |
+| bits_romb   | ❌     |
+| bits_unused | ❌     |
+| rom_512kb   | ❌     |
+| rom_1Mb     | ❌     |
+| rom_2Mb     | ❌     |
+| ram         | ❌     |
 
 #### MBC5
 
-| Test              | State |
-| ----------------- | ----- |
-| rom_512kb         | :x:  |
-| rom_1Mb           | :x:  |
-| rom_2Mb           | :x:  |
-| rom_4Mb           | :x:  |
-| rom_8Mb           | :x:  |
-| rom_16Mb          | :x:  |
-| rom_32Mb          | :x:  |
-| rom_64Mb          | :x:  |
+| Test      | State |
+|-----------|-------|
+| rom_512kb | ❌     |
+| rom_1Mb   | ❌     |
+| rom_2Mb   | ❌     |
+| rom_4Mb   | ❌     |
+| rom_8Mb   | ❌     |
+| rom_16Mb  | ❌     |
+| rom_32Mb  | ❌     |
+| rom_64Mb  | ❌     |
 
 ### manual
 
 | Test            | State |
-| --------------- | ----- |
-| sprite_priority | :x:  |
+|-----------------|-------|
+| sprite_priority | ❌     |
 
 ### misc (CGB)
 
 | Test              | State |
-| ---------------   | ----- |
-| boot_div-cgbABCDE | :x:  |
-| boot_hwio-C       | :x:  |
-| boot_regs-cgb     | :x:  |
+|-------------------|-------|
+| boot_div-cgbABCDE | ❌     |
+| boot_hwio-C       | ❌     |
+| boot_regs-cgb     | ❌     |
 
 #### Bits
 
 | Test          | State |
-| ------------- | ----- |
-| unused_hwio-C | :x:  |
+|---------------|-------|
+| unused_hwio-C | ❌     |
 
-#### PPU
+#### PPU {#ppu-2}
 
 | Test               | State |
-| ------------------ | ----- |
-| vblank_stat_intr-C | :x:  |
+|--------------------|-------|
+| vblank_stat_intr-C | ❌     |
 
 ## [Tearoom tests][tearoom_tests]
 
 | Test                              | State |
-| --------------------------------- | ----- | 
-| m2_win_en_toggle                  | :x:  |
-| m3_bgp_change                     | :x:  |
-| m3_bgp_change_sprites             | :x:  |
-| m3_lcdc_bg_en_change              | :x:  |
-| m3_lcdc_bg_en_change2             | :x:  |
-| m3_lcdc_bg_map_change             | :x:  |
-| m3_lcdc_bg_map_change2            | :x:  |
-| m3_lcdc_obj_en_change             | :x:  |
-| m3_lcdc_obj_en_change_variant     | :x:  |
-| m3_lcdc_obj_size_change           | :x:  |
-| m3_lcdc_obj_size_change_scx       | :x:  |
-| m3_lcdc_tile_sel_change           | :x:  |
-| m3_lcdc_tile_sel_change2          | :x:  |
-| m3_lcdc_tile_sel_win_change       | :x:  |
-| m3_lcdc_tile_sel_win_change2      | :x:  |
-| m3_lcdc_win_en_change_multiple    | :x:  |
-| m3_lcdc_win_en_change_multiple_wx | :x:  |
-| m3_lcdc_win_map_change            | :x:  |
-| m3_lcdc_win_map_change2           | :x:  |
-| m3_obp0_change                    | :x:  |
-| m3_scx_high_5_bits                | :x:  |
-| m3_scx_high_5_bits_change2        | :x:  |
-| m3_scx_low_3_bits                 | :x:  |
-| m3_scy_change                     | :x:  |
-| m3_scy_change2                    | :x:  |
-| m3_window_timing                  | :x:  |
-| m3_window_timing_wx_0             | :x:  |
-| m3_wx_4_change                    | :x:  |
-| m3_wx_4_change_sprites            | :x:  |
-| m3_wx_5_change                    | :x:  |
-| m3_wx_6_change                    | :x:  |
+|-----------------------------------|-------|
+| m2_win_en_toggle                  | ❌     |
+| m3_bgp_change                     | ❌     |
+| m3_bgp_change_sprites             | ❌     |
+| m3_lcdc_bg_en_change              | ❌     |
+| m3_lcdc_bg_en_change2             | ❌     |
+| m3_lcdc_bg_map_change             | ❌     |
+| m3_lcdc_bg_map_change2            | ❌     |
+| m3_lcdc_obj_en_change             | ❌     |
+| m3_lcdc_obj_en_change_variant     | ❌     |
+| m3_lcdc_obj_size_change           | ❌     |
+| m3_lcdc_obj_size_change_scx       | ❌     |
+| m3_lcdc_tile_sel_change           | ❌     |
+| m3_lcdc_tile_sel_change2          | ❌     |
+| m3_lcdc_tile_sel_win_change       | ❌     |
+| m3_lcdc_tile_sel_win_change2      | ❌     |
+| m3_lcdc_win_en_change_multiple    | ❌     |
+| m3_lcdc_win_en_change_multiple_wx | ❌     |
+| m3_lcdc_win_map_change            | ❌     |
+| m3_lcdc_win_map_change2           | ❌     |
+| m3_obp0_change                    | ❌     |
+| m3_scx_high_5_bits                | ❌     |
+| m3_scx_high_5_bits_change2        | ❌     |
+| m3_scx_low_3_bits                 | ❌     |
+| m3_scy_change                     | ❌     |
+| m3_scy_change2                    | ❌     |
+| m3_window_timing                  | ❌     |
+| m3_window_timing_wx_0             | ❌     |
+| m3_wx_4_change                    | ❌     |
+| m3_wx_4_change_sprites            | ❌     |
+| m3_wx_5_change                    | ❌     |
+| m3_wx_6_change                    | ❌     |
 
 ## Extra
-These are valuable tests, they come in a single rom, so they were grouped into
-a single table
+
+These are valuable tests, they come in a single rom, so they were grouped into a single table
 
 | Test             | State |
-| ---------------- | ----- |
-| [rtc3test]       | :x:  |
-| [bullyGB] in DMG | :x:  |
-| [dmg_acid2]      | :x:  |
+|------------------|-------|
+| [rtc3test]       | ❌     |
+| [bullyGB] in DMG | ❌     |
+| [dmg_acid2]      | ❌     |
 
+[blargg_tests]: https://github.com/retrio/gb-test-roms
 
-[blargg_tests]: https://gbdev.gg8.se/wiki/articles/Test_ROMs
 [scribbltests]: https://github.com/Hacktix/scribbltests
-[mooneye_tests]: https://github.com/Gekkio/mooneye-gb/tree/master/tests
+
+[mooneye_tests]: https://github.com/Gekkio/mooneye-test-suite/
+
 [rtc3test]: https://github.com/aaaaaa123456789/rtc3test
+
 [bullyGB]: https://github.com/Hacktix/BullyGB
+
 [tearoom_tests]: https://github.com/mattcurrie/mealybug-tearoom-tests
+
 [dmg_acid2]: https://github.com/mattcurrie/dmg-acid2
