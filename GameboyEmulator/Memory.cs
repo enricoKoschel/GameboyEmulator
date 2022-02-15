@@ -70,7 +70,9 @@ namespace GameboyEmulator
 
 		//TODO - Accept game file path as console parameter / make into property
 		//private const string GAME_ROM_FILE_PATH = "../../../roms/zelda.gb";
-		private const string GAME_ROM_FILE_PATH = "../../../roms/test/Mooneye/emulator-only/mbc1/bits_bank2.gb";
+		//private const string GAME_ROM_FILE_PATH = "../../../roms/test/Mooneye/emulator-only/mbc1/rom_8Mb.gb";
+		//private const string GAME_ROM_FILE_PATH = "../../../roms/test/blargg/cpu_instrs/cpu_instrs.gb";
+		private const string GAME_ROM_FILE_PATH = "../../../roms/test/blargg/cpu_instrs/individual/02-interrupts.gb";
 
 		public Memory(Cpu cpu)
 		{
@@ -88,6 +90,18 @@ namespace GameboyEmulator
 		{
 			if (numberOfRamBanks > 0)
 				cartridgeRam = new byte[numberOfRamBanks * 0x2000];
+		}
+
+		private void DumpRam()
+		{
+			//File.WriteAllBytes("../../../saves/zelda.bin", cartridgeRam);
+		}
+
+		private void LoadRam()
+		{
+			if (!File.Exists("../../../saves/zelda.bin")) return;
+
+			cartridgeRam = File.ReadAllBytes("../../../saves/zelda.bin");
 		}
 
 		public void LoadGame()
@@ -141,6 +155,11 @@ namespace GameboyEmulator
 			mbc.InitialiseBanking();
 
 			AllocateCartridgeRam(mbc.GetNumberOfRamBanks());
+			//if (mbc.GetNumberOfRamBanks() > 0)
+			//{
+			//	LoadRam();
+			//	Array.Resize(ref cartridgeRam, mbc.GetNumberOfRamBanks() * 0x2000);
+			//}
 
 			Logger.LogMessage("Game was loaded.", Logger.LogLevel.Info);
 		}
@@ -247,7 +266,10 @@ namespace GameboyEmulator
 			else if (IsInRange(address, CARTRIDGE_RAM_BASE_ADDRESS, CARTRIDGE_RAM_LAST_ADDRESS))
 			{
 				if (cartridgeRam != null && mbc.GetIsRamEnabled())
+				{
 					cartridgeRam[mbc.ConvertAddressInRamBank((ushort)(address - CARTRIDGE_RAM_BASE_ADDRESS))] = data;
+					DumpRam();
+				}
 			}
 
 			else if (IsInRange(address, WORK_RAM_BASE_ADDRESS, WORK_RAM_LAST_ADDRESS))
