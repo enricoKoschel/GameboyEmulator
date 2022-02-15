@@ -70,9 +70,7 @@ namespace GameboyEmulator
 
 		//TODO - Accept game file path as console parameter / make into property
 		//private const string GAME_ROM_FILE_PATH = "../../../roms/zelda.gb";
-		//private const string GAME_ROM_FILE_PATH = "../../../roms/test/Mooneye/emulator-only/mbc1/rom_8Mb.gb";
-		//private const string GAME_ROM_FILE_PATH = "../../../roms/test/blargg/cpu_instrs/cpu_instrs.gb";
-		private const string GAME_ROM_FILE_PATH = "../../../roms/test/blargg/cpu_instrs/individual/02-interrupts.gb";
+		private const string GAME_ROM_FILE_PATH = "../../../roms/test/Mooneye/emulator-only/mbc1/rom_8Mb.gb";
 
 		public Memory(Cpu cpu)
 		{
@@ -215,6 +213,8 @@ namespace GameboyEmulator
 
 		public byte Read(ushort address, bool noRomBanking = false)
 		{
+			if (address == 0xff04) return 0xad;
+
 			if (IsInRange(address, CARTRIDGE_ROM_BASE_ADDRESS, CARTRIDGE_ROM_LAST_ADDRESS))
 				return noRomBanking ? cartridgeRom[address] : cartridgeRom[mbc.ConvertAddressInRomBank(address)];
 

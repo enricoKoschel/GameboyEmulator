@@ -167,6 +167,8 @@ namespace GameboyEmulator
 
 			switch (currentBankControllerType)
 			{
+				case BankControllerType.RomOnly:
+					return;
 				case BankControllerType.Mbc1:
 				{
 					HandleBankingMbc1(address, data, false);
@@ -284,9 +286,9 @@ namespace GameboyEmulator
 								int a = 1;
 							}
 
-							Console.WriteLine(
-								$"current rom bank: {CurrentRomBank}, actual rom bank: {currentActualRomBank}, address: {address}"
-							);
+							//Console.WriteLine(
+							//	$"current rom bank: {CurrentRomBank}, actual rom bank: {currentActualRomBank}, address: {address}"
+							//);
 
 							return (uint)(address + (currentActualRomBank & 0b01100000) * 0x4000);
 						}

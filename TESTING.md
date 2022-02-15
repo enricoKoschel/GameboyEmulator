@@ -2,7 +2,7 @@
 
 - [Tests](#tests)
     - [Blargg tests](#blargg-tests)
-    - [Scribble tests](#scribble-tests)
+    - [Scribbl tests](#scribbl-tests)
     - [Mooneye tests](#mooneye-tests)
         - [Acceptance](#acceptance)
             - [Bits (unusable bits in memory and registers)](#bits-unusable-bits-in-memory-and-registers)
@@ -16,7 +16,8 @@
             - [MBC1](#mbc1)
             - [MBC2](#mbc2)
             - [MBC5](#mbc5)
-        - [manual](#manual)
+        - [madness](#madness)
+        - [manual-only](#manual-only)
         - [misc (CGB)](#misc-cgb)
             - [Bits](#bits)
             - [PPU](#ppu-1)
@@ -25,27 +26,27 @@
 
 ## [Blargg tests][blargg_tests]
 
-| Test         | State |
-|--------------|-------|
-| cpu_instrs   | ❌     |
-| instr_timing | ❌     |
-| halt_bug     | ❌     |
-| mem_timing-2 | ❌     |
-| dmg_sound    | ❌     |
-| cgb_sound    | ❌     |
-| oam_bug      | ❌     |
+| Test         | State                                               |
+|--------------|-----------------------------------------------------|
+| cpu_instrs   | ❌ (Every test except ***02-interrupts.gb*** passes) |
+| instr_timing | ❌ (Fails with failure code ***Failure #255***)      |
+| halt_bug     | ❌ (Fails with failure code ***IE IF IF DE***        |
+| mem_timing-2 | ❌ (Requires correct timer and instruction timing)   |
+| dmg_sound    | ❌ (Sound is not implemented yet)                    |
+| cgb_sound    | ❌ (Sound is not implemented yet)                    |
+| oam_bug      | ❌ (OAM bug is not implemented yet)                  |
 
-## [Scribble tests][scribbltests]
+## [Scribbl tests][scribbltests]
 
-| Test      | State |
-|-----------|-------|
-| fairylake | ❌     |
-| lycscx    | ❌     |
-| lycscy    | ❌     |
-| palettely | ❌     |
-| scxly     | ❌     |
-| statcount | ❌     |
-| winpos    | ❌     |
+| Test      | State                                              |
+|-----------|----------------------------------------------------|
+| fairylake | ✅                                                  |
+| lycscx    | ✅                                                  |
+| lycscy    | ✅                                                  |
+| palettely | ✅                                                  |
+| scxly     | ✅                                                  |
+| statcount | ❌                                                  |
+| winpos    | ❌ (Window does not display correctly when WY is 0) |
 
 ## [Mooneye tests][mooneye_tests]
 
@@ -56,18 +57,18 @@
 | add_sp_e_timing         | ❌     |
 | boot_div-dmgABCmgb      | ❌     |
 | boot_hwio-dmgABCmgb     | ❌     |
-| boot_regs-dmgABC        | ❌     |
+| boot_regs-dmgABC        | ✅     |
 | call_timing             | ❌     |
 | call_timing2            | ❌     |
 | call_cc_timing          | ❌     |
 | call_cc_timing2         | ❌     |
-| di_timing GS            | ❌     |
+| di_timing-GS            | ❌     |
 | div_timing              | ❌     |
 | ei_sequence             | ❌     |
-| ei_timing               | ❌     |
-| halt_ime0_ei            | ❌     |
+| ei_timing               | ✅     |
+| halt_ime0_ei            | ✅     |
 | halt_ime0_nointr_timing | ❌     |
-| halt_ime1_timing        | ❌     |
+| halt_ime1_timing        | ✅     |
 | halt_ime1_timing2-GS    | ❌     |
 | if_ie_registers         | ❌     |
 | intr_timing             | ❌     |
@@ -79,26 +80,26 @@
 | oam_dma_timing          | ❌     |
 | pop_timing              | ❌     |
 | push_timing             | ❌     |
-| rapid_di_ei             | ❌     |
+| rapid_di_ei             | ✅     |
 | ret_timing              | ❌     |
 | ret_cc_timing           | ❌     |
 | reti_timing             | ❌     |
-| reti_intr_timing        | ❌     |
+| reti_intr_timing        | ✅     |
 | rst_timing              | ❌     |
 
 #### Bits (unusable bits in memory and registers)
 
 | Test           | State |
 |----------------|-------|
-| mem_oam        | ❌     |
-| reg_f          | ❌     |
+| mem_oam        | ✅     |
+| reg_f          | ✅     |
 | unused_hwio-GS | ❌     |
 
 #### Instructions
 
 | Test | State |
 |------|-------|
-| daa  | ❌     |
+| daa  | ✅     |
 
 #### Interrupt handling
 
@@ -108,11 +109,11 @@
 
 #### OAM DMA
 
-| Test       | State |
-|------------|-------|
-| basic      | ❌     |
-| reg_read   | ❌     |
-| sources-GS | ❌     |
+| Test       | State             |
+|------------|-------------------|
+| basic      | ✅                 |
+| reg_read   | ✅                 |
+| sources-GS | ❌ (Requires MBC5) |
 
 #### PPU
 
@@ -133,74 +134,80 @@
 
 #### Serial
 
-| Test                      | State |
-|---------------------------|-------|
-| boot_sclk_align-dmgABCmgb | ❌     |
+| Test                      | State                                            |
+|---------------------------|--------------------------------------------------|
+| boot_sclk_align-dmgABCmgb | ❌ (Fails with failure code ***No serial intr***) |
 
 #### Timer
 
-| Test                 | State |
-|----------------------|-------|
-| div_write            | ❌     |
-| rapid_toggle         | ❌     |
-| tim00_div_trigger    | ❌     |
-| tim00                | ❌     |
-| tim01_div_trigger    | ❌     |
-| tim01                | ❌     |
-| tim10_div_trigger    | ❌     |
-| tim10                | ❌     |
-| tim11_div_trigger    | ❌     |
-| tim11                | ❌     |
-| tima_reload          | ❌     |
-| tima_write_reloading | ❌     |
-| tma_write_reloading  | ❌     |
+| Test                 | State                                        |
+|----------------------|----------------------------------------------|
+| div_write            | ❌ (Fails with failure code ***FAIL: INTR***) |
+| rapid_toggle         | ❌                                            |
+| tim00_div_trigger    | ✅                                            |
+| tim00                | ❌                                            |
+| tim01_div_trigger    | ❌                                            |
+| tim01                | ❌                                            |
+| tim10_div_trigger    | ❌                                            |
+| tim10                | ❌                                            |
+| tim11_div_trigger    | ✅                                            |
+| tim11                | ❌                                            |
+| tima_reload          | ❌                                            |
+| tima_write_reloading | ❌                                            |
+| tma_write_reloading  | ❌                                            |
 
 ### emulator-only
 
 #### MBC1
 
-| Test              | State |
-|-------------------|-------|
-| bits_bank1        | ✅     |
-| bits_bank2        | ✅     |
-| bits_mode         | ✅     |
-| bits_ramg         | ✅     |
-| rom_512kb         | ✅     |
-| rom_1Mb           | ✅     |
-| rom_2Mb           | ✅     |
-| rom_4Mb           | ✅     |
-| rom_8Mb           | ❌     |
-| rom_16Mb          | ❌     |
-| ram_64kb          | ❌     |
-| ram_256kb         | ❌     |
-| multicart_rom_8Mb | ❌     |
+| Test              | State                                           |
+|-------------------|-------------------------------------------------|
+| bits_bank1        | ✅                                               |
+| bits_bank2        | ✅                                               |
+| bits_mode         | ✅                                               |
+| bits_ramg         | ✅                                               |
+| rom_512kb         | ✅                                               |
+| rom_1Mb           | ✅                                               |
+| rom_2Mb           | ✅                                               |
+| rom_4Mb           | ✅                                               |
+| rom_8Mb           | ❌                                               |
+| rom_16Mb          | ❌                                               |
+| ram_64kb          | ✅                                               |
+| ram_256kb         | ✅                                               |
+| multicart_rom_8Mb | ❌ (Multicart functionality not implemented yet) |
 
 #### MBC2
 
-| Test        | State |
-|-------------|-------|
-| bits_ramg   | ❌     |
-| bits_romb   | ❌     |
-| bits_unused | ❌     |
-| rom_512kb   | ❌     |
-| rom_1Mb     | ❌     |
-| rom_2Mb     | ❌     |
-| ram         | ❌     |
+| Test        | State                        |
+|-------------|------------------------------|
+| bits_ramg   | ❌ (MBC2 not implemented yet) |
+| bits_romb   | ❌ (MBC2 not implemented yet) |
+| bits_unused | ❌ (MBC2 not implemented yet) |
+| rom_512kb   | ❌ (MBC2 not implemented yet) |
+| rom_1Mb     | ❌ (MBC2 not implemented yet) |
+| rom_2Mb     | ❌ (MBC2 not implemented yet) |
+| ram         | ❌ (MBC2 not implemented yet) |
 
 #### MBC5
 
-| Test      | State |
-|-----------|-------|
-| rom_512kb | ❌     |
-| rom_1Mb   | ❌     |
-| rom_2Mb   | ❌     |
-| rom_4Mb   | ❌     |
-| rom_8Mb   | ❌     |
-| rom_16Mb  | ❌     |
-| rom_32Mb  | ❌     |
-| rom_64Mb  | ❌     |
+| Test      | State                        |
+|-----------|------------------------------|
+| rom_512kb | ❌ (MBC5 not implemented yet) |
+| rom_1Mb   | ❌ (MBC5 not implemented yet) |
+| rom_2Mb   | ❌ (MBC5 not implemented yet) |
+| rom_4Mb   | ❌ (MBC5 not implemented yet) |
+| rom_8Mb   | ❌ (MBC5 not implemented yet) |
+| rom_16Mb  | ❌ (MBC5 not implemented yet) |
+| rom_32Mb  | ❌ (MBC5 not implemented yet) |
+| rom_64Mb  | ❌ (MBC5 not implemented yet) |
 
-### manual
+### madness
+
+| Test                     | State  |
+|--------------------------|--------|
+| mgb_oam_dma_halt_sprites | ❌      |
+
+### manual-only
 
 | Test            | State |
 |-----------------|-------|
@@ -210,8 +217,11 @@
 
 | Test              | State |
 |-------------------|-------|
+| boot_div-A        | ❌     |
+| boot_div-cgb0     | ❌     |
 | boot_div-cgbABCDE | ❌     |
 | boot_hwio-C       | ❌     |
+| boot_regs-A       | ❌     |
 | boot_regs-cgb     | ❌     |
 
 #### Bits
@@ -263,8 +273,6 @@
 | m3_wx_6_change                    | ❌     |
 
 ## Extra
-
-These are valuable tests, they come in a single rom, so they were grouped into a single table
 
 | Test             | State |
 |------------------|-------|
