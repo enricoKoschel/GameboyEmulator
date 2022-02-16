@@ -105,6 +105,9 @@ namespace GameboyEmulator
 		public void LoadGame()
 		{
 			//TODO refactor this method
+			//Have separate array for boot rom and read from there when boot rom is enabled
+			//If boot rom is disabled, read from normal rom
+			//Also refactor DisableBootRom()
 			if (bootRomEnabled)
 			{
 				try
