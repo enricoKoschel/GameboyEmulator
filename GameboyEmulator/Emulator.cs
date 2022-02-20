@@ -8,12 +8,11 @@ namespace GameboyEmulator
 	public class Emulator
 	{
 		public readonly Cpu                  cpu;
-		public readonly Graphics             graphics;
 		public readonly Interrupts           interrupts;
 		public readonly Joypad               joypad;
-		public readonly Lcd                  lcd;
 		public readonly Memory               memory;
 		public readonly MemoryBankController memoryBankController;
+		public readonly Ppu                  ppu;
 		public readonly Screen               screen;
 		public readonly Timer                timer;
 		public readonly RenderWindow         window;
@@ -23,12 +22,11 @@ namespace GameboyEmulator
 		public Emulator()
 		{
 			cpu                  = new Cpu(this);
-			graphics             = new Graphics(this);
 			interrupts           = new Interrupts(this);
 			joypad               = new Joypad(this);
-			lcd                  = new Lcd(this);
 			memory               = new Memory(this);
 			memoryBankController = new MemoryBankController(this);
+			ppu                  = new Ppu(this);
 			screen               = new Screen(this);
 			timer                = new Timer(this);
 
@@ -54,9 +52,7 @@ namespace GameboyEmulator
 				//Interrupts only get enabled when requested beforehand by the corresponding instruction
 				interrupts.EnableInterrupts();
 
-				lcd.Update(cycles);
-				if (lcd.shouldDrawScanline) graphics.DrawScanline();
-				if (lcd.shouldIncreaseScanline && lcd.CurrentScanline++ == 0) internalWindowCounter = 0;
+				ppu.Update(cycles);
 
 				//timer.Update(cycles);
 				//joypad.Update(false);

@@ -144,7 +144,7 @@ namespace GameboyEmulator
 					return 12;
 				//LD (BC),A
 				case 0x02:
-					memory.Write(BcRegister, aRegister);
+					emulator.memory.Write(BcRegister, aRegister);
 					return 8;
 				//INC BC
 				case 0x03:
@@ -175,7 +175,7 @@ namespace GameboyEmulator
 					return 8;
 				//LD A,(BC)
 				case 0x0A:
-					aRegister = memory.Read(BcRegister);
+					aRegister = emulator.memory.Read(BcRegister);
 					return 8;
 				//DEC BC
 				case 0x0B:
@@ -207,7 +207,7 @@ namespace GameboyEmulator
 					return 12;
 				//LD (DE),A
 				case 0x12:
-					memory.Write(DeRegister, aRegister);
+					emulator.memory.Write(DeRegister, aRegister);
 					return 8;
 				//INC DE
 				case 0x13:
@@ -238,7 +238,7 @@ namespace GameboyEmulator
 					return 8;
 				//LD A,(DE)
 				case 0x1A:
-					aRegister = memory.Read(DeRegister);
+					aRegister = emulator.memory.Read(DeRegister);
 					return 8;
 				//DEC DE
 				case 0x1B:
@@ -335,15 +335,15 @@ namespace GameboyEmulator
 					return 8;
 				//INC (HL)
 				case 0x34:
-					memory.Write(HlRegister, Increment(memory.Read(HlRegister)));
+					emulator.memory.Write(HlRegister, Increment(emulator.memory.Read(HlRegister)));
 					return 12;
 				//DEC (HL)
 				case 0x35:
-					memory.Write(HlRegister, Decrement(memory.Read(HlRegister)));
+					emulator.memory.Write(HlRegister, Decrement(emulator.memory.Read(HlRegister)));
 					return 12;
 				//LD (HL),n
 				case 0x36:
-					memory.Write(HlRegister, Load8BitImmediate());
+					emulator.memory.Write(HlRegister, Load8BitImmediate());
 					return 12;
 				//SCF
 				case 0x37:
@@ -404,7 +404,7 @@ namespace GameboyEmulator
 					return 4;
 				//LD B,(HL)
 				case 0x46:
-					bRegister = memory.Read(HlRegister);
+					bRegister = emulator.memory.Read(HlRegister);
 					return 8;
 				//LD B,A
 				case 0x47:
@@ -436,7 +436,7 @@ namespace GameboyEmulator
 					return 4;
 				//LD C,(HL)
 				case 0x4E:
-					cRegister = memory.Read(HlRegister);
+					cRegister = emulator.memory.Read(HlRegister);
 					return 8;
 				//LD C,A
 				case 0x4F:
@@ -468,7 +468,7 @@ namespace GameboyEmulator
 					return 4;
 				//LD D,(HL)
 				case 0x56:
-					dRegister = memory.Read(HlRegister);
+					dRegister = emulator.memory.Read(HlRegister);
 					return 8;
 				//LD D,A
 				case 0x57:
@@ -500,7 +500,7 @@ namespace GameboyEmulator
 					return 4;
 				//LD E,(HL)
 				case 0x5E:
-					eRegister = memory.Read(HlRegister);
+					eRegister = emulator.memory.Read(HlRegister);
 					return 8;
 				//LD E,A
 				case 0x5F:
@@ -532,7 +532,7 @@ namespace GameboyEmulator
 					return 4;
 				//LD H,(HL)
 				case 0x66:
-					hRegister = memory.Read(HlRegister);
+					hRegister = emulator.memory.Read(HlRegister);
 					return 8;
 				//LD H,A
 				case 0x67:
@@ -564,7 +564,7 @@ namespace GameboyEmulator
 					return 4;
 				//LD L,(HL)
 				case 0x6E:
-					lRegister = memory.Read(HlRegister);
+					lRegister = emulator.memory.Read(HlRegister);
 					return 8;
 				//LD L,A
 				case 0x6F:
@@ -572,34 +572,34 @@ namespace GameboyEmulator
 					return 4;
 				//LD (HL),B
 				case 0x70:
-					memory.Write(HlRegister, bRegister);
+					emulator.memory.Write(HlRegister, bRegister);
 					return 8;
 				//LD (HL),C
 				case 0x71:
-					memory.Write(HlRegister, cRegister);
+					emulator.memory.Write(HlRegister, cRegister);
 					return 8;
 				//LD (HL),D
 				case 0x72:
-					memory.Write(HlRegister, dRegister);
+					emulator.memory.Write(HlRegister, dRegister);
 					return 8;
 				//LD (HL),E
 				case 0x73:
-					memory.Write(HlRegister, eRegister);
+					emulator.memory.Write(HlRegister, eRegister);
 					return 8;
 				//LD (HL),H
 				case 0x74:
-					memory.Write(HlRegister, hRegister);
+					emulator.memory.Write(HlRegister, hRegister);
 					return 8;
 				//LD (HL),L
 				case 0x75:
-					memory.Write(HlRegister, lRegister);
+					emulator.memory.Write(HlRegister, lRegister);
 					return 8;
 				//HALT
 				case 0x76:
 					return HaltCpu();
 				//LD (HL),A
 				case 0x77:
-					memory.Write(HlRegister, aRegister);
+					emulator.memory.Write(HlRegister, aRegister);
 					return 8;
 				//LD A,B
 				case 0x78:
@@ -627,7 +627,7 @@ namespace GameboyEmulator
 					return 4;
 				//LD A,(HL)
 				case 0x7E:
-					aRegister = memory.Read(HlRegister);
+					aRegister = emulator.memory.Read(HlRegister);
 					return 8;
 				//LD A,A
 				case 0x7F:
@@ -659,7 +659,7 @@ namespace GameboyEmulator
 					return 4;
 				//ADD A,(HL)
 				case 0x86:
-					AddByteToAReg(memory.Read(HlRegister));
+					AddByteToAReg(emulator.memory.Read(HlRegister));
 					return 8;
 				//ADD A,A
 				case 0x87:
@@ -691,7 +691,7 @@ namespace GameboyEmulator
 					return 4;
 				//ADC A,(HL)
 				case 0x8E:
-					AddByteToAReg(memory.Read(HlRegister), CarryFlag);
+					AddByteToAReg(emulator.memory.Read(HlRegister), CarryFlag);
 					return 8;
 				//ADC A,A
 				case 0x8F:
@@ -723,7 +723,7 @@ namespace GameboyEmulator
 					return 4;
 				//SUB (HL)
 				case 0x96:
-					SubtractByteFromAReg(memory.Read(HlRegister));
+					SubtractByteFromAReg(emulator.memory.Read(HlRegister));
 					return 8;
 				//SUB A
 				case 0x97:
@@ -755,7 +755,7 @@ namespace GameboyEmulator
 					return 4;
 				//SBC A,(HL)
 				case 0x9E:
-					SubtractByteFromAReg(memory.Read(HlRegister), false, CarryFlag);
+					SubtractByteFromAReg(emulator.memory.Read(HlRegister), false, CarryFlag);
 					return 8;
 				//SBC A,A
 				case 0x9F:
@@ -787,7 +787,7 @@ namespace GameboyEmulator
 					return 4;
 				//AND (HL)
 				case 0xA6:
-					AndIntoA(memory.Read(HlRegister));
+					AndIntoA(emulator.memory.Read(HlRegister));
 					return 8;
 				//AND A
 				case 0xA7:
@@ -819,7 +819,7 @@ namespace GameboyEmulator
 					return 4;
 				//XOR (HL)
 				case 0xAE:
-					XorIntoA(memory.Read(HlRegister));
+					XorIntoA(emulator.memory.Read(HlRegister));
 					return 8;
 				//XOR A
 				case 0xAF:
@@ -851,7 +851,7 @@ namespace GameboyEmulator
 					return 4;
 				//OR (HL)
 				case 0xB6:
-					OrIntoA(memory.Read(HlRegister));
+					OrIntoA(emulator.memory.Read(HlRegister));
 					return 8;
 				//OR A
 				case 0xB7:
@@ -883,7 +883,7 @@ namespace GameboyEmulator
 					return 4;
 				//CP (HL)
 				case 0xBE:
-					SubtractByteFromAReg(memory.Read(HlRegister), true);
+					SubtractByteFromAReg(emulator.memory.Read(HlRegister), true);
 					return 8;
 				//CP A
 				case 0xBF:
@@ -970,7 +970,7 @@ namespace GameboyEmulator
 					return ReturnSubroutine(JumpCondition.C);
 				//RETI
 				case 0xD9:
-					enableInterruptsStatus = InterruptStatus.ThisCycle;
+					emulator.interrupts.enableInterruptsStatus = Interrupts.EnableInterruptsStatus.ThisCycle;
 					return ReturnSubroutine(JumpCondition.Always);
 				//JP C,nn
 				case 0xDA:
@@ -1021,7 +1021,7 @@ namespace GameboyEmulator
 					return 4;
 				//LD (nn),A
 				case 0xEA:
-					memory.Write(Load16BitImmediate(), aRegister);
+					emulator.memory.Write(Load16BitImmediate(), aRegister);
 					return 16;
 				//Invalid Opcode
 				//0xEB
@@ -1038,7 +1038,7 @@ namespace GameboyEmulator
 					return ResetOpcode(0x28);
 				//LD A,(0xFF00+n)
 				case 0xF0:
-					aRegister = memory.Read((ushort)(0xFF00 + Load8BitImmediate()));
+					aRegister = emulator.memory.Read((ushort)(0xFF00 + Load8BitImmediate()));
 					return 12;
 				//POP AF
 				case 0xF1:
@@ -1046,12 +1046,14 @@ namespace GameboyEmulator
 					return 12;
 				//LD A,(0xFF00+C)
 				case 0xF2:
-					aRegister = memory.Read((ushort)(0xFF00 + cRegister));
+					aRegister = emulator.memory.Read((ushort)(0xFF00 + cRegister));
 					return 8;
 				//DI
 				case 0xF3:
-					interrupts.masterInterruptEnable = false;
-					enableInterruptsStatus           = InterruptStatus.None;
+					emulator.interrupts.InterruptMasterEnable = false;
+
+					//Make sure interrupts are not enabled next cycle
+					emulator.interrupts.enableInterruptsStatus = Interrupts.EnableInterruptsStatus.None;
 					return 4;
 				//Invalid Opcode
 				//0xF4
@@ -1075,11 +1077,12 @@ namespace GameboyEmulator
 					return 8;
 				//LD A,(nn)
 				case 0xFA:
-					aRegister = memory.Read(Load16BitImmediate());
+					aRegister = emulator.memory.Read(Load16BitImmediate());
 					return 16;
 				//EI
 				case 0xFB:
-					enableInterruptsStatus = InterruptStatus.NextCycle;
+					//Interrupts are actually enabled one cycle after this instruction is executed
+					emulator.interrupts.enableInterruptsStatus = Interrupts.EnableInterruptsStatus.NextCycle;
 					return 4;
 				//Invalid Opcode
 				//0xFC
@@ -1146,7 +1149,7 @@ namespace GameboyEmulator
 					return 8;
 				//RLC (HL)
 				case 0x06:
-					memory.Write(HlRegister, RotateLeftIntoCarry(memory.Read(HlRegister)));
+					emulator.memory.Write(HlRegister, RotateLeftIntoCarry(emulator.memory.Read(HlRegister)));
 					return 16;
 				//RLC A
 				case 0x07:
@@ -1178,7 +1181,7 @@ namespace GameboyEmulator
 					return 8;
 				//RRC (HL)
 				case 0x0E:
-					memory.Write(HlRegister, RotateRightIntoCarry(memory.Read(HlRegister)));
+					emulator.memory.Write(HlRegister, RotateRightIntoCarry(emulator.memory.Read(HlRegister)));
 					return 16;
 				//RRC A
 				case 0x0F:
@@ -1210,7 +1213,7 @@ namespace GameboyEmulator
 					return 8;
 				//RL (HL)
 				case 0x16:
-					memory.Write(HlRegister, RotateLeftThroughCarry(memory.Read(HlRegister)));
+					emulator.memory.Write(HlRegister, RotateLeftThroughCarry(emulator.memory.Read(HlRegister)));
 					return 16;
 				//RL A
 				case 0x17:
@@ -1242,7 +1245,7 @@ namespace GameboyEmulator
 					return 8;
 				//RR (HL)
 				case 0x1E:
-					memory.Write(HlRegister, RotateRightThroughCarry(memory.Read(HlRegister)));
+					emulator.memory.Write(HlRegister, RotateRightThroughCarry(emulator.memory.Read(HlRegister)));
 					return 16;
 				//RR A
 				case 0x1F:
@@ -1274,7 +1277,7 @@ namespace GameboyEmulator
 					return 8;
 				//SLA (HL)
 				case 0x26:
-					memory.Write(HlRegister, ShiftLeftIntoCarryLsb0(memory.Read(HlRegister)));
+					emulator.memory.Write(HlRegister, ShiftLeftIntoCarryLsb0(emulator.memory.Read(HlRegister)));
 					return 16;
 				//SLA A
 				case 0x27:
@@ -1306,7 +1309,7 @@ namespace GameboyEmulator
 					return 8;
 				//SRA (HL)
 				case 0x2E:
-					memory.Write(HlRegister, ShiftRightIntoCarryKeepMsb(memory.Read(HlRegister)));
+					emulator.memory.Write(HlRegister, ShiftRightIntoCarryKeepMsb(emulator.memory.Read(HlRegister)));
 					return 16;
 				//SRA A
 				case 0x2F:
@@ -1338,7 +1341,7 @@ namespace GameboyEmulator
 					return 8;
 				//SWAP (HL)
 				case 0x36:
-					memory.Write(HlRegister, SwapNibbles(memory.Read(HlRegister)));
+					emulator.memory.Write(HlRegister, SwapNibbles(emulator.memory.Read(HlRegister)));
 					return 16;
 				//SWAP A
 				case 0x37:
@@ -1370,7 +1373,7 @@ namespace GameboyEmulator
 					return 8;
 				//SRL (HL)
 				case 0x3E:
-					memory.Write(HlRegister, ShiftRightIntoCarryMsb0(memory.Read(HlRegister)));
+					emulator.memory.Write(HlRegister, ShiftRightIntoCarryMsb0(emulator.memory.Read(HlRegister)));
 					return 16;
 				//SRL A
 				case 0x3F:
@@ -1402,7 +1405,7 @@ namespace GameboyEmulator
 					return 8;
 				//BIT 0,(HL)
 				case 0x46:
-					BitOpcode(memory.Read(HlRegister), 0);
+					BitOpcode(emulator.memory.Read(HlRegister), 0);
 					return 16;
 				//BIT 0,A
 				case 0x47:
@@ -1434,7 +1437,7 @@ namespace GameboyEmulator
 					return 8;
 				//BIT 1,(HL)
 				case 0x4E:
-					BitOpcode(memory.Read(HlRegister), 1);
+					BitOpcode(emulator.memory.Read(HlRegister), 1);
 					return 16;
 				//BIT 1,A
 				case 0x4F:
@@ -1466,7 +1469,7 @@ namespace GameboyEmulator
 					return 8;
 				//BIT 2,(HL)
 				case 0x56:
-					BitOpcode(memory.Read(HlRegister), 2);
+					BitOpcode(emulator.memory.Read(HlRegister), 2);
 					return 16;
 				//BIT 2,A
 				case 0x57:
@@ -1498,7 +1501,7 @@ namespace GameboyEmulator
 					return 8;
 				//BIT 3,(HL)
 				case 0x5E:
-					BitOpcode(memory.Read(HlRegister), 3);
+					BitOpcode(emulator.memory.Read(HlRegister), 3);
 					return 16;
 				//BIT 3,A
 				case 0x5F:
@@ -1530,7 +1533,7 @@ namespace GameboyEmulator
 					return 8;
 				//BIT 4,(HL)
 				case 0x66:
-					BitOpcode(memory.Read(HlRegister), 4);
+					BitOpcode(emulator.memory.Read(HlRegister), 4);
 					return 16;
 				//BIT 4,A
 				case 0x67:
@@ -1562,7 +1565,7 @@ namespace GameboyEmulator
 					return 8;
 				//BIT 5,(HL)
 				case 0x6E:
-					BitOpcode(memory.Read(HlRegister), 5);
+					BitOpcode(emulator.memory.Read(HlRegister), 5);
 					return 16;
 				//BIT 5,A
 				case 0x6F:
@@ -1594,7 +1597,7 @@ namespace GameboyEmulator
 					return 8;
 				//BIT 6,(HL)
 				case 0x76:
-					BitOpcode(memory.Read(HlRegister), 6);
+					BitOpcode(emulator.memory.Read(HlRegister), 6);
 					return 16;
 				//BIT 6,A
 				case 0x77:
@@ -1626,7 +1629,7 @@ namespace GameboyEmulator
 					return 8;
 				//BIT 7,(HL)
 				case 0x7E:
-					BitOpcode(memory.Read(HlRegister), 7);
+					BitOpcode(emulator.memory.Read(HlRegister), 7);
 					return 16;
 				//BIT 7,A
 				case 0x7F:
@@ -1658,7 +1661,7 @@ namespace GameboyEmulator
 					return 8;
 				//RES 0,(HL)
 				case 0x86:
-					memory.Write(HlRegister, SetBit(memory.Read(HlRegister), 0, false));
+					emulator.memory.Write(HlRegister, SetBit(emulator.memory.Read(HlRegister), 0, false));
 					return 16;
 				//RES 0,A
 				case 0x87:
@@ -1690,7 +1693,7 @@ namespace GameboyEmulator
 					return 8;
 				//RES 1,(HL)
 				case 0x8E:
-					memory.Write(HlRegister, SetBit(memory.Read(HlRegister), 1, false));
+					emulator.memory.Write(HlRegister, SetBit(emulator.memory.Read(HlRegister), 1, false));
 					return 16;
 				//RES 1,A
 				case 0x8F:
@@ -1722,7 +1725,7 @@ namespace GameboyEmulator
 					return 8;
 				//RES 2,(HL)
 				case 0x96:
-					memory.Write(HlRegister, SetBit(memory.Read(HlRegister), 2, false));
+					emulator.memory.Write(HlRegister, SetBit(emulator.memory.Read(HlRegister), 2, false));
 					return 16;
 				//RES 2,A
 				case 0x97:
@@ -1754,7 +1757,7 @@ namespace GameboyEmulator
 					return 8;
 				//RES 3,(HL)
 				case 0x9E:
-					memory.Write(HlRegister, SetBit(memory.Read(HlRegister), 3, false));
+					emulator.memory.Write(HlRegister, SetBit(emulator.memory.Read(HlRegister), 3, false));
 					return 16;
 				//RES 3,A
 				case 0x9F:
@@ -1786,7 +1789,7 @@ namespace GameboyEmulator
 					return 8;
 				//RES 4,(HL)
 				case 0xA6:
-					memory.Write(HlRegister, SetBit(memory.Read(HlRegister), 4, false));
+					emulator.memory.Write(HlRegister, SetBit(emulator.memory.Read(HlRegister), 4, false));
 					return 16;
 				//RES 4,A
 				case 0xA7:
@@ -1818,7 +1821,7 @@ namespace GameboyEmulator
 					return 8;
 				//RES 5,(HL)
 				case 0xAE:
-					memory.Write(HlRegister, SetBit(memory.Read(HlRegister), 5, false));
+					emulator.memory.Write(HlRegister, SetBit(emulator.memory.Read(HlRegister), 5, false));
 					return 16;
 				//RES 5,A
 				case 0xAF:
@@ -1850,7 +1853,7 @@ namespace GameboyEmulator
 					return 8;
 				//RES 6,(HL)
 				case 0xB6:
-					memory.Write(HlRegister, SetBit(memory.Read(HlRegister), 6, false));
+					emulator.memory.Write(HlRegister, SetBit(emulator.memory.Read(HlRegister), 6, false));
 					return 16;
 				//RES 6,A
 				case 0xB7:
@@ -1882,7 +1885,7 @@ namespace GameboyEmulator
 					return 8;
 				//RES 7,(HL)
 				case 0xBE:
-					memory.Write(HlRegister, SetBit(memory.Read(HlRegister), 7, false));
+					emulator.memory.Write(HlRegister, SetBit(emulator.memory.Read(HlRegister), 7, false));
 					return 16;
 				//RES 7,A
 				case 0xBF:
@@ -1914,7 +1917,7 @@ namespace GameboyEmulator
 					return 8;
 				//SET 0,(HL)
 				case 0xC6:
-					memory.Write(HlRegister, SetBit(memory.Read(HlRegister), 0, true));
+					emulator.memory.Write(HlRegister, SetBit(emulator.memory.Read(HlRegister), 0, true));
 					return 16;
 				//SET 0,A
 				case 0xC7:
@@ -1946,7 +1949,7 @@ namespace GameboyEmulator
 					return 8;
 				//SET 1,(HL)
 				case 0xCE:
-					memory.Write(HlRegister, SetBit(memory.Read(HlRegister), 1, true));
+					emulator.memory.Write(HlRegister, SetBit(emulator.memory.Read(HlRegister), 1, true));
 					return 16;
 				//SET 1,A
 				case 0xCF:
@@ -1978,7 +1981,7 @@ namespace GameboyEmulator
 					return 8;
 				//SET 2,(HL)
 				case 0xD6:
-					memory.Write(HlRegister, SetBit(memory.Read(HlRegister), 2, true));
+					emulator.memory.Write(HlRegister, SetBit(emulator.memory.Read(HlRegister), 2, true));
 					return 16;
 				//SET 2,A
 				case 0xD7:
@@ -2010,7 +2013,7 @@ namespace GameboyEmulator
 					return 8;
 				//SET 3,(HL)
 				case 0xDE:
-					memory.Write(HlRegister, SetBit(memory.Read(HlRegister), 3, true));
+					emulator.memory.Write(HlRegister, SetBit(emulator.memory.Read(HlRegister), 3, true));
 					return 16;
 				//SET 3,A
 				case 0xDF:
@@ -2042,7 +2045,7 @@ namespace GameboyEmulator
 					return 8;
 				//SET 4,(HL)
 				case 0xE6:
-					memory.Write(HlRegister, SetBit(memory.Read(HlRegister), 4, true));
+					emulator.memory.Write(HlRegister, SetBit(emulator.memory.Read(HlRegister), 4, true));
 					return 16;
 				//SET 4,A
 				case 0xE7:
@@ -2074,7 +2077,7 @@ namespace GameboyEmulator
 					return 8;
 				//SET 5,(HL)
 				case 0xEE:
-					memory.Write(HlRegister, SetBit(memory.Read(HlRegister), 5, true));
+					emulator.memory.Write(HlRegister, SetBit(emulator.memory.Read(HlRegister), 5, true));
 					return 16;
 				//SET 5,A
 				case 0xEF:
@@ -2106,7 +2109,7 @@ namespace GameboyEmulator
 					return 8;
 				//SET 6,(HL)
 				case 0xF6:
-					memory.Write(HlRegister, SetBit(memory.Read(HlRegister), 6, true));
+					emulator.memory.Write(HlRegister, SetBit(emulator.memory.Read(HlRegister), 6, true));
 					return 16;
 				//SET 6,A
 				case 0xF7:
@@ -2138,7 +2141,7 @@ namespace GameboyEmulator
 					return 8;
 				//SET 7,(HL)
 				case 0xFE:
-					memory.Write(HlRegister, SetBit(memory.Read(HlRegister), 7, true));
+					emulator.memory.Write(HlRegister, SetBit(emulator.memory.Read(HlRegister), 7, true));
 					return 16;
 				//SET 7,A
 				case 0xFF:
@@ -2383,24 +2386,24 @@ namespace GameboyEmulator
 
 		private byte Load8BitImmediate()
 		{
-			return memory.Read(programCounter++);
+			return emulator.memory.Read(programCounter++);
 		}
 
 		private int WriteIoPortsCRegisterOffset(byte data)
 		{
-			memory.Write((ushort)(0xFF00 + cRegister), data);
+			emulator.memory.Write((ushort)(0xFF00 + cRegister), data);
 			return 8;
 		}
 
 		private int WriteIoPortsImmediateOffset(byte data)
 		{
-			memory.Write((ushort)(0xFF00 + Load8BitImmediate()), data);
+			emulator.memory.Write((ushort)(0xFF00 + Load8BitImmediate()), data);
 			return 12;
 		}
 
 		private int WriteHlDecrement(byte data, bool increment)
 		{
-			memory.Write(HlRegister, data);
+			emulator.memory.Write(HlRegister, data);
 
 			HlRegister += (ushort)(increment ? 1 : -1);
 
@@ -2409,7 +2412,7 @@ namespace GameboyEmulator
 
 		private byte ReadHlDecrement(bool increment)
 		{
-			byte data = memory.Read(HlRegister);
+			byte data = emulator.memory.Read(HlRegister);
 
 			HlRegister += (ushort)(increment ? 1 : -1);
 
@@ -2420,8 +2423,8 @@ namespace GameboyEmulator
 		{
 			ushort address = Load16BitImmediate();
 
-			memory.Write(address++, GetLoByte(stackPointer));
-			memory.Write(address, GetHiByte(stackPointer));
+			emulator.memory.Write(address++, GetLoByte(stackPointer));
+			emulator.memory.Write(address, GetHiByte(stackPointer));
 
 			return 20;
 		}
@@ -2634,16 +2637,16 @@ namespace GameboyEmulator
 			byte lo = GetLoByte(data);
 			byte hi = GetHiByte(data);
 
-			memory.Write(--stackPointer, hi);
-			memory.Write(--stackPointer, lo);
+			emulator.memory.Write(--stackPointer, hi);
+			emulator.memory.Write(--stackPointer, lo);
 
 			return 16;
 		}
 
 		private ushort PopStack()
 		{
-			byte lo = memory.Read(stackPointer++);
-			byte hi = memory.Read(stackPointer++);
+			byte lo = emulator.memory.Read(stackPointer++);
+			byte hi = emulator.memory.Read(stackPointer++);
 
 			return MakeWord(hi, lo);
 		}
@@ -2659,7 +2662,7 @@ namespace GameboyEmulator
 		//Halt/Stop functions
 		private int HaltCpu()
 		{
-			if (interrupts.masterInterruptEnable || !interrupts.HasPendingInterrupts)
+			if (emulator.interrupts.InterruptMasterEnable || !emulator.interrupts.HasPendingInterrupts)
 				haltMode = HaltMode.Halted;
 			else
 				haltMode = HaltMode.HaltBug;
@@ -2671,12 +2674,6 @@ namespace GameboyEmulator
 		{
 			//Exit halt mode except if halt bug occured, halt mode is exited automatically after halt bug occured
 			if (haltMode != HaltMode.HaltBug) haltMode = HaltMode.NotHalted;
-		}
-
-		//Module Functions
-		public Graphics GetGraphics()
-		{
-			return graphics;
 		}
 	}
 }

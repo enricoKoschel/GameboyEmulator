@@ -14,7 +14,7 @@ namespace GameboyEmulator
 			Joypad  = 16
 		}
 
-		private enum EnableInterruptsStatus
+		public enum EnableInterruptsStatus
 		{
 			ThisCycle,
 			NextCycle,
@@ -80,9 +80,9 @@ namespace GameboyEmulator
 
 		public bool HasPendingInterrupts => Cpu.ToBool(InterruptFlagRegister & InterruptEnableRegister & 0x1F);
 
-		public bool InterruptMasterEnable { private set; get; }
+		public bool InterruptMasterEnable { set; get; }
 
-		private EnableInterruptsStatus enableInterruptsStatus = EnableInterruptsStatus.None;
+		public EnableInterruptsStatus enableInterruptsStatus = EnableInterruptsStatus.None;
 
 		public void EnableInterrupts()
 		{
