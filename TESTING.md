@@ -26,15 +26,15 @@
 
 ## [Blargg tests][blargg_tests]
 
-| Test         | State                                               |
-|--------------|-----------------------------------------------------|
-| cpu_instrs   | ❌ (Every test except ***02-interrupts.gb*** passes) |
-| instr_timing | ❌ (Fails with failure code ***Failure #255***)      |
-| halt_bug     | ❌ (Fails with failure code ***IE IF IF DE***        |
-| mem_timing-2 | ❌ (Requires correct timer and instruction timing)   |
-| dmg_sound    | ❌ (Sound is not implemented yet)                    |
-| cgb_sound    | ❌ (Sound is not implemented yet)                    |
-| oam_bug      | ❌ (OAM bug is not implemented yet)                  |
+| Test         | State                                             |
+|--------------|---------------------------------------------------|
+| cpu_instrs   | ❌ (Requires STOP opcode to be implemented)        |
+| instr_timing | ❌ (Fails with failure code ***Failure #255***)    |
+| halt_bug     | ❌ (Fails with failure code ***IE IF IF DE***      |
+| mem_timing-2 | ❌ (Requires correct timer and instruction timing) |
+| dmg_sound    | ❌ (Sound is not implemented yet)                  |
+| cgb_sound    | ❌ (Sound is not implemented yet)                  |
+| oam_bug      | ❌ (OAM bug is not implemented yet)                |
 
 ## [Scribbl tests][scribbltests]
 

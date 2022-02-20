@@ -23,8 +23,7 @@ namespace GameboyEmulator
 
 		private enum HaltMode
 		{
-			HaltedImeTrue,
-			HaltedImeFalse,
+			Halted,
 			HaltBug,
 			NotHalted
 		}
@@ -181,8 +180,7 @@ namespace GameboyEmulator
 				return 4;
 			}
 
-			if (haltMode == HaltMode.HaltedImeFalse || haltMode == HaltMode.HaltedImeTrue)
-				return 4;
+			if (haltMode == HaltMode.Halted) return 4;
 
 			byte opcode = Load8BitImmediate();
 			if (haltMode == HaltMode.HaltBug)
@@ -2701,8 +2699,6 @@ namespace GameboyEmulator
 		//Interrupt functions
 		public void ServiceInterrupt(ushort address)
 		{
-			if (haltMode != HaltMode.NotHalted && haltMode != HaltMode.HaltBug) haltMode = HaltMode.NotHalted;
-
 			PushStack(programCounter);
 			programCounter = address;
 			waitNopAmount  = 5;
@@ -2711,14 +2707,18 @@ namespace GameboyEmulator
 		//Halt/Stop functions
 		private int HaltCpu()
 		{
-			if (interrupts.masterInterruptEnable)
-				haltMode = HaltMode.HaltedImeTrue;
-			else if (!interrupts.HasPendingInterrupts)
-				haltMode = HaltMode.HaltedImeFalse;
+			if (interrupts.masterInterruptEnable || !interrupts.HasPendingInterrupts)
+				haltMode = HaltMode.Halted;
 			else
 				haltMode = HaltMode.HaltBug;
 
 			return 4;
+		}
+
+		public void ExitHaltMode()
+		{
+			//Exit halt mode except if halt bug occured, halt mode is exited automatically after halt bug occured
+			if (haltMode != HaltMode.HaltBug) haltMode = HaltMode.NotHalted;
 		}
 
 		//Module Functions

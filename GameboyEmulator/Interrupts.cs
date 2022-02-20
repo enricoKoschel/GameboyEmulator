@@ -1,14 +1,17 @@
-﻿namespace GameboyEmulator
+﻿using System;
+
+namespace GameboyEmulator
 {
 	class Interrupts
 	{
+		[Flags]
 		public enum InterruptType
 		{
-			VBlank,
-			LcdStat,
-			Timer,
-			Serial,
-			Joypad
+			VBlank  = 1,
+			LcdStat = 2,
+			Timer   = 4,
+			Serial  = 8,
+			Joypad  = 16
 		}
 
 		//Modules
@@ -92,6 +95,14 @@
 				case InterruptType.Joypad:
 					JoypadRequested = true;
 					break;
+				default:
+					throw new ArgumentOutOfRangeException(nameof(interrupt), interrupt, "Invalid interrupt requested!");
+			}
+
+			if (((byte)interrupt & InterruptEnableRegister) != 0)
+			{
+				//Halt mode is exited when an enabled interrupt is requested, master interrupt enable is ignored
+				cpu.ExitHaltMode();
 			}
 		}
 
