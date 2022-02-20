@@ -69,8 +69,9 @@ namespace GameboyEmulator
 		private       bool   bootRomEnabled     = false;
 
 		//TODO - Accept game file path as console parameter / make into property
-		//private const string GAME_ROM_FILE_PATH = "../../../roms/zelda.gb";
-		private const string GAME_ROM_FILE_PATH = "../../../roms/test/Mooneye/emulator-only/mbc1/rom_8Mb.gb";
+		//private const string GAME_ROM_FILE_PATH = "../../../roms/mario.gb";
+		//private const string GAME_ROM_FILE_PATH = "../../../roms/test/Mooneye/emulator-only/mbc1/rom_8Mb.gb";
+		private const string GAME_ROM_FILE_PATH = "../../../roms/test/Blargg/cpu_instrs/cpu_instrs.gb";
 
 		public Memory(Cpu cpu)
 		{
@@ -216,7 +217,8 @@ namespace GameboyEmulator
 
 		public byte Read(ushort address, bool noRomBanking = false)
 		{
-			if (address == 0xff04) return 0xad;
+			//0xFF4F is used to detect GameBoy Color, a regular GameBoy always returns 0xFF
+			if (address == 0xFF4D) return 0xFF;
 
 			if (IsInRange(address, CARTRIDGE_ROM_BASE_ADDRESS, CARTRIDGE_ROM_LAST_ADDRESS))
 				return noRomBanking ? cartridgeRom[address] : cartridgeRom[mbc.ConvertAddressInRomBank(address)];

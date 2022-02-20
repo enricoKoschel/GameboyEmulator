@@ -28,7 +28,7 @@
 
 | Test         | State                                             |
 |--------------|---------------------------------------------------|
-| cpu_instrs   | ❌ (Requires STOP opcode to be implemented)        |
+| cpu_instrs   | ✅                                                 |
 | instr_timing | ❌ (Fails with failure code ***Failure #255***)    |
 | halt_bug     | ❌ (Fails with failure code ***IE IF IF DE***      |
 | mem_timing-2 | ❌ (Requires correct timer and instruction timing) |

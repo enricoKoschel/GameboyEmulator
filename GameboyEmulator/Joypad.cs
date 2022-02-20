@@ -103,18 +103,18 @@ namespace GameboyEmulator
 
 			if (ButtonKeysSelected)
 			{
-				DownOrStartPressed    = startPressedThisFrame;
-				UpOrSelectPressed     = selectPressedThisFrame;
-				LeftOrButtonBPressed  = buttonBPressedThisFrame;
-				RightOrButtonAPressed = buttonAPressedThisFrame;
+				DownOrStartPressed    |= startPressedThisFrame;
+				UpOrSelectPressed     |= selectPressedThisFrame;
+				LeftOrButtonBPressed  |= buttonBPressedThisFrame;
+				RightOrButtonAPressed |= buttonAPressedThisFrame;
 			}
 
 			if (DirectionKeysSelected)
 			{
-				DownOrStartPressed    = downPressedThisFrame;
-				UpOrSelectPressed     = upPressedThisFrame;
-				LeftOrButtonBPressed  = leftPressedThisFrame;
-				RightOrButtonAPressed = rightPressedThisFrame;
+				DownOrStartPressed    |= downPressedThisFrame;
+				UpOrSelectPressed     |= upPressedThisFrame;
+				LeftOrButtonBPressed  |= leftPressedThisFrame;
+				RightOrButtonAPressed |= rightPressedThisFrame;
 			}
 		}
 	}
