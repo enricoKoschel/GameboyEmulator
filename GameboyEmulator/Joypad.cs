@@ -1,21 +1,12 @@
-﻿using System;
-using SFML.Window;
-
-namespace GameboyEmulator
+﻿namespace GameboyEmulator
 {
-	class Joypad
+	public class Joypad
 	{
-		//Modules
-		private readonly Memory     memory;
-		private readonly Interrupts interrupts;
-		private readonly Window     window;
+		private readonly Emulator emulator;
 
-		public Joypad(Memory memory, Interrupts interrupts, Graphics graphics)
+		public Joypad(Emulator emulator)
 		{
-			this.memory     = memory;
-			this.interrupts = interrupts;
-
-			window = graphics.GetScreen().GetWindow();
+			this.emulator = emulator;
 		}
 
 		//Registers

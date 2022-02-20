@@ -3,7 +3,7 @@ using System.IO;
 
 namespace GameboyEmulator
 {
-	class Memory
+	public class Memory
 	{
 		// ReSharper disable CommentTypo
 		//Memory Map
@@ -60,29 +60,28 @@ namespace GameboyEmulator
 
 		private const ushort DMA_FINISH_ADDRESS = 0xFEA0;
 
-		//Modules
-		private readonly Cpu                  cpu;
-		private readonly MemoryBankController mbc;
-
 		//File paths
 		private const string BOOT_ROM_FILE_PATH = "../../../roms/boot.gb";
 		private       bool   bootRomEnabled     = false;
 
 		//TODO - Accept game file path as console parameter / make into property
-		//private const string GAME_ROM_FILE_PATH = "../../../roms/mario.gb";
+		private const string GAME_ROM_FILE_PATH = "../../../roms/mario.gb";
 		//private const string GAME_ROM_FILE_PATH = "../../../roms/test/Mooneye/emulator-only/mbc1/rom_8Mb.gb";
-		private const string GAME_ROM_FILE_PATH = "../../../roms/test/Blargg/cpu_instrs/cpu_instrs.gb";
+		//private const string GAME_ROM_FILE_PATH = "../../../roms/test/Blargg/instr_timing/instr_timing.gb";
 
-		public Memory(Cpu cpu)
+		private readonly Emulator emulator;
+
+		public Memory(Emulator emulator)
 		{
-			this.cpu = cpu;
-			mbc      = new MemoryBankController(this);
+			this.emulator = emulator;
 
 			videoRam         = new byte[0x2000];
 			workRam          = new byte[0x2000];
 			spriteAttributes = new byte[0x100];
 			ioPorts          = new byte[0x80];
 			highRam          = new byte[0x7F];
+
+			LoadGame();
 		}
 
 		private void AllocateCartridgeRam(byte numberOfRamBanks)
@@ -318,7 +317,7 @@ namespace GameboyEmulator
 					ioPorts[address - IO_PORTS_BASE_ADDRESS] = address switch
 					{
 						//Reset when written to
-						0xFF04 => 0,
+						0xFF04 => 0, //TODO needs to reset internal counter too
 						0xFF44 => 0,
 
 						//Default

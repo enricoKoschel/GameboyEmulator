@@ -2,7 +2,7 @@
 
 namespace GameboyEmulator
 {
-	class Interrupts
+	public class Interrupts
 	{
 		[Flags]
 		public enum InterruptType
@@ -14,14 +14,20 @@ namespace GameboyEmulator
 			Joypad  = 16
 		}
 
-		//Modules
-		private readonly Memory memory;
-		private readonly Cpu    cpu;
-
-		public Interrupts(Memory memory, Cpu cpu)
+		private enum EnableInterruptsStatus
 		{
-			this.memory = memory;
-			this.cpu    = cpu;
+			ThisCycle,
+			NextCycle,
+			None
+		}
+
+		private readonly Emulator emulator;
+
+		public Interrupts(Emulator emulator)
+		{
+			this.emulator = emulator;
+
+			InterruptMasterEnable = true;
 		}
 
 		private byte InterruptEnableRegister => memory.Read(0xFFFF);
@@ -74,7 +80,27 @@ namespace GameboyEmulator
 
 		public bool HasPendingInterrupts => Cpu.ToBool(InterruptFlagRegister & InterruptEnableRegister & 0x1F);
 
-		public bool masterInterruptEnable = true;
+		public bool InterruptMasterEnable { private set; get; }
+
+		private EnableInterruptsStatus enableInterruptsStatus = EnableInterruptsStatus.None;
+
+		public void EnableInterrupts()
+		{
+			//After interrupts are enabled, there is a delay of one cycle until they are actually enabled
+			switch (enableInterruptsStatus)
+			{
+				case EnableInterruptsStatus.NextCycle:
+					enableInterruptsStatus = EnableInterruptsStatus.ThisCycle;
+					break;
+				case EnableInterruptsStatus.ThisCycle:
+					enableInterruptsStatus = EnableInterruptsStatus.None;
+					InterruptMasterEnable  = true;
+					break;
+				case EnableInterruptsStatus.None:
+				default:
+					break;
+			}
+		}
 
 		public void Request(InterruptType interrupt)
 		{
@@ -108,7 +134,7 @@ namespace GameboyEmulator
 
 		public void Update()
 		{
-			if (!masterInterruptEnable || InterruptFlagRegister == 0 || InterruptEnableRegister == 0) return;
+			if (!InterruptMasterEnable || InterruptFlagRegister == 0 || InterruptEnableRegister == 0) return;
 
 			//Ordered in decreasing Priority so that highest Priority always gets executed
 			if (VBlankEnabled && VBlankRequested) Service(InterruptType.VBlank);
@@ -120,7 +146,7 @@ namespace GameboyEmulator
 
 		private void Service(InterruptType interrupt)
 		{
-			masterInterruptEnable = false;
+			InterruptMasterEnable = false;
 
 			switch (interrupt)
 			{

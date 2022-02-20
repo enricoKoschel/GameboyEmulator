@@ -3,7 +3,7 @@ using System.IO;
 
 namespace GameboyEmulator
 {
-	class MemoryBankController
+	public class MemoryBankController
 	{
 		//A list of games and their corresponding mappers can be found here: https://gbhwdb.gekkio.fi/cartridges/
 		private enum BankControllerType
@@ -68,12 +68,11 @@ namespace GameboyEmulator
 			AdvancedRomOrRamBanking = 1
 		}
 
-		//Modules
-		private readonly Memory memory;
+		private readonly Emulator emulator;
 
-		public MemoryBankController(Memory memory)
+		public MemoryBankController(Emulator emulator)
 		{
-			this.memory = memory;
+			this.emulator = emulator;
 		}
 
 		private BankControllerType currentBankControllerType;

@@ -2,18 +2,13 @@
 
 namespace GameboyEmulator
 {
-	class Lcd
+	public class Lcd
 	{
-		//Modules
-		private readonly Memory     memory;
-		private readonly Screen     screen;
-		private readonly Interrupts interrupts;
+		private readonly Emulator emulator;
 
-		public Lcd(Memory memory, Screen screen, Interrupts interrupts)
+		public Lcd(Emulator emulator)
 		{
-			this.memory     = memory;
-			this.screen     = screen;
-			this.interrupts = interrupts;
+			this.emulator = emulator;
 		}
 
 		//Constants

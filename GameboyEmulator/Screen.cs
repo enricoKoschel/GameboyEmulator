@@ -1,7 +1,5 @@
 ﻿using System;
 using SFML.Graphics;
-using SFML.System;
-using SFML.Window;
 
 namespace GameboyEmulator
 {
@@ -13,33 +11,31 @@ namespace GameboyEmulator
 		public static SFML.Graphics.Color white     = new SFML.Graphics.Color(224, 248, 208);
 	}
 
-	class Screen
+	public class Screen
 	{
-		private const int SCREEN_GAME_WIDTH  = 160, SCREEN_GAME_HEIGHT = 144;
-		private const int NUMBER_OF_VERTICES = SCREEN_GAME_WIDTH * SCREEN_GAME_HEIGHT * 4;
-		private const int SCREEN_SCALE       = 8;
-		private const int SCREEN_DRAW_WIDTH  = SCREEN_GAME_WIDTH * SCREEN_SCALE;
-		private const int SCREEN_DRAW_HEIGHT = SCREEN_GAME_HEIGHT * SCREEN_SCALE;
-
-		private readonly RenderWindow window;
+		private const int GAME_WIDTH         = 160, GAME_HEIGHT = 144;
+		private const int NUMBER_OF_VERTICES = GAME_WIDTH * GAME_HEIGHT * 4;
+		private const int SCALE              = 8;
+		public const  int DRAW_WIDTH         = GAME_WIDTH * SCALE;
+		public const  int DRAW_HEIGHT        = GAME_HEIGHT * SCALE;
 
 		private readonly VertexBuffer vertexBuffer;
 		private readonly Vertex[]     vertexArray;
 
 		private readonly bool[,] zBuffer;
 
-		public Screen()
+		private readonly Emulator emulator;
+
+		public Screen(Emulator emulator)
 		{
+			this.emulator = emulator;
+
 			vertexArray = new Vertex[NUMBER_OF_VERTICES];
 			vertexBuffer = new VertexBuffer(
 				NUMBER_OF_VERTICES, PrimitiveType.Quads, VertexBuffer.UsageSpecifier.Stream
 			);
 
-			zBuffer = new bool[SCREEN_GAME_WIDTH, SCREEN_GAME_HEIGHT];
-
-			window = new RenderWindow(
-				new VideoMode(SCREEN_DRAW_WIDTH, SCREEN_DRAW_HEIGHT), "GameBoy Emulator", Styles.Close
-			);
+			zBuffer = new bool[GAME_WIDTH, GAME_HEIGHT];
 
 			window.SetActive();
 
@@ -53,7 +49,7 @@ namespace GameboyEmulator
 
 		public void UpdatePixelBuffer(int x, int y, SFML.Graphics.Color color)
 		{
-			int index = x * 4 + y * SCREEN_GAME_WIDTH * 4;
+			int index = x * 4 + y * GAME_WIDTH * 4;
 
 			vertexArray[index + 0].Color = color;
 			vertexArray[index + 1].Color = color;
@@ -71,22 +67,15 @@ namespace GameboyEmulator
 			return zBuffer[x, y];
 		}
 
-		public bool IsOpen => window.IsOpen;
-
-		public Window GetWindow()
-		{
-			return window;
-		}
-
 		private void Initialize()
 		{
 			for (int i = 0; i < vertexArray.Length; i += 4)
 			{
-				int x = i % (SCREEN_GAME_WIDTH * 4);
-				int y = i / (SCREEN_GAME_WIDTH * 4);
+				int x = i % (GAME_WIDTH * 4);
+				int y = i / (GAME_WIDTH * 4);
 
-				int leftSide = x / 4 * SCREEN_SCALE;
-				int topSide  = y * SCREEN_SCALE;
+				int leftSide = x / 4 * SCALE;
+				int topSide  = y * SCALE;
 
 				//Vertex Direction
 				//1******2
@@ -103,15 +92,15 @@ namespace GameboyEmulator
 				);
 
 				vertexArray[i + 1] = new Vertex(
-					new Vector2f(leftSide + SCREEN_SCALE, topSide), SFML.Graphics.Color.Blue
+					new Vector2f(leftSide + SCALE, topSide), SFML.Graphics.Color.Blue
 				);
 
 				vertexArray[i + 2] = new Vertex(
-					new Vector2f(leftSide + SCREEN_SCALE, topSide + SCREEN_SCALE), SFML.Graphics.Color.Blue
+					new Vector2f(leftSide + SCALE, topSide + SCALE), SFML.Graphics.Color.Blue
 				);
 
 				vertexArray[i + 3] = new Vertex(
-					new Vector2f(leftSide, topSide + SCREEN_SCALE), SFML.Graphics.Color.Blue
+					new Vector2f(leftSide, topSide + SCALE), SFML.Graphics.Color.Blue
 				);
 			}
 		}

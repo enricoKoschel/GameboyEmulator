@@ -3,7 +3,7 @@ using System.Linq;
 
 namespace GameboyEmulator
 {
-	class Graphics
+	public class Graphics
 	{
 		private readonly struct Sprite
 		{
@@ -26,27 +26,14 @@ namespace GameboyEmulator
 			}
 		}
 
-		//Modules
-		private readonly Lcd    lcd;
-		private readonly Screen screen;
-		private readonly Memory memory;
+		private readonly Emulator emulator;
 
-		public Graphics(Memory memory, Interrupts interrupts)
+		public Graphics(Emulator emulator)
 		{
-			this.memory = memory;
-
-			screen = new Screen();
-			lcd    = new Lcd(memory, screen, interrupts);
+			this.emulator = emulator;
 		}
-
-		public bool IsScreenOpen => screen.IsOpen;
 
 		private int internalWindowCounter;
-
-		public Screen GetScreen()
-		{
-			return screen;
-		}
 
 		public void Update(int cycles)
 		{

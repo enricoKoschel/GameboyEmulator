@@ -2,16 +2,13 @@
 
 namespace GameboyEmulator
 {
-	class Timer
+	public class Timer
 	{
-		//Modules
-		private readonly Memory     memory;
-		private readonly Interrupts interrupts;
+		private readonly Emulator emulator;
 
-		public Timer(Memory memory, Interrupts interrupts)
+		public Timer(Emulator emulator)
 		{
-			this.memory     = memory;
-			this.interrupts = interrupts;
+			this.emulator = emulator;
 		}
 
 		//Registers
@@ -35,26 +32,21 @@ namespace GameboyEmulator
 			set => memory.Write(0xFF07, value);
 		}
 
-		private byte Frequency
+		private int InternalMainTimerCounterResetValue => (TimerControl & 0b00000011) switch
 		{
-			get => (byte)(TimerControl & 0b00000011);
-			set
-			{
-				if (value > 0x3)
-				{
-					Logger.LogMessage("Frequency cannot be larger than 3!", Logger.LogLevel.Error);
-					throw new ArgumentOutOfRangeException(nameof(value), "Frequency cannot be larger than 3!");
-				}
+			0 => 1024,
+			1 => 16,
+			2 => 64,
+			3 => 256,
+			_ => throw new ArgumentOutOfRangeException(
+					 nameof(TimerControl) + " & 0b00000011", TimerControl & 0b00000011,
+					 "Something has gone horribly wrong and the fabric of space time is rupturing as we speak."
+				 )
+		};
 
+		private int internalDividerRegisterCounter;
 
-				TimerControl &= 0b11111100;
-				TimerControl |= value;
-			}
-		}
-
-		private int updateDividerRegisterCounter;
-
-		private int updateMainTimerCounter;
+		private int internalMainTimerCounter;
 
 		//Flags
 		private bool MainTimerEnabled => Cpu.GetBit(TimerControl, 2);
@@ -65,20 +57,27 @@ namespace GameboyEmulator
 			if (MainTimerEnabled) UpdateMainTimer(cycles);
 		}
 
+		public void ResetDividerRegister()
+		{
+		}
+
 		private void UpdateDividerRegister(int cycles)
 		{
-			if ((updateDividerRegisterCounter += cycles) < 256) return;
+			int counterWithCycles = internalDividerRegisterCounter += cycles;
+
+			if (counterWithCycles < 256) return;
 
 			//Increment Divider Register every 256 Clock Cycles
-			updateDividerRegisterCounter = 0;
+			internalDividerRegisterCounter = counterWithCycles - 256;
 			DividerRegister++;
 		}
 
 		private void UpdateMainTimer(int cycles)
 		{
-			if ((updateMainTimerCounter -= cycles) > 0) return;
+			//int counterWithCycles = 
+			if ((internalMainTimerCounter -= cycles) > 0) return;
 
-			SetMainTimerCounter();
+			internalMainTimerCounter = InternalMainTimerCounterResetValue;
 
 			if (TimerRegister == 255)
 			{
@@ -88,18 +87,6 @@ namespace GameboyEmulator
 			}
 			else
 				TimerRegister++;
-		}
-
-		private void SetMainTimerCounter()
-		{
-			updateMainTimerCounter = Frequency switch
-			{
-				0 => 1024,
-				1 => 16,
-				2 => 64,
-				3 => 256,
-				_ => throw new ArgumentOutOfRangeException(nameof(Frequency), "Frequency cannot be larger than 3!")
-			};
 		}
 	}
 }

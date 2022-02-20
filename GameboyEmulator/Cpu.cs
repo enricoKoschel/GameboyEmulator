@@ -3,7 +3,7 @@ using System.IO;
 
 namespace GameboyEmulator
 {
-	class Cpu
+	public class Cpu
 	{
 		private enum JumpCondition
 		{
@@ -11,14 +11,7 @@ namespace GameboyEmulator
 			Z,
 			Nc,
 			C,
-			NoCondition
-		}
-
-		private enum InterruptStatus
-		{
-			ThisCycle,
-			NextCycle,
-			False
+			Always
 		}
 
 		private enum HaltMode
@@ -28,21 +21,11 @@ namespace GameboyEmulator
 			NotHalted
 		}
 
-		//Modules
-		private readonly Memory     memory;
-		private readonly Graphics   graphics;
-		private readonly Interrupts interrupts;
-		private readonly Timer      timer;
-		private readonly Joypad     joypad;
+		private readonly Emulator emulator;
 
-		public Cpu()
+		public Cpu(Emulator emulator)
 		{
-			//Initialize modules
-			memory     = new Memory(this);
-			interrupts = new Interrupts(memory, this);
-			graphics   = new Graphics(memory, interrupts);
-			joypad     = new Joypad(memory, interrupts, graphics);
-			timer      = new Timer(memory, interrupts);
+			this.emulator = emulator;
 		}
 
 		//Registers
@@ -127,52 +110,14 @@ namespace GameboyEmulator
 			set => flagRegister = SetBit(flagRegister, 4, value);
 		}
 
-		public bool IsRunning => graphics.IsScreenOpen;
-
 		//Constants
-		private const int MAX_CPU_CYCLES_PER_FRAME = 70224;
+		public const int MAX_CYCLES_PER_FRAME = 70224;
 
 		//Flags
-		private InterruptStatus enableInterrupts = InterruptStatus.False;
-		private HaltMode        haltMode         = HaltMode.NotHalted;
-		private int             waitNopAmount;
+		private HaltMode haltMode = HaltMode.NotHalted;
+		private int      waitNopAmount;
 
-		public void Start()
-		{
-			memory.LoadGame();
-		}
-
-		public void Update()
-		{
-			int cyclesThisFrame = 0;
-
-			while (cyclesThisFrame < MAX_CPU_CYCLES_PER_FRAME)
-			{
-				int cycles = ExecuteOpcode();
-
-				//Delayed Interrupt enabling
-				switch (enableInterrupts)
-				{
-					case InterruptStatus.NextCycle:
-						enableInterrupts = InterruptStatus.ThisCycle;
-						break;
-					case InterruptStatus.ThisCycle:
-						enableInterrupts                 = InterruptStatus.False;
-						interrupts.masterInterruptEnable = true;
-						break;
-				}
-
-				cyclesThisFrame += cycles;
-				graphics.Update(cycles);
-				timer.Update(cycles);
-				joypad.Update(false);
-				interrupts.Update();
-			}
-
-			joypad.Update(true);
-		}
-
-		private int ExecuteOpcode()
+		public int ExecuteOpcode()
 		{
 			if (waitNopAmount > 0)
 			{
@@ -182,13 +127,9 @@ namespace GameboyEmulator
 
 			if (haltMode == HaltMode.Halted) return 4;
 
+			HandleHaltBug();
+
 			byte opcode = Load8BitImmediate();
-			if (haltMode == HaltMode.HaltBug)
-			{
-				//If Halt Bug occurs, the Program Counter does not get increased after fetching Opcode 
-				programCounter -= 1;
-				haltMode       =  HaltMode.NotHalted;
-			}
 
 			switch (opcode)
 			{
@@ -288,7 +229,7 @@ namespace GameboyEmulator
 					return 4;
 				//JR n
 				case 0x18:
-					return JumpRelative(JumpCondition.NoCondition);
+					return JumpRelative(JumpCondition.Always);
 				//ADD HL,DE
 				case 0x19:
 					HlRegister = Add16BitRegisters(HlRegister, DeRegister);
@@ -958,7 +899,7 @@ namespace GameboyEmulator
 					return JumpImmediate(JumpCondition.Nz);
 				//JP nn
 				case 0xC3:
-					return JumpImmediate(JumpCondition.NoCondition);
+					return JumpImmediate(JumpCondition.Always);
 				//CALL NZ,nn
 				case 0xC4:
 					return CallSubroutine(JumpCondition.Nz);
@@ -977,7 +918,7 @@ namespace GameboyEmulator
 					return ReturnSubroutine(JumpCondition.Z);
 				//RET
 				case 0xC9:
-					return ReturnSubroutine(JumpCondition.NoCondition);
+					return ReturnSubroutine(JumpCondition.Always);
 				//JP Z,nn
 				case 0xCA:
 					return JumpImmediate(JumpCondition.Z);
@@ -989,7 +930,7 @@ namespace GameboyEmulator
 					return CallSubroutine(JumpCondition.Z);
 				//CALL nn
 				case 0xCD:
-					return CallSubroutine(JumpCondition.NoCondition);
+					return CallSubroutine(JumpCondition.Always);
 				//ADC A,n
 				case 0xCE:
 					AddByteToAReg(Load8BitImmediate(), CarryFlag);
@@ -1027,8 +968,8 @@ namespace GameboyEmulator
 					return ReturnSubroutine(JumpCondition.C);
 				//RETI
 				case 0xD9:
-					enableInterrupts = InterruptStatus.ThisCycle;
-					return ReturnSubroutine(JumpCondition.NoCondition);
+					enableInterruptsStatus = InterruptStatus.ThisCycle;
+					return ReturnSubroutine(JumpCondition.Always);
 				//JP C,nn
 				case 0xDA:
 					return JumpImmediate(JumpCondition.C);
@@ -1108,7 +1049,7 @@ namespace GameboyEmulator
 				//DI
 				case 0xF3:
 					interrupts.masterInterruptEnable = false;
-					enableInterrupts                 = InterruptStatus.False;
+					enableInterruptsStatus           = InterruptStatus.None;
 					return 4;
 				//Invalid Opcode
 				//0xF4
@@ -1136,7 +1077,7 @@ namespace GameboyEmulator
 					return 16;
 				//EI
 				case 0xFB:
-					enableInterrupts = InterruptStatus.NextCycle;
+					enableInterruptsStatus = InterruptStatus.NextCycle;
 					return 4;
 				//Invalid Opcode
 				//0xFC
@@ -1160,6 +1101,15 @@ namespace GameboyEmulator
 						$"Invalid Opcode 0x{opcode:X} encountered at 0x{programCounter - 1:X}!"
 					);
 			}
+		}
+
+		private void HandleHaltBug()
+		{
+			if (haltMode != HaltMode.HaltBug) return;
+
+			//If Halt Bug occurs, the Program Counter does not get increased after fetching Opcode 
+			programCounter -= 1;
+			haltMode       =  HaltMode.NotHalted;
 		}
 
 		private int ExecuteExtendedOpcode()
@@ -2529,7 +2479,7 @@ namespace GameboyEmulator
 					CarryFlag,
 
 				//Always Jump
-				JumpCondition.NoCondition =>
+				JumpCondition.Always =>
 					true,
 
 				//Default
@@ -2550,7 +2500,7 @@ namespace GameboyEmulator
 
 		private int ReturnSubroutine(JumpCondition condition)
 		{
-			if (condition == JumpCondition.NoCondition)
+			if (condition == JumpCondition.Always)
 			{
 				//Special Case for unconditional return
 				programCounter = PopStack();
