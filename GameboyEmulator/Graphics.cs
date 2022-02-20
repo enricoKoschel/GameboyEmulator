@@ -35,16 +35,9 @@ namespace GameboyEmulator
 
 		private int internalWindowCounter;
 
-		public void Update(int cycles)
-		{
-			lcd.Update(cycles);
+		public void Reset
 
-			if (lcd.shouldDrawScanline) DrawScanline();
-
-			if (lcd.shouldIncreaseScanline && lcd.CurrentScanline++ == 0) internalWindowCounter = 0;
-		}
-
-		private void DrawScanline()
+		public void DrawScanline()
 		{
 			if (lcd.TilesEnabled) RenderTiles();
 

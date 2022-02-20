@@ -119,12 +119,14 @@ namespace GameboyEmulator
 
 		public int ExecuteOpcode()
 		{
+			//Emulates length it takes to service interrupts
 			if (waitNopAmount > 0)
 			{
 				waitNopAmount--;
 				return 4;
 			}
 
+			//If cpu is halted, return without executing an opcode
 			if (haltMode == HaltMode.Halted) return 4;
 
 			HandleHaltBug();

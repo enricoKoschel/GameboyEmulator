@@ -49,22 +49,21 @@ namespace GameboyEmulator
 			while (cyclesThisFrame < Cpu.MAX_CYCLES_PER_FRAME)
 			{
 				int cycles = cpu.ExecuteOpcode();
+				cyclesThisFrame += cycles;
 
 				//Interrupts only get enabled when requested beforehand by the corresponding instruction
 				interrupts.EnableInterrupts();
 
-				cyclesThisFrame += cycles;
+				lcd.Update(cycles);
+				if (lcd.shouldDrawScanline) graphics.DrawScanline();
+				if (lcd.shouldIncreaseScanline && lcd.CurrentScanline++ == 0) internalWindowCounter = 0;
 
-				graphics.Update(cycles);
-
-				timer.Update(cycles);
-
-				joypad.Update(false);
-
-				interrupts.Update();
+				//timer.Update(cycles);
+				//joypad.Update(false);
+				//interrupts.Update();
 			}
 
-			joypad.Update(true);
+			//joypad.Update(true);
 
 			int fps = Convert.ToInt32(1 / frameTime.ElapsedTime.AsSeconds());
 			highestFps = Math.Max(highestFps, fps);
