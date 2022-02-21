@@ -19,6 +19,9 @@ namespace GameboyEmulator
 
 		public bool IsRunning => window.IsOpen;
 
+		private int lowestFps = int.MaxValue;
+		private int highestFps;
+
 		public Emulator()
 		{
 			cpu                  = new Cpu(this);
@@ -45,10 +48,9 @@ namespace GameboyEmulator
 
 		public void Update()
 		{
-			Clock frameTime       = new Clock();
-			int   lowestFps       = int.MaxValue;
-			int   highestFps      = 0;
-			int   cyclesThisFrame = 0;
+			Clock frameTime = new Clock();
+
+			int cyclesThisFrame = 0;
 
 			frameTime.Restart();
 

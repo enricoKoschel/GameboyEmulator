@@ -1406,7 +1406,7 @@ namespace GameboyEmulator
 				//BIT 0,(HL)
 				case 0x46:
 					BitOpcode(emulator.memory.Read(HlRegister), 0);
-					return 16;
+					return 12;
 				//BIT 0,A
 				case 0x47:
 					BitOpcode(aRegister, 0);
@@ -1438,7 +1438,7 @@ namespace GameboyEmulator
 				//BIT 1,(HL)
 				case 0x4E:
 					BitOpcode(emulator.memory.Read(HlRegister), 1);
-					return 16;
+					return 12;
 				//BIT 1,A
 				case 0x4F:
 					BitOpcode(aRegister, 1);
@@ -1470,7 +1470,7 @@ namespace GameboyEmulator
 				//BIT 2,(HL)
 				case 0x56:
 					BitOpcode(emulator.memory.Read(HlRegister), 2);
-					return 16;
+					return 12;
 				//BIT 2,A
 				case 0x57:
 					BitOpcode(aRegister, 2);
@@ -1502,7 +1502,7 @@ namespace GameboyEmulator
 				//BIT 3,(HL)
 				case 0x5E:
 					BitOpcode(emulator.memory.Read(HlRegister), 3);
-					return 16;
+					return 12;
 				//BIT 3,A
 				case 0x5F:
 					BitOpcode(aRegister, 3);
@@ -1534,7 +1534,7 @@ namespace GameboyEmulator
 				//BIT 4,(HL)
 				case 0x66:
 					BitOpcode(emulator.memory.Read(HlRegister), 4);
-					return 16;
+					return 12;
 				//BIT 4,A
 				case 0x67:
 					BitOpcode(aRegister, 4);
@@ -1566,7 +1566,7 @@ namespace GameboyEmulator
 				//BIT 5,(HL)
 				case 0x6E:
 					BitOpcode(emulator.memory.Read(HlRegister), 5);
-					return 16;
+					return 12;
 				//BIT 5,A
 				case 0x6F:
 					BitOpcode(aRegister, 5);
@@ -1598,7 +1598,7 @@ namespace GameboyEmulator
 				//BIT 6,(HL)
 				case 0x76:
 					BitOpcode(emulator.memory.Read(HlRegister), 6);
-					return 16;
+					return 12;
 				//BIT 6,A
 				case 0x77:
 					BitOpcode(aRegister, 6);
@@ -1630,7 +1630,7 @@ namespace GameboyEmulator
 				//BIT 7,(HL)
 				case 0x7E:
 					BitOpcode(emulator.memory.Read(HlRegister), 7);
-					return 16;
+					return 12;
 				//BIT 7,A
 				case 0x7F:
 					BitOpcode(aRegister, 7);

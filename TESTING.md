@@ -29,7 +29,7 @@
 | Test         | State                                             |
 |--------------|---------------------------------------------------|
 | cpu_instrs   | ✅                                                 |
-| instr_timing | ❌ (Fails with failure code ***Failure #255***)    |
+| instr_timing | ✅                                                 |
 | halt_bug     | ❌ (Fails with failure code ***IE IF IF DE***      |
 | mem_timing-2 | ❌ (Requires correct timer and instruction timing) |
 | dmg_sound    | ❌ (Sound is not implemented yet)                  |
