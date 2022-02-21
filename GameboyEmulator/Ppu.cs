@@ -56,12 +56,12 @@ namespace GameboyEmulator
 
 		public byte ScrollY { get; set; }
 
-		private byte windowX;
+		public byte WindowX { get; set; }
 
-		public byte WindowX
+		private short WindowXCorrected
 		{
-			get => (byte)(windowX - 7);
-			set => windowX = (byte)(value + 7);
+			get => (short)(WindowX - 7);
+			set => WindowX = (byte)(value + 7);
 		}
 
 		public byte WindowY { get; set; }
@@ -144,32 +144,22 @@ namespace GameboyEmulator
 
 		public void Update(int cycles)
 		{
-			bool shouldDrawScanline     = false;
-			bool shouldIncreaseScanline = false;
-
 			drawScanlineCounter += cycles;
 
 			if (drawScanlineCounter >= 456)
 			{
 				//Increase Scanline every 456 Clockcycles, only draw if not in VBlank
-				if (CurrentScanline < 144) shouldDrawScanline = true;
+				if (CurrentScanline < 144) DrawScanline();
 
 				coincidenceRequested = false;
 				CoincidenceFlag      = false;
 
-				shouldIncreaseScanline = true;
-				drawScanlineCounter    = 0; //TODO maybe add remaining drawScanlineCounter above 456
+				CurrentScanline++;
+				drawScanlineCounter = 0; //TODO maybe add remaining drawScanlineCounter above 456
 			}
 
 			SetStatus();
 			CompareLyWithLyc();
-
-			if (shouldDrawScanline) DrawScanline();
-
-			//Reset window counter at the beginning of every frame
-			if (shouldIncreaseScanline && CurrentScanline++ == 0) internalWindowCounter = 0;
-
-			//TODO maybe remove the two bools and inline if bodies
 		}
 
 		private void CompareLyWithLyc()
@@ -214,8 +204,9 @@ namespace GameboyEmulator
 				vBlankRequested = false;
 
 				//One Frame done
-				CurrentScanline     = 0;
-				drawScanlineCounter = 0;
+				CurrentScanline       = 0;
+				drawScanlineCounter   = 0;
+				internalWindowCounter = 0;
 
 				emulator.screen.DrawFrame();
 			}
@@ -288,8 +279,10 @@ namespace GameboyEmulator
 				ushort backgroundTileDataIndex = TileDataBaseAddress;
 
 				if (TileDataIsSigned)
+				{
 					backgroundTileDataIndex +=
 						(ushort)(((sbyte)emulator.memory.Read(backgroundTileMapIndex) + 128) * 16);
+				}
 				else
 					backgroundTileDataIndex += (ushort)(emulator.memory.Read(backgroundTileMapIndex) * 16);
 
@@ -312,13 +305,13 @@ namespace GameboyEmulator
 			}
 
 			//Window
-			if (!WindowEnabled || WindowY > CurrentScanline || WindowX > 159) return;
+			if (!WindowEnabled || WindowY > CurrentScanline || WindowXCorrected < 0 || WindowXCorrected > 159) return;
 
 			int windowTileMapY = internalWindowCounter++ / 8 * 32;
 
-			for (int windowPixel = WindowX; windowPixel < 160; windowPixel++)
+			for (int windowPixel = WindowXCorrected; windowPixel < 160; windowPixel++)
 			{
-				int windowTileMapX = (windowPixel - WindowX) / 8;
+				int windowTileMapX = (windowPixel - WindowXCorrected) / 8;
 
 				ushort windowTileMapIndex = (ushort)(WindowTileMapBaseAddress + windowTileMapX + windowTileMapY);
 
@@ -329,8 +322,9 @@ namespace GameboyEmulator
 				else
 					windowTileDataIndex += (ushort)(emulator.memory.Read(windowTileMapIndex) * 16);
 
-				int currentTileLine          = (CurrentScanline - WindowY) % 8 * 2;
-				int currentTileColumn        = (windowPixel - WindowX) % 8;
+				int currentTileLine = (CurrentScanline - WindowY) % 8 * 2;
+
+				int currentTileColumn        = (windowPixel - WindowXCorrected) % 8;
 				int currentTileColumnReverse = (currentTileColumn - 7) * -1;
 
 				byte tileDataLo = emulator.memory.Read((ushort)(windowTileDataIndex + currentTileLine));
