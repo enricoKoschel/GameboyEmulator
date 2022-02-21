@@ -217,7 +217,7 @@ namespace GameboyEmulator
 				CurrentScanline     = 0;
 				drawScanlineCounter = 0;
 
-				screen.DrawFrame();
+				emulator.screen.DrawFrame();
 			}
 			else
 			{
@@ -232,7 +232,7 @@ namespace GameboyEmulator
 
 					if (!Mode2InterruptEnabled || mode2Requested) return;
 
-					interrupts.Request(Interrupts.InterruptType.LcdStat);
+					emulator.interrupts.Request(Interrupts.InterruptType.LcdStat);
 					mode2Requested = true;
 				}
 				else if (drawScanlineCounter < MODE_3_TIME)
@@ -255,13 +255,13 @@ namespace GameboyEmulator
 
 					if (!Mode0InterruptEnabled || mode0Requested) return;
 
-					interrupts.Request(Interrupts.InterruptType.LcdStat);
+					emulator.interrupts.Request(Interrupts.InterruptType.LcdStat);
 					mode0Requested = true;
 				}
 			}
 		}
 
-		public void DrawScanline()
+		private void DrawScanline()
 		{
 			if (TilesEnabled) RenderTiles();
 			if (SpritesEnabled) RenderSprites();
@@ -288,16 +288,17 @@ namespace GameboyEmulator
 				ushort backgroundTileDataIndex = TileDataBaseAddress;
 
 				if (TileDataIsSigned)
-					backgroundTileDataIndex += (ushort)(((sbyte)memory.Read(backgroundTileMapIndex) + 128) * 16);
+					backgroundTileDataIndex +=
+						(ushort)(((sbyte)emulator.memory.Read(backgroundTileMapIndex) + 128) * 16);
 				else
-					backgroundTileDataIndex += (ushort)(memory.Read(backgroundTileMapIndex) * 16);
+					backgroundTileDataIndex += (ushort)(emulator.memory.Read(backgroundTileMapIndex) * 16);
 
 				int currentTileLine          = (CurrentScanline + ScrollY) % 8 * 2;
 				int currentTileColumn        = (backgroundPixel + ScrollX) % 8;
 				int currentTileColumnReverse = (currentTileColumn - 7) * -1;
 
-				byte tileDataLo = memory.Read((ushort)(backgroundTileDataIndex + currentTileLine));
-				byte tileDataHi = memory.Read((ushort)(backgroundTileDataIndex + currentTileLine + 1));
+				byte tileDataLo = emulator.memory.Read((ushort)(backgroundTileDataIndex + currentTileLine));
+				byte tileDataHi = emulator.memory.Read((ushort)(backgroundTileDataIndex + currentTileLine + 1));
 
 				int  paletteIndexLo = Cpu.GetBit(tileDataLo, currentTileColumnReverse) ? 1 : 0;
 				int  paletteIndexHi = Cpu.GetBit(tileDataHi, currentTileColumnReverse) ? 1 : 0;
@@ -306,8 +307,8 @@ namespace GameboyEmulator
 				int bufferXIndex = backgroundPixel;
 				int bufferYIndex = CurrentScanline;
 
-				screen.UpdateZBuffer(bufferXIndex, bufferYIndex, paletteIndex == 0);
-				screen.UpdatePixelBuffer(bufferXIndex, bufferYIndex, GetColor(TilePalette, paletteIndex));
+				emulator.screen.UpdateZBuffer(bufferXIndex, bufferYIndex, paletteIndex == 0);
+				emulator.screen.UpdatePixelBuffer(bufferXIndex, bufferYIndex, GetColor(TilePalette, paletteIndex));
 			}
 
 			//Window
@@ -324,16 +325,16 @@ namespace GameboyEmulator
 				ushort windowTileDataIndex = TileDataBaseAddress;
 
 				if (TileDataIsSigned)
-					windowTileDataIndex += (ushort)(((sbyte)memory.Read(windowTileMapIndex) + 128) * 16);
+					windowTileDataIndex += (ushort)(((sbyte)emulator.memory.Read(windowTileMapIndex) + 128) * 16);
 				else
-					windowTileDataIndex += (ushort)(memory.Read(windowTileMapIndex) * 16);
+					windowTileDataIndex += (ushort)(emulator.memory.Read(windowTileMapIndex) * 16);
 
 				int currentTileLine          = (CurrentScanline - WindowY) % 8 * 2;
 				int currentTileColumn        = (windowPixel - WindowX) % 8;
 				int currentTileColumnReverse = (currentTileColumn - 7) * -1;
 
-				byte tileDataLo = memory.Read((ushort)(windowTileDataIndex + currentTileLine));
-				byte tileDataHi = memory.Read((ushort)(windowTileDataIndex + currentTileLine + 1));
+				byte tileDataLo = emulator.memory.Read((ushort)(windowTileDataIndex + currentTileLine));
+				byte tileDataHi = emulator.memory.Read((ushort)(windowTileDataIndex + currentTileLine + 1));
 
 				int  paletteIndexLo = Cpu.GetBit(tileDataLo, currentTileColumnReverse) ? 1 : 0;
 				int  paletteIndexHi = Cpu.GetBit(tileDataHi, currentTileColumnReverse) ? 1 : 0;
@@ -342,8 +343,8 @@ namespace GameboyEmulator
 				int bufferXIndex = windowPixel;
 				int bufferYIndex = CurrentScanline;
 
-				screen.UpdateZBuffer(bufferXIndex, bufferYIndex, paletteIndex == 0);
-				screen.UpdatePixelBuffer(bufferXIndex, bufferYIndex, GetColor(TilePalette, paletteIndex));
+				emulator.screen.UpdateZBuffer(bufferXIndex, bufferYIndex, paletteIndex == 0);
+				emulator.screen.UpdatePixelBuffer(bufferXIndex, bufferYIndex, GetColor(TilePalette, paletteIndex));
 			}
 		}
 
@@ -354,15 +355,15 @@ namespace GameboyEmulator
 			for (ushort i = 0; i < 40 && sprites.Count < 10; i++)
 			{
 				ushort oamSpriteAddress = (ushort)(0xFE00 + i * 4);
-				short  yPosition        = (short)(memory.Read(oamSpriteAddress) - 16);
+				short  yPosition        = (short)(emulator.memory.Read(oamSpriteAddress) - 16);
 
 				//Check if Sprite is visible and on current Scanline
 				if (CurrentScanline < yPosition || CurrentScanline >= yPosition + SpriteSize) continue;
 
 				ushort spriteAddress = oamSpriteAddress++;
-				short  xPosition     = (short)(memory.Read(oamSpriteAddress++) - 8);
-				byte   tileNumber    = memory.Read(oamSpriteAddress++);
-				byte   attributes    = memory.Read(oamSpriteAddress);
+				short  xPosition     = (short)(emulator.memory.Read(oamSpriteAddress++) - 8);
+				byte   tileNumber    = emulator.memory.Read(oamSpriteAddress++);
+				byte   attributes    = emulator.memory.Read(oamSpriteAddress);
 
 				if (SpriteSize == 16) tileNumber &= 0xFE;
 
@@ -397,8 +398,8 @@ namespace GameboyEmulator
 				spriteLine *= 2;
 
 				ushort spriteDataAddress = (ushort)(0x8000 + spriteLine + tileNumber * 16);
-				byte   spriteDataLo      = memory.Read(spriteDataAddress++);
-				byte   spriteDataHi      = memory.Read(spriteDataAddress);
+				byte   spriteDataLo      = emulator.memory.Read(spriteDataAddress++);
+				byte   spriteDataHi      = emulator.memory.Read(spriteDataAddress);
 
 				for (int spritePixelIndex = 7; spritePixelIndex >= 0; spritePixelIndex--)
 				{
@@ -430,10 +431,10 @@ namespace GameboyEmulator
 					if (spriteBehindBackground)
 					{
 						//Sprite only shows if BG Color is 0
-						if (!screen.GetZBufferAt(bufferXIndex, bufferYIndex)) continue;
+						if (!emulator.screen.GetZBufferAt(bufferXIndex, bufferYIndex)) continue;
 					}
 
-					screen.UpdatePixelBuffer(bufferXIndex, bufferYIndex, color);
+					emulator.screen.UpdatePixelBuffer(bufferXIndex, bufferYIndex, color);
 				}
 			}
 		}

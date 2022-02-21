@@ -130,7 +130,7 @@ namespace GameboyEmulator
 			if (((byte)interrupt & InterruptEnableRegister) != 0)
 			{
 				//Halt mode is exited when an enabled interrupt is requested, master interrupt enable is ignored
-				cpu.ExitHaltMode();
+				emulator.cpu.ExitHaltMode();
 			}
 		}
 
@@ -154,23 +154,23 @@ namespace GameboyEmulator
 			{
 				case InterruptType.VBlank:
 					VBlankRequested = false;
-					cpu.ServiceInterrupt(0x40);
+					emulator.cpu.ServiceInterrupt(0x40);
 					break;
 				case InterruptType.LcdStat:
 					LcdStatRequested = false;
-					cpu.ServiceInterrupt(0x48);
+					emulator.cpu.ServiceInterrupt(0x48);
 					break;
 				case InterruptType.Timer:
 					TimerRequested = false;
-					cpu.ServiceInterrupt(0x50);
+					emulator.cpu.ServiceInterrupt(0x50);
 					break;
 				case InterruptType.Serial:
 					SerialRequested = false;
-					cpu.ServiceInterrupt(0x58);
+					emulator.cpu.ServiceInterrupt(0x58);
 					break;
 				case InterruptType.Joypad:
 					JoypadRequested = false;
-					cpu.ServiceInterrupt(0x60);
+					emulator.cpu.ServiceInterrupt(0x60);
 					break;
 			}
 		}

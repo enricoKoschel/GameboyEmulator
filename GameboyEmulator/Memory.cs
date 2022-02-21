@@ -79,8 +79,6 @@ namespace GameboyEmulator
 			spriteAttributes = new byte[0x100];
 			dmaRegister      = 0xFF;
 			highRam          = new byte[0x7F];
-
-			LoadGame();
 		}
 
 		private void AllocateCartridgeRam(byte numberOfRamBanks)
@@ -88,7 +86,7 @@ namespace GameboyEmulator
 			if (numberOfRamBanks > 0) cartridgeRam = new byte[numberOfRamBanks * 0x2000];
 		}
 
-		private void LoadGame()
+		public void LoadGame()
 		{
 			//TODO refactor this method
 			//Have separate array for boot rom and read from there when boot rom is enabled

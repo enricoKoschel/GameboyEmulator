@@ -98,7 +98,7 @@ namespace GameboyEmulator
 
 		public void InitializeBanking()
 		{
-			currentBankControllerType = (BankControllerType)memory.Read(0x147, true);
+			currentBankControllerType = (BankControllerType)emulator.memory.Read(0x147, true);
 			if (!Enum.IsDefined(typeof(BankControllerType), currentBankControllerType))
 			{
 				Logger.LogMessage(
@@ -115,7 +115,7 @@ namespace GameboyEmulator
 				Logger.LogLevel.Info, true
 			);
 
-			byte numberOfRomBanksRaw = memory.Read(0x148, true);
+			byte numberOfRomBanksRaw = emulator.memory.Read(0x148, true);
 			if (numberOfRomBanksRaw > 0x08)
 			{
 				Logger.LogMessage("Cartridge has invalid number of ROM banks!", Logger.LogLevel.Error);
@@ -126,7 +126,7 @@ namespace GameboyEmulator
 
 			Logger.LogMessage($"{numberOfRomBanks} ROM bank(s) determined.", Logger.LogLevel.Info, true);
 
-			byte numberOfRamBanksRaw = memory.Read(0x149, true);
+			byte numberOfRamBanksRaw = emulator.memory.Read(0x149, true);
 			switch (numberOfRamBanksRaw)
 			{
 				case 0x00:

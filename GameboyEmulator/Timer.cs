@@ -64,12 +64,13 @@ namespace GameboyEmulator
 			if (counterWithCycles < 256) return;
 
 			//Increment Divider Register every 256 Clock Cycles
-			internalDividerRegisterCounter = counterWithCycles - 256;
+			internalDividerRegisterCounter = counterWithCycles - 256; //TODO maybe reset to 0
 			DividerRegister++;
 		}
 
 		private void UpdateMainTimer(int cycles)
 		{
+			//TODO add remaining counter back after below 0
 			//int counterWithCycles = 
 			if ((internalMainTimerCounter -= cycles) > 0) return;
 
@@ -79,7 +80,7 @@ namespace GameboyEmulator
 			{
 				//Timer Overflow, reset to Value in Timer Modulo and request Interrupt
 				TimerRegister = TimerModulo;
-				interrupts.Request(Interrupts.InterruptType.Timer);
+				emulator.interrupts.Request(Interrupts.InterruptType.Timer);
 			}
 			else
 				TimerRegister++;

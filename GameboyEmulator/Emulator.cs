@@ -30,9 +30,17 @@ namespace GameboyEmulator
 			screen               = new Screen(this);
 			timer                = new Timer(this);
 
+			memory.LoadGame();
+
 			window = new RenderWindow(
 				new VideoMode(Screen.DRAW_WIDTH, Screen.DRAW_HEIGHT), "GameBoy Emulator", Styles.Close
 			);
+
+			window.SetActive();
+
+			//Gameboy runs at 60 fps
+			window.SetFramerateLimit(60);
+			window.Closed += OnClosed;
 		}
 
 		public void Update()
@@ -53,19 +61,24 @@ namespace GameboyEmulator
 				interrupts.EnableInterrupts();
 
 				ppu.Update(cycles);
-
-				//timer.Update(cycles);
-				//joypad.Update(false);
-				//interrupts.Update();
+				timer.Update(cycles);
+				joypad.Update(false);
+				interrupts.Update();
 			}
 
-			//joypad.Update(true);
+			joypad.Update(true);
 
 			int fps = Convert.ToInt32(1 / frameTime.ElapsedTime.AsSeconds());
 			highestFps = Math.Max(highestFps, fps);
 			lowestFps  = Math.Min(lowestFps, fps);
 
 			window.SetTitle($"GameBoy Emulator | FPS - {fps} | Lowest - {lowestFps} | Highest - {highestFps}");
+		}
+
+		private static void OnClosed(object sender, EventArgs e)
+		{
+			RenderWindow window = (RenderWindow)sender;
+			window.Close();
 		}
 	}
 }

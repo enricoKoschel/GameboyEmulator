@@ -1,5 +1,6 @@
 ﻿using System;
 using SFML.Graphics;
+using SFML.System;
 
 namespace GameboyEmulator
 {
@@ -37,14 +38,7 @@ namespace GameboyEmulator
 
 			zBuffer = new bool[GAME_WIDTH, GAME_HEIGHT];
 
-			window.SetActive();
-
-			//Gameboy runs at 60 fps
-			window.SetFramerateLimit(60);
-
 			Initialize();
-
-			window.Closed += OnClosed;
 		}
 
 		public void UpdatePixelBuffer(int x, int y, SFML.Graphics.Color color)
@@ -107,30 +101,23 @@ namespace GameboyEmulator
 
 		public void DrawFrame()
 		{
-			if (!window.IsOpen)
+			if (!emulator.window.IsOpen)
 			{
 				Logger.LogMessage("Cannot draw Screen when Window is closed!", Logger.LogLevel.Error);
 				throw new InvalidOperationException("Cannot draw Screen when Window is closed!");
 			}
 
-			window.DispatchEvents();
+			emulator.window.DispatchEvents();
 
 			vertexBuffer.Update(vertexArray);
-			vertexBuffer.Draw(window, RenderStates.Default);
+			vertexBuffer.Draw(emulator.window, RenderStates.Default);
 
-			window.Display();
+			emulator.window.Display();
 		}
 
 		public void Clear(SFML.Graphics.Color color)
 		{
 			for (int i = 0; i < NUMBER_OF_VERTICES; i++) vertexArray[i].Color = color;
-		}
-
-		//Event handlers
-		private static void OnClosed(object sender, EventArgs e)
-		{
-			RenderWindow window = (RenderWindow)sender;
-			window.Close();
 		}
 	}
 }

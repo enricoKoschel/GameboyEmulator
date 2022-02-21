@@ -1,4 +1,6 @@
-﻿namespace GameboyEmulator
+﻿using SFML.Window;
+
+namespace GameboyEmulator
 {
 	public class Joypad
 	{
@@ -68,7 +70,7 @@
 		{
 			if (frameDone)
 			{
-				hadFocusLastFrame = window.HasFocus();
+				hadFocusLastFrame = emulator.window.HasFocus();
 
 				downPressedThisFrame    = Keyboard.IsKeyPressed(Keyboard.Key.Down);
 				upPressedThisFrame      = Keyboard.IsKeyPressed(Keyboard.Key.Up);
@@ -81,7 +83,7 @@
 
 				//Only request Interrupt if Button was pressed this Frame
 				if (ButtonPressedThisFrame && ButtonPressedThisFrame != buttonPressedLastFrame)
-					interrupts.Request(Interrupts.InterruptType.Joypad);
+					emulator.interrupts.Request(Interrupts.InterruptType.Joypad);
 
 				buttonPressedLastFrame = ButtonPressedThisFrame;
 			}
