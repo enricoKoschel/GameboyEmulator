@@ -12,24 +12,18 @@ namespace GameboyEmulator
 		}
 
 		//Registers
-		private byte DividerRegister
-		{
-			get => memory.Read(0xFF04);
-			set => memory.Write(0xFF04, value, true);
-		}
+		public byte DividerRegister { get; private set; }
 
-		private byte TimerRegister
-		{
-			get => memory.Read(0xFF05);
-			set => memory.Write(0xFF05, value);
-		}
+		public byte TimerRegister { get; set; }
 
-		private byte TimerModulo => memory.Read(0xFF06);
+		public byte TimerModulo { get; set; }
 
-		private byte TimerControl
+		private byte timerControl;
+
+		public byte TimerControl
 		{
-			get => memory.Read(0xFF07);
-			set => memory.Write(0xFF07, value);
+			get => (byte)(timerControl & 0b00000111);
+			set => timerControl = (byte)(value & 0b00000111);
 		}
 
 		private int InternalMainTimerCounterResetValue => (TimerControl & 0b00000011) switch
@@ -59,6 +53,8 @@ namespace GameboyEmulator
 
 		public void ResetDividerRegister()
 		{
+			DividerRegister                = 0;
+			internalDividerRegisterCounter = 0;
 		}
 
 		private void UpdateDividerRegister(int cycles)

@@ -30,12 +30,14 @@ namespace GameboyEmulator
 			InterruptMasterEnable = true;
 		}
 
-		private byte InterruptEnableRegister => memory.Read(0xFFFF);
+		public byte InterruptEnableRegister { get; set; }
 
-		private byte InterruptFlagRegister
+		private byte interruptFlagRegister;
+
+		public byte InterruptFlagRegister
 		{
-			get => memory.Read(0xFF0F);
-			set => memory.Write(0xFF0F, (byte)(value & 0b00011111));
+			get => (byte)(interruptFlagRegister & 0b00011111);
+			set => interruptFlagRegister = (byte)(value & 0b00011111);
 		}
 
 		private bool VBlankEnabled => Cpu.GetBit(InterruptEnableRegister, 0);
@@ -80,7 +82,7 @@ namespace GameboyEmulator
 
 		public bool HasPendingInterrupts => Cpu.ToBool(InterruptFlagRegister & InterruptEnableRegister & 0x1F);
 
-		public bool InterruptMasterEnable { set; get; }
+		public bool InterruptMasterEnable { get; set; }
 
 		public EnableInterruptsStatus enableInterruptsStatus = EnableInterruptsStatus.None;
 

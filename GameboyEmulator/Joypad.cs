@@ -10,10 +10,12 @@
 		}
 
 		//Registers
-		private byte JoypadRegister
+		private byte joypadRegister;
+
+		public byte JoypadRegister
 		{
-			get => memory.Read(0xFF00);
-			set => memory.Write(0xFF00, (byte)(value & 0b00111111));
+			get => (byte)(joypadRegister & 0b00111111);
+			set => joypadRegister = (byte)(value & 0b00111111);
 		}
 
 		//Flags

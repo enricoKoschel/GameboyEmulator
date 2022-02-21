@@ -27,19 +27,10 @@ namespace GameboyEmulator
 			}
 		}
 
-		//Constants
-		private const int MODE_2_TIME = 80;
-		private const int MODE_3_TIME = 390; //Maybe 390? Was 252 before
-
-		public const ushort SPRITE_PALETTE_0_ADDRESS = 0xFF48;
-		public const ushort SPRITE_PALETTE_1_ADDRESS = 0xFF49;
-
-		private int drawScanlineCounter;
-
 		//Registers
 		private byte Mode
 		{
-			get => (byte)(StatusRegister & 0b00000011);
+			get => (byte)(LcdStatusRegister & 0b00000011);
 			set
 			{
 				if (value > 0x3)
@@ -48,109 +39,93 @@ namespace GameboyEmulator
 					throw new ArgumentOutOfRangeException(nameof(value), "LCD Mode cannot be larger than 3!");
 				}
 
-				StatusRegister &= 0b11111100;
-				StatusRegister |= value;
+				LcdStatusRegister &= 0b11111100;
+				LcdStatusRegister |= value;
 			}
 		}
 
-		private byte ControlRegister
-		{
-			get => memory.Read(0xFF40);
-			set => memory.Write(0xFF40, value);
-		}
+		public byte LcdControlRegister { get; set; }
 
-		private byte StatusRegister
-		{
-			get => memory.Read(0xFF41);
-			set => memory.Write(0xFF41, value);
-		}
+		public byte LcdStatusRegister { get; set; }
 
-		public byte CurrentScanline
-		{
-			get => memory.Read(0xFF44);
-			set => memory.Write(0xFF44, value, true);
-		}
+		public byte CurrentScanline { get; private set; }
 
-		private byte CurrentScanlineCompare
-		{
-			get => memory.Read(0xFF45);
-			set => memory.Write(0xFF45, value, true);
-		}
+		public byte CurrentScanlineCompare { get; set; }
 
-		public byte ScrollX
-		{
-			get => memory.Read(0xFF43);
-			set => memory.Write(0xFF43, value);
-		}
+		public byte ScrollX { get; set; }
 
-		public byte ScrollY
-		{
-			get => memory.Read(0xFF42);
-			set => memory.Write(0xFF42, value);
-		}
+		public byte ScrollY { get; set; }
+
+		private byte windowX;
 
 		public byte WindowX
 		{
-			get => (byte)(memory.Read(0xFF4B) - 7);
-			set => memory.Write(0xFF4B, (byte)(value + 7));
+			get => (byte)(windowX - 7);
+			set => windowX = (byte)(value + 7);
 		}
 
-		public byte WindowY
-		{
-			get => memory.Read(0xFF4A);
-			set => memory.Write(0xFF4A, value);
-		}
+		public byte WindowY { get; set; }
 
-		public ushort WindowTileMapBaseAddress => Cpu.GetBit(ControlRegister, 6) ? (ushort)0x9C00 : (ushort)0x9800;
+		public byte TilePalette { get; set; }
 
-		public ushort BackgroundTileMapBaseAddress => Cpu.GetBit(ControlRegister, 3) ? (ushort)0x9C00 : (ushort)0x9800;
+		public byte SpritePalette0 { get; set; }
 
-		public ushort TileDataBaseAddress => Cpu.GetBit(ControlRegister, 4) ? (ushort)0x8000 : (ushort)0x8800;
-
-		public byte TilePalette => memory.Read(0xFF47);
-
-		public int SpriteSize => Cpu.GetBit(ControlRegister, 2) ? 16 : 8;
-
-		//Flags
-		public bool IsEnabled => Cpu.GetBit(ControlRegister, 7);
-
-		public bool TilesEnabled => Cpu.GetBit(ControlRegister, 0);
-
-		public bool SpritesEnabled => Cpu.GetBit(ControlRegister, 1);
-
-		public bool WindowEnabled => Cpu.GetBit(ControlRegister, 5);
-
-		public bool TileDataIsSigned => !Cpu.GetBit(ControlRegister, 4);
+		public byte SpritePalette1 { get; set; }
 
 		private bool CoincidenceFlag
 		{
-			get => Cpu.GetBit(StatusRegister, 2);
-			set => StatusRegister = Cpu.SetBit(StatusRegister, 2, value);
+			get => Cpu.GetBit(LcdStatusRegister, 2);
+			set => LcdStatusRegister = Cpu.SetBit(LcdStatusRegister, 2, value);
 		}
 
 		private bool CoincidenceInterruptEnabled
 		{
-			get => Cpu.GetBit(StatusRegister, 6);
-			set => StatusRegister = Cpu.SetBit(StatusRegister, 6, value);
+			get => Cpu.GetBit(LcdStatusRegister, 6);
+			set => LcdStatusRegister = Cpu.SetBit(LcdStatusRegister, 6, value);
 		}
 
 		private bool Mode2InterruptEnabled
 		{
-			get => Cpu.GetBit(StatusRegister, 5);
-			set => StatusRegister = Cpu.SetBit(StatusRegister, 5, value);
+			get => Cpu.GetBit(LcdStatusRegister, 5);
+			set => LcdStatusRegister = Cpu.SetBit(LcdStatusRegister, 5, value);
 		}
 
 		private bool Mode1InterruptEnabled
 		{
-			get => Cpu.GetBit(StatusRegister, 4);
-			set => StatusRegister = Cpu.SetBit(StatusRegister, 4, value);
+			get => Cpu.GetBit(LcdStatusRegister, 4);
+			set => LcdStatusRegister = Cpu.SetBit(LcdStatusRegister, 4, value);
 		}
 
 		private bool Mode0InterruptEnabled
 		{
-			get => Cpu.GetBit(StatusRegister, 3);
-			set => StatusRegister = Cpu.SetBit(StatusRegister, 3, value);
+			get => Cpu.GetBit(LcdStatusRegister, 3);
+			set => LcdStatusRegister = Cpu.SetBit(LcdStatusRegister, 3, value);
 		}
+
+		private ushort WindowTileMapBaseAddress => Cpu.GetBit(LcdControlRegister, 6) ? (ushort)0x9C00 : (ushort)0x9800;
+
+		private ushort BackgroundTileMapBaseAddress =>
+			Cpu.GetBit(LcdControlRegister, 3) ? (ushort)0x9C00 : (ushort)0x9800;
+
+		private ushort TileDataBaseAddress => Cpu.GetBit(LcdControlRegister, 4) ? (ushort)0x8000 : (ushort)0x8800;
+
+		private int SpriteSize => Cpu.GetBit(LcdControlRegister, 2) ? 16 : 8;
+
+		private bool IsEnabled => Cpu.GetBit(LcdControlRegister, 7);
+
+		private bool TilesEnabled => Cpu.GetBit(LcdControlRegister, 0);
+
+		private bool SpritesEnabled => Cpu.GetBit(LcdControlRegister, 1);
+
+		private bool WindowEnabled => Cpu.GetBit(LcdControlRegister, 5);
+
+		private bool TileDataIsSigned => !Cpu.GetBit(LcdControlRegister, 4);
+
+		//Constants
+		private const int MODE_2_TIME = 80;
+		private const int MODE_3_TIME = 390; //Maybe 390? Was 252 before
+
+		private int drawScanlineCounter;
 
 		private bool vBlankRequested;
 		private bool coincidenceRequested;
@@ -158,14 +133,14 @@ namespace GameboyEmulator
 		private bool mode1Requested;
 		private bool mode0Requested;
 
+		private int internalWindowCounter;
+
 		private readonly Emulator emulator;
 
 		public Ppu(Emulator emulator)
 		{
 			this.emulator = emulator;
 		}
-
-		private int internalWindowCounter;
 
 		public void Update(int cycles)
 		{
@@ -207,7 +182,7 @@ namespace GameboyEmulator
 
 			if (coincidenceRequested) return;
 
-			interrupts.Request(Interrupts.InterruptType.LcdStat);
+			emulator.interrupts.Request(Interrupts.InterruptType.LcdStat);
 			coincidenceRequested = true;
 		}
 
@@ -224,13 +199,13 @@ namespace GameboyEmulator
 
 				if (Mode1InterruptEnabled && !mode1Requested)
 				{
-					interrupts.Request(Interrupts.InterruptType.LcdStat);
+					emulator.interrupts.Request(Interrupts.InterruptType.LcdStat);
 					mode1Requested = true;
 				}
 
 				if (!vBlankRequested)
 				{
-					interrupts.Request(Interrupts.InterruptType.VBlank);
+					emulator.interrupts.Request(Interrupts.InterruptType.VBlank);
 					vBlankRequested = true;
 				}
 
@@ -429,9 +404,6 @@ namespace GameboyEmulator
 				{
 					int spriteDataIndex = spritePixelIndex;
 
-					ushort paletteAddress =
-						usingPalette0 ? SPRITE_PALETTE_0_ADDRESS : SPRITE_PALETTE_1_ADDRESS;
-
 					int  paletteIndexLo = Cpu.GetBit(spriteDataLo, spriteDataIndex) ? 1 : 0;
 					int  paletteIndexHi = Cpu.GetBit(spriteDataHi, spriteDataIndex) ? 1 : 0;
 					byte paletteIndex   = (byte)((paletteIndexHi << 1) | paletteIndexLo);
@@ -439,8 +411,7 @@ namespace GameboyEmulator
 					//Transparent Pixel
 					if (paletteIndex == 0) continue;
 
-					byte                palette = memory.Read(paletteAddress);
-					SFML.Graphics.Color color   = GetColor(palette, paletteIndex);
+					SFML.Graphics.Color color = GetColor(usingPalette0 ? SpritePalette0 : SpritePalette1, paletteIndex);
 
 					int spriteDataIndexReverse = spriteDataIndex;
 
