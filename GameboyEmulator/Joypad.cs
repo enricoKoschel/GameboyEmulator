@@ -1,28 +1,23 @@
-﻿using System;
-using SFML.Window;
+﻿using SFML.Window;
 
 namespace GameboyEmulator
 {
-	class Joypad
+	public class Joypad
 	{
-		//Modules
-		private readonly Memory     memory;
-		private readonly Interrupts interrupts;
-		private readonly Window     window;
+		private readonly Emulator emulator;
 
-		public Joypad(Memory memory, Interrupts interrupts, Graphics graphics)
+		public Joypad(Emulator emulator)
 		{
-			this.memory     = memory;
-			this.interrupts = interrupts;
-
-			window = graphics.GetScreen().GetWindow();
+			this.emulator = emulator;
 		}
 
 		//Registers
-		private byte JoypadRegister
+		private byte joypadRegister;
+
+		public byte JoypadRegister
 		{
-			get => memory.Read(0xFF00);
-			set => memory.Write(0xFF00, (byte)(value & 0b00111111));
+			get => (byte)(joypadRegister & 0b00111111);
+			set => joypadRegister = (byte)(value & 0b00111111);
 		}
 
 		//Flags
@@ -75,7 +70,7 @@ namespace GameboyEmulator
 		{
 			if (frameDone)
 			{
-				hadFocusLastFrame = window.HasFocus();
+				hadFocusLastFrame = emulator.window.HasFocus();
 
 				downPressedThisFrame    = Keyboard.IsKeyPressed(Keyboard.Key.Down);
 				upPressedThisFrame      = Keyboard.IsKeyPressed(Keyboard.Key.Up);
@@ -88,7 +83,7 @@ namespace GameboyEmulator
 
 				//Only request Interrupt if Button was pressed this Frame
 				if (ButtonPressedThisFrame && ButtonPressedThisFrame != buttonPressedLastFrame)
-					interrupts.Request(Interrupts.InterruptType.Joypad);
+					emulator.interrupts.Request(Interrupts.InterruptType.Joypad);
 
 				buttonPressedLastFrame = ButtonPressedThisFrame;
 			}
@@ -103,18 +98,18 @@ namespace GameboyEmulator
 
 			if (ButtonKeysSelected)
 			{
-				DownOrStartPressed    = startPressedThisFrame;
-				UpOrSelectPressed     = selectPressedThisFrame;
-				LeftOrButtonBPressed  = buttonBPressedThisFrame;
-				RightOrButtonAPressed = buttonAPressedThisFrame;
+				DownOrStartPressed    |= startPressedThisFrame;
+				UpOrSelectPressed     |= selectPressedThisFrame;
+				LeftOrButtonBPressed  |= buttonBPressedThisFrame;
+				RightOrButtonAPressed |= buttonAPressedThisFrame;
 			}
 
 			if (DirectionKeysSelected)
 			{
-				DownOrStartPressed    = downPressedThisFrame;
-				UpOrSelectPressed     = upPressedThisFrame;
-				LeftOrButtonBPressed  = leftPressedThisFrame;
-				RightOrButtonAPressed = rightPressedThisFrame;
+				DownOrStartPressed    |= downPressedThisFrame;
+				UpOrSelectPressed     |= upPressedThisFrame;
+				LeftOrButtonBPressed  |= leftPressedThisFrame;
+				RightOrButtonAPressed |= rightPressedThisFrame;
 			}
 		}
 	}

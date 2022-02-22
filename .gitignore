@@ -19,6 +19,9 @@ roms/
 #Log folder
 logs/
 
+#Saves folder
+saves/
+
 # Build results
 [Dd]ebug/
 [Dd]ebugPublic/

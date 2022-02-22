@@ -2,59 +2,45 @@
 
 namespace GameboyEmulator
 {
-	class Timer
+	public class Timer
 	{
-		//Modules
-		private readonly Memory     memory;
-		private readonly Interrupts interrupts;
+		private readonly Emulator emulator;
 
-		public Timer(Memory memory, Interrupts interrupts)
+		public Timer(Emulator emulator)
 		{
-			this.memory     = memory;
-			this.interrupts = interrupts;
+			this.emulator = emulator;
 		}
 
 		//Registers
-		private byte DividerRegister
+		public byte DividerRegister { get; private set; }
+
+		public byte TimerRegister { get; set; }
+
+		public byte TimerModulo { get; set; }
+
+		private byte timerControl;
+
+		public byte TimerControl
 		{
-			get => memory.Read(0xFF04);
-			set => memory.Write(0xFF04, value, true);
+			get => (byte)(timerControl & 0b00000111);
+			set => timerControl = (byte)(value & 0b00000111);
 		}
 
-		private byte TimerRegister
+		private int InternalMainTimerCounterResetValue => (TimerControl & 0b00000011) switch
 		{
-			get => memory.Read(0xFF05);
-			set => memory.Write(0xFF05, value);
-		}
+			0 => 1024,
+			1 => 16,
+			2 => 64,
+			3 => 256,
+			_ => throw new ArgumentOutOfRangeException(
+					 nameof(TimerControl) + " & 0b00000011", TimerControl & 0b00000011,
+					 "Something has gone horribly wrong and the fabric of space time is rupturing as we speak."
+				 )
+		};
 
-		private byte TimerModulo => memory.Read(0xFF06);
+		private int internalDividerRegisterCounter;
 
-		private byte TimerControl
-		{
-			get => memory.Read(0xFF07);
-			set => memory.Write(0xFF07, value);
-		}
-
-		private byte Frequency
-		{
-			get => (byte)(TimerControl & 0b00000011);
-			set
-			{
-				if (value > 0x3)
-				{
-					Logger.LogMessage("Frequency cannot be larger than 3!", Logger.LogLevel.Error);
-					throw new ArgumentOutOfRangeException(nameof(value), "Frequency cannot be larger than 3!");
-				}
-
-
-				TimerControl &= 0b11111100;
-				TimerControl |= value;
-			}
-		}
-
-		private int updateDividerRegisterCounter;
-
-		private int updateMainTimerCounter;
+		private int internalMainTimerCounter;
 
 		//Flags
 		private bool MainTimerEnabled => Cpu.GetBit(TimerControl, 2);
@@ -65,41 +51,39 @@ namespace GameboyEmulator
 			if (MainTimerEnabled) UpdateMainTimer(cycles);
 		}
 
+		public void ResetDividerRegister()
+		{
+			DividerRegister                = 0;
+			internalDividerRegisterCounter = 0;
+		}
+
 		private void UpdateDividerRegister(int cycles)
 		{
-			if ((updateDividerRegisterCounter += cycles) < 256) return;
+			int counterWithCycles = internalDividerRegisterCounter += cycles;
+
+			if (counterWithCycles < 256) return;
 
 			//Increment Divider Register every 256 Clock Cycles
-			updateDividerRegisterCounter = 0;
+			internalDividerRegisterCounter = counterWithCycles - 256; //Maybe reset to 0
 			DividerRegister++;
 		}
 
 		private void UpdateMainTimer(int cycles)
 		{
-			if ((updateMainTimerCounter -= cycles) > 0) return;
+			int counterWithCycles = internalMainTimerCounter -= cycles;
+			if (counterWithCycles > 0) return;
 
-			SetMainTimerCounter();
+			internalMainTimerCounter = InternalMainTimerCounterResetValue;
+			Update(-counterWithCycles);
 
 			if (TimerRegister == 255)
 			{
 				//Timer Overflow, reset to Value in Timer Modulo and request Interrupt
 				TimerRegister = TimerModulo;
-				interrupts.Request(Interrupts.InterruptType.Timer);
+				emulator.interrupts.Request(Interrupts.InterruptType.Timer);
 			}
 			else
 				TimerRegister++;
-		}
-
-		private void SetMainTimerCounter()
-		{
-			updateMainTimerCounter = Frequency switch
-			{
-				0 => 1024,
-				1 => 16,
-				2 => 64,
-				3 => 256,
-				_ => throw new ArgumentOutOfRangeException(nameof(Frequency), "Frequency cannot be larger than 3!")
-			};
 		}
 	}
 }

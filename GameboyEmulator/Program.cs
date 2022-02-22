@@ -1,8 +1,4 @@
-﻿using System;
-using SFML.System;
-using SFML.Window;
-
-namespace GameboyEmulator
+﻿namespace GameboyEmulator
 {
 	static class Program
 	{
@@ -10,25 +6,9 @@ namespace GameboyEmulator
 		{
 			Logger.LogMessage("Program started", Logger.LogLevel.Info);
 
-			Cpu    emulator   = new Cpu();
-			Window window     = emulator.GetGraphics().GetScreen().GetWindow();
-			Clock  frameTime  = new Clock();
-			int    lowestFps  = int.MaxValue;
-			int    highestFps = 0;
+			Emulator emulator = new Emulator();
 
-			emulator.Start();
-
-			while (emulator.IsRunning)
-			{
-				frameTime.Restart();
-				emulator.Update();
-
-				int fps = Convert.ToInt32(1 / frameTime.ElapsedTime.AsSeconds());
-				highestFps = Math.Max(highestFps, fps);
-				lowestFps  = Math.Min(lowestFps, fps);
-
-				window.SetTitle($"GameBoy Emulator | FPS - {fps} | Lowest - {lowestFps} | Highest - {highestFps}");
-			}
+			while (emulator.IsRunning) emulator.Update();
 
 			Logger.LogMessage("Program terminated without errors", Logger.LogLevel.Info);
 		}

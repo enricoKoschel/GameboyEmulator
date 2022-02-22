@@ -1,32 +1,43 @@
-﻿namespace GameboyEmulator
+﻿using System;
+
+namespace GameboyEmulator
 {
-	class Interrupts
+	public class Interrupts
 	{
+		[Flags]
 		public enum InterruptType
 		{
-			VBlank,
-			LcdStat,
-			Timer,
-			Serial,
-			Joypad
+			VBlank  = 1,
+			LcdStat = 2,
+			Timer   = 4,
+			Serial  = 8,
+			Joypad  = 16
 		}
 
-		//Modules
-		private readonly Memory memory;
-		private readonly Cpu    cpu;
-
-		public Interrupts(Memory memory, Cpu cpu)
+		public enum EnableInterruptsStatus
 		{
-			this.memory = memory;
-			this.cpu    = cpu;
+			ThisCycle,
+			NextCycle,
+			None
 		}
 
-		private byte InterruptEnableRegister => memory.Read(0xFFFF);
+		private readonly Emulator emulator;
 
-		private byte InterruptFlagRegister
+		public Interrupts(Emulator emulator)
 		{
-			get => memory.Read(0xFF0F);
-			set => memory.Write(0xFF0F, (byte)(value & 0b00011111));
+			this.emulator = emulator;
+
+			InterruptMasterEnable = true;
+		}
+
+		public byte InterruptEnableRegister { get; set; }
+
+		private byte interruptFlagRegister;
+
+		public byte InterruptFlagRegister
+		{
+			get => (byte)(interruptFlagRegister & 0b00011111);
+			set => interruptFlagRegister = (byte)(value & 0b00011111);
 		}
 
 		private bool VBlankEnabled => Cpu.GetBit(InterruptEnableRegister, 0);
@@ -71,7 +82,27 @@
 
 		public bool HasPendingInterrupts => Cpu.ToBool(InterruptFlagRegister & InterruptEnableRegister & 0x1F);
 
-		public bool masterInterruptEnable = true;
+		public bool InterruptMasterEnable { get; set; }
+
+		public EnableInterruptsStatus enableInterruptsStatus = EnableInterruptsStatus.None;
+
+		public void EnableInterrupts()
+		{
+			//After interrupts are enabled, there is a delay of one cycle until they are actually enabled
+			switch (enableInterruptsStatus)
+			{
+				case EnableInterruptsStatus.NextCycle:
+					enableInterruptsStatus = EnableInterruptsStatus.ThisCycle;
+					break;
+				case EnableInterruptsStatus.ThisCycle:
+					enableInterruptsStatus = EnableInterruptsStatus.None;
+					InterruptMasterEnable  = true;
+					break;
+				case EnableInterruptsStatus.None:
+				default:
+					break;
+			}
+		}
 
 		public void Request(InterruptType interrupt)
 		{
@@ -92,12 +123,20 @@
 				case InterruptType.Joypad:
 					JoypadRequested = true;
 					break;
+				default:
+					throw new ArgumentOutOfRangeException(nameof(interrupt), interrupt, "Invalid interrupt requested!");
+			}
+
+			if (((byte)interrupt & InterruptEnableRegister) != 0)
+			{
+				//Halt mode is exited when an enabled interrupt is requested, master interrupt enable is ignored
+				emulator.cpu.ExitHaltMode();
 			}
 		}
 
 		public void Update()
 		{
-			if (!masterInterruptEnable || InterruptFlagRegister == 0 || InterruptEnableRegister == 0) return;
+			if (!InterruptMasterEnable || InterruptFlagRegister == 0 || InterruptEnableRegister == 0) return;
 
 			//Ordered in decreasing Priority so that highest Priority always gets executed
 			if (VBlankEnabled && VBlankRequested) Service(InterruptType.VBlank);
@@ -109,29 +148,29 @@
 
 		private void Service(InterruptType interrupt)
 		{
-			masterInterruptEnable = false;
+			InterruptMasterEnable = false;
 
 			switch (interrupt)
 			{
 				case InterruptType.VBlank:
 					VBlankRequested = false;
-					cpu.ServiceInterrupt(0x40);
+					emulator.cpu.ServiceInterrupt(0x40);
 					break;
 				case InterruptType.LcdStat:
 					LcdStatRequested = false;
-					cpu.ServiceInterrupt(0x48);
+					emulator.cpu.ServiceInterrupt(0x48);
 					break;
 				case InterruptType.Timer:
 					TimerRequested = false;
-					cpu.ServiceInterrupt(0x50);
+					emulator.cpu.ServiceInterrupt(0x50);
 					break;
 				case InterruptType.Serial:
 					SerialRequested = false;
-					cpu.ServiceInterrupt(0x58);
+					emulator.cpu.ServiceInterrupt(0x58);
 					break;
 				case InterruptType.Joypad:
 					JoypadRequested = false;
-					cpu.ServiceInterrupt(0x60);
+					emulator.cpu.ServiceInterrupt(0x60);
 					break;
 			}
 		}

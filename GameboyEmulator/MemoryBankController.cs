@@ -3,7 +3,7 @@ using System.IO;
 
 namespace GameboyEmulator
 {
-	class MemoryBankController
+	public class MemoryBankController
 	{
 		//A list of games and their corresponding mappers can be found here: https://gbhwdb.gekkio.fi/cartridges/
 		private enum BankControllerType
@@ -68,26 +68,37 @@ namespace GameboyEmulator
 			AdvancedRomOrRamBanking = 1
 		}
 
-		//Modules
-		private readonly Memory memory;
+		private readonly Emulator emulator;
 
-		public MemoryBankController(Memory memory)
+		public MemoryBankController(Emulator emulator)
 		{
-			this.memory = memory;
+			this.emulator = emulator;
 		}
 
 		private BankControllerType currentBankControllerType;
 		private MemoryBankingMode  currentMemoryBankingMode;
 		private byte               numberOfRomBanks;
-		private byte               numberOfRamBanks;
 		private byte               currentRamBank;
-		private byte               currentRomBank;
+		private byte               currentRomBankUpper;
+		private byte               currentRomBankLower;
 
-		private bool isRamEnabled;
+		public byte NumberOfRamBanks { get; private set; }
 
-		public void InitialiseBanking()
+		private byte CurrentRomBank
 		{
-			currentBankControllerType = (BankControllerType)memory.Read(0x147, true);
+			get => (byte)(((currentRomBankUpper & 0b00000011) << 5) | (currentRomBankLower & 0b00011111));
+			set
+			{
+				currentRomBankLower = (byte)(value & 0b00011111);
+				currentRomBankUpper = (byte)((value & 0b01100000) >> 5);
+			}
+		}
+
+		public bool IsRamEnabled { get; private set; }
+
+		public void InitializeBanking()
+		{
+			currentBankControllerType = (BankControllerType)emulator.memory.Read(0x147, true);
 			if (!Enum.IsDefined(typeof(BankControllerType), currentBankControllerType))
 			{
 				Logger.LogMessage(
@@ -104,7 +115,7 @@ namespace GameboyEmulator
 				Logger.LogLevel.Info, true
 			);
 
-			byte numberOfRomBanksRaw = memory.Read(0x148, true);
+			byte numberOfRomBanksRaw = emulator.memory.Read(0x148, true);
 			if (numberOfRomBanksRaw > 0x08)
 			{
 				Logger.LogMessage("Cartridge has invalid number of ROM banks!", Logger.LogLevel.Error);
@@ -115,47 +126,49 @@ namespace GameboyEmulator
 
 			Logger.LogMessage($"{numberOfRomBanks} ROM bank(s) determined.", Logger.LogLevel.Info, true);
 
-			byte numberOfRamBanksRaw = memory.Read(0x149, true);
+			byte numberOfRamBanksRaw = emulator.memory.Read(0x149, true);
 			switch (numberOfRamBanksRaw)
 			{
 				case 0x00:
 				case 0x01:
-					numberOfRamBanks = 0;
+					NumberOfRamBanks = 0;
 					break;
 				case 0x02:
-					numberOfRamBanks = 1;
+					NumberOfRamBanks = 1;
 					break;
 				case 0x03:
-					numberOfRamBanks = 4;
+					NumberOfRamBanks = 4;
 					break;
 				case 0x04:
-					numberOfRamBanks = 16;
+					NumberOfRamBanks = 16;
 					break;
 				case 0x05:
-					numberOfRamBanks = 8;
+					NumberOfRamBanks = 8;
 					break;
 				default:
 					Logger.LogMessage("Cartridge has invalid number of RAM banks!", Logger.LogLevel.Error);
 					throw new InvalidDataException("Cartridge has invalid number of RAM banks!");
 			}
 
-			Logger.LogMessage($"{numberOfRamBanks} RAM bank(s) determined.", Logger.LogLevel.Info, true);
+			Logger.LogMessage($"{NumberOfRamBanks} RAM bank(s) determined.", Logger.LogLevel.Info, true);
 
 			currentMemoryBankingMode = MemoryBankingMode.SimpleRomBanking;
 
-			isRamEnabled = false;
+			IsRamEnabled = false;
 
-			currentRomBank = 1;
+			CurrentRomBank = 1;
 			currentRamBank = 0;
 		}
 
 		public void HandleBanking(ushort address, byte data)
 		{
-			byte previousRomBank = currentRomBank;
+			byte previousRomBank = CurrentRomBank;
 			byte previousRamBank = currentRamBank;
 
 			switch (currentBankControllerType)
 			{
+				case BankControllerType.RomOnly:
+					return;
 				case BankControllerType.Mbc1:
 				{
 					HandleBankingMbc1(address, data, false);
@@ -180,10 +193,10 @@ namespace GameboyEmulator
 				}
 			}
 
-			if (previousRomBank != currentRomBank)
+			if (previousRomBank != CurrentRomBank)
 			{
 				Logger.LogMessage(
-					$"Rom bank was changed from '0x{previousRomBank:X}' to '0x{currentRomBank:X}'",
+					$"Rom bank was changed from '0x{previousRomBank:X}' to '0x{CurrentRomBank:X}'",
 					Logger.LogLevel.Info,
 					true
 				);
@@ -203,27 +216,26 @@ namespace GameboyEmulator
 		{
 			if (hasRam && Memory.IsInRange(address, 0x0000, 0x1FFF))
 			{
-				isRamEnabled = (data & 0x0F) == 0xA;
+				IsRamEnabled = (data & 0x0F) == 0xA;
 
 				Logger.LogMessage(
-					$"Cartridge ram was {(isRamEnabled ? "enabled" : "disabled")}",
+					$"Cartridge ram was {(IsRamEnabled ? "enabled" : "disabled")}",
 					Logger.LogLevel.Info,
 					true
 				);
 			}
 			else if (Memory.IsInRange(address, 0x2000, 0x3FFF))
 			{
-				//Set up to the lower 5 bits of current rom bank number
-				currentRomBank = (byte)(data & 0b00011111);
+				//Set the lower 5 bits of current rom bank number
+				currentRomBankLower = (byte)(data & 0b00011111);
 			}
 			else if (Memory.IsInRange(address, 0x4000, 0x5FFF))
 			{
 				//Set bits 5 and 6 of current rom bank number if enough banks are available
-				if (currentMemoryBankingMode == MemoryBankingMode.SimpleRomBanking && numberOfRomBanks >= 64)
-					currentRomBank = (byte)((currentRomBank & 0b00011111) | ((data & 0b00000011) << 5));
+				if (numberOfRomBanks >= 64) currentRomBankUpper = (byte)(data & 0b00000011);
 
 				//Set current ram bank number if enough banks are available
-				if (currentMemoryBankingMode == MemoryBankingMode.AdvancedRomOrRamBanking && numberOfRamBanks >= 4)
+				if (currentMemoryBankingMode == MemoryBankingMode.AdvancedRomOrRamBanking && NumberOfRamBanks >= 4)
 					currentRamBank = (byte)(data & 0b00000011);
 			}
 			else if (Memory.IsInRange(address, 0x6000, 0x7FFF))
@@ -247,9 +259,7 @@ namespace GameboyEmulator
 				}
 			}
 
-			if (currentRomBank == 0x00 || currentRomBank == 0x20 || currentRomBank == 0x40 ||
-				currentRomBank == 0x60)
-				currentRomBank++;
+			if (currentRomBankLower == 0) currentRomBankLower++;
 		}
 
 		public uint ConvertAddressInRomBank(ushort address)
@@ -264,14 +274,13 @@ namespace GameboyEmulator
 				case BankControllerType.Mbc1Ram:
 				case BankControllerType.Mbc1RamBattery:
 				{
-					byte currentActualRomBank = (byte)(currentRomBank & (numberOfRomBanks - 1));
+					byte currentActualRomBank = (byte)(CurrentRomBank & (numberOfRomBanks - 1));
 
 					if (currentMemoryBankingMode == MemoryBankingMode.AdvancedRomOrRamBanking)
 					{
-						if (address < 0x4000)
-							return (ushort)(address + (currentActualRomBank & 0b01100000) * 0x4000);
+						if (address < 0x4000) return (uint)(address + (currentActualRomBank & 0b01100000) * 0x4000);
 
-						return (uint)(address + ((currentActualRomBank & 0b00011111) - 1) * 0x4000);
+						return (uint)(address + (currentActualRomBank - 1) * 0x4000);
 					}
 
 					if (address < 0x4000) return address;
@@ -298,16 +307,6 @@ namespace GameboyEmulator
 			if (currentMemoryBankingMode == MemoryBankingMode.SimpleRomBanking) return address;
 
 			return (uint)(address + 0x2000 * currentRamBank);
-		}
-
-		public byte GetNumberOfRamBanks()
-		{
-			return numberOfRamBanks;
-		}
-
-		public bool GetIsRamEnabled()
-		{
-			return isRamEnabled;
 		}
 	}
 }
