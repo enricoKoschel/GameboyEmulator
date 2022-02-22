@@ -38,15 +38,15 @@
 
 ## [Scribbl tests][scribbltests]
 
-| Test      | State                                              |
-|-----------|----------------------------------------------------|
-| fairylake | ✅                                                  |
-| lycscx    | ✅                                                  |
-| lycscy    | ✅                                                  |
-| palettely | ✅                                                  |
-| scxly     | ✅                                                  |
-| statcount | ❌                                                  |
-| winpos    | ❌ (Window does not display correctly when WY is 0) |
+| Test      | State |
+|-----------|-------|
+| fairylake | ✅     |
+| lycscx    | ✅     |
+| lycscy    | ✅     |
+| palettely | ✅     |
+| scxly     | ✅     |
+| statcount | ❌     |
+| winpos    | ✅     |
 
 ## [Mooneye tests][mooneye_tests]
 
@@ -71,7 +71,7 @@
 | halt_ime1_timing        | ✅     |
 | halt_ime1_timing2-GS    | ❌     |
 | if_ie_registers         | ❌     |
-| intr_timing             | ❌     |
+| intr_timing             | ✅     |
 | jp_timing               | ❌     |
 | jp_cc_timing            | ❌     |
 | ld_hl_sp_e_timing       | ❌     |
@@ -170,8 +170,8 @@
 | rom_1Mb           | ✅                                               |
 | rom_2Mb           | ✅                                               |
 | rom_4Mb           | ✅                                               |
-| rom_8Mb           | ❌                                               |
-| rom_16Mb          | ❌                                               |
+| rom_8Mb           | ✅                                               |
+| rom_16Mb          | ✅                                               |
 | ram_64kb          | ✅                                               |
 | ram_256kb         | ✅                                               |
 | multicart_rom_8Mb | ❌ (Multicart functionality not implemented yet) |
@@ -278,7 +278,7 @@
 |------------------|-------|
 | [rtc3test]       | ❌     |
 | [bullyGB] in DMG | ❌     |
-| [dmg_acid2]      | ❌     |
+| [dmg_acid2]      | ✅     |
 
 [blargg_tests]: https://github.com/retrio/gb-test-roms
 
