@@ -305,7 +305,7 @@ namespace GameboyEmulator
 			}
 
 			//Window
-			if (!WindowEnabled || WindowY > CurrentScanline || WindowXCorrected < 0 || WindowXCorrected > 159) return;
+			if (!WindowEnabled || WindowY > CurrentScanline || WindowXCorrected > 159) return;
 
 			int windowTileMapY = internalWindowCounter++ / 8 * 32;
 
@@ -334,7 +334,7 @@ namespace GameboyEmulator
 				int  paletteIndexHi = Cpu.GetBit(tileDataHi, currentTileColumnReverse) ? 1 : 0;
 				byte paletteIndex   = (byte)((paletteIndexHi << 1) | paletteIndexLo);
 
-				int bufferXIndex = windowPixel;
+				int bufferXIndex = windowPixel < 0 ? 0 : windowPixel;
 				int bufferYIndex = CurrentScanline;
 
 				emulator.screen.UpdateZBuffer(bufferXIndex, bufferYIndex, paletteIndex == 0);
