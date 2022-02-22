@@ -19,7 +19,7 @@ namespace GameboyEmulator
 		//0xFFFF			Interrupt Enable Register
 		// ReSharper restore CommentTypo
 
-		private          byte[] cartridgeRomWithBanks;
+		private          byte[] bootRom;
 		private          byte[] cartridgeRom;
 		private readonly byte[] videoRam;
 		private          byte[] cartridgeRam;
@@ -61,11 +61,11 @@ namespace GameboyEmulator
 
 		//File paths
 		private const string BOOT_ROM_FILE_PATH = "../../../roms/boot.gb";
-		private       bool   bootRomEnabled     = false;
+		private       bool   useBootRom         = false;
+		private       bool   bootRomEnabled;
 
 		//TODO - Accept game file path as console parameter / make into property
 		private const string GAME_ROM_FILE_PATH = "../../../roms/mario.gb";
-		//private const string GAME_ROM_FILE_PATH = "../../../roms/test/Mooneye/emulator-only/mbc1/rom_8Mb.gb";
 		//private const string GAME_ROM_FILE_PATH = "../../../roms/test/Blargg/instr_timing/instr_timing.gb";
 
 		private readonly Emulator emulator;
@@ -88,51 +88,34 @@ namespace GameboyEmulator
 
 		public void LoadGame()
 		{
-			//TODO refactor this method
-			//Have separate array for boot rom and read from there when boot rom is enabled
-			//If boot rom is disabled, read from normal rom
-			//Also refactor DisableBootRom()
-			if (bootRomEnabled)
+			if (useBootRom)
 			{
+				bootRomEnabled = true;
+
 				try
 				{
-					cartridgeRom = File.ReadAllBytes(BOOT_ROM_FILE_PATH);
+					bootRom = File.ReadAllBytes(BOOT_ROM_FILE_PATH);
 				}
 				catch (Exception e)
 				{
 					Logger.LogMessage($"Boot rom '{BOOT_ROM_FILE_PATH}' could not be opened!", Logger.LogLevel.Error);
 					throw new Exception("", e);
 				}
-
-				//Resize for Cartridge Header
-				Array.Resize(ref cartridgeRom, 0x150);
-
-				try
-				{
-					cartridgeRomWithBanks = File.ReadAllBytes(GAME_ROM_FILE_PATH);
-				}
-				catch (Exception e)
-				{
-					Logger.LogMessage($"Game rom '{GAME_ROM_FILE_PATH}' could not be opened!", Logger.LogLevel.Error);
-					throw new Exception("", e);
-				}
-
-				//Copy Cartridge Header
-				for (int i = 0x100; i < 0x150; i++) cartridgeRom[i] = cartridgeRomWithBanks[i];
 			}
 			else
 			{
+				bootRomEnabled = false;
 				InitializeRegisters();
+			}
 
-				try
-				{
-					cartridgeRom = File.ReadAllBytes(GAME_ROM_FILE_PATH);
-				}
-				catch (Exception e)
-				{
-					Logger.LogMessage($"Game rom '{GAME_ROM_FILE_PATH}' could not be opened!", Logger.LogLevel.Error);
-					throw new Exception("", e);
-				}
+			try
+			{
+				cartridgeRom = File.ReadAllBytes(GAME_ROM_FILE_PATH);
+			}
+			catch (Exception e)
+			{
+				Logger.LogMessage($"Game rom '{GAME_ROM_FILE_PATH}' could not be opened!", Logger.LogLevel.Error);
+				throw new Exception("", e);
 			}
 
 			//Detect current Memorybanking Mode
@@ -186,8 +169,7 @@ namespace GameboyEmulator
 
 		private void DisableBootRom()
 		{
-			//Overwrite Boot rom with Game rom, thus disabling it
-			cartridgeRom = cartridgeRomWithBanks;
+			bootRomEnabled = false;
 
 			Logger.LogMessage("Boot rom was disabled.", Logger.LogLevel.Info);
 		}
@@ -196,6 +178,8 @@ namespace GameboyEmulator
 		{
 			if (IsInRange(address, CARTRIDGE_ROM_BASE_ADDRESS, CARTRIDGE_ROM_LAST_ADDRESS))
 			{
+				if (bootRomEnabled && address < 0x100) return bootRom[address];
+
 				return noRomBanking
 						   ? cartridgeRom[address]
 						   : cartridgeRom[emulator.memoryBankController.ConvertAddressInRomBank(address)];
