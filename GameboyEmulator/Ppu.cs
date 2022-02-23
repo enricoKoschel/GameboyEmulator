@@ -375,8 +375,14 @@ namespace GameboyEmulator
 			}
 
 			//Sort Sprites by x-coordinate in descending order
-			//If Sprites have the same x-coordinate, they are sorted by the Address in OAM in descending order
-			sprites = sprites.OrderByDescending(s => s.x).ThenByDescending(s => s.oamAddress).ToList();
+			//If Sprites have the same x-coordinate, they are sorted by their Address in OAM in descending order
+			sprites.Sort(
+				delegate(Sprite a, Sprite b)
+				{
+					int compareX = b.x - a.x;
+					return compareX != 0 ? compareX : b.oamAddress - a.oamAddress;
+				}
+			);
 
 			//Draw Sprites
 			foreach (Sprite sprite in sprites)

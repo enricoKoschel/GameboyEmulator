@@ -7,3 +7,4 @@
 - Implement save states/rewind
 - Implement sound
 - Controller support
+- Limit fps without using SetFramerateLimit()

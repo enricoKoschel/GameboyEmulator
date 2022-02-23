@@ -64,8 +64,8 @@ namespace GameboyEmulator
 		private       bool   useBootRom         = false;
 		private       bool   bootRomEnabled;
 
-		public const string GAME_ROM_FILE_PATH = "../../../roms/zelda.gb";
-		//private const string GAME_ROM_FILE_PATH = "../../../roms/test/blargg/instr_timing/instr_timing.gb";
+		//public const string GAME_ROM_FILE_PATH = "../../../roms/zelda.gb";
+		public const string GAME_ROM_FILE_PATH = "../../../roms/test/extra/dmg-acid2.gb";
 
 		private readonly Emulator emulator;
 

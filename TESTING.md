@@ -278,7 +278,7 @@
 |------------------|-------|
 | [rtc3test]       | ❌     |
 | [bullyGB] in DMG | ❌     |
-| [dmg_acid2]      | ✅     |
+| [dmg-acid2]      | ✅     |
 
 [blargg_tests]: https://github.com/retrio/gb-test-roms
 
