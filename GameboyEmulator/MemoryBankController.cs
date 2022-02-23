@@ -111,8 +111,7 @@ namespace GameboyEmulator
 			}
 
 			Logger.LogMessage(
-				$"Memory bank controller '{currentBankControllerType.ToString()}' was determined.",
-				Logger.LogLevel.Info, true
+				$"Memory bank controller '{currentBankControllerType.ToString()}' was determined.", Logger.LogLevel.Info
 			);
 
 			byte numberOfRomBanksRaw = emulator.memory.Read(0x148, true);
@@ -196,18 +195,14 @@ namespace GameboyEmulator
 			if (previousRomBank != CurrentRomBank)
 			{
 				Logger.LogMessage(
-					$"Rom bank was changed from '0x{previousRomBank:X}' to '0x{CurrentRomBank:X}'",
-					Logger.LogLevel.Info,
-					true
+					$"Rom bank was changed from '0x{previousRomBank:X}' to '0x{CurrentRomBank:X}'", Logger.LogLevel.Info
 				);
 			}
 
 			if (previousRamBank != currentRamBank)
 			{
 				Logger.LogMessage(
-					$"Ram bank was changed from '0x{previousRamBank:X}' to '0x{currentRamBank:X}'",
-					Logger.LogLevel.Info,
-					true
+					$"Ram bank was changed from '0x{previousRamBank:X}' to '0x{currentRamBank:X}'", Logger.LogLevel.Info
 				);
 			}
 		}
@@ -218,11 +213,7 @@ namespace GameboyEmulator
 			{
 				IsRamEnabled = (data & 0x0F) == 0xA;
 
-				Logger.LogMessage(
-					$"Cartridge ram was {(IsRamEnabled ? "enabled" : "disabled")}",
-					Logger.LogLevel.Info,
-					true
-				);
+				Logger.LogMessage($"Cartridge ram was {(IsRamEnabled ? "enabled" : "disabled")}", Logger.LogLevel.Info);
 			}
 			else if (Memory.IsInRange(address, 0x2000, 0x3FFF))
 			{
@@ -245,12 +236,12 @@ namespace GameboyEmulator
 				{
 					case 0:
 						currentMemoryBankingMode = MemoryBankingMode.SimpleRomBanking;
-						Logger.LogMessage("Change banking mode to 0", Logger.LogLevel.Info, true);
+						Logger.LogMessage("Change banking mode to 0", Logger.LogLevel.Info);
 
 						break;
 					case 1:
 						currentMemoryBankingMode = MemoryBankingMode.AdvancedRomOrRamBanking;
-						Logger.LogMessage("Change banking mode to 1", Logger.LogLevel.Info, true);
+						Logger.LogMessage("Change banking mode to 1", Logger.LogLevel.Info);
 
 						break;
 					default:
