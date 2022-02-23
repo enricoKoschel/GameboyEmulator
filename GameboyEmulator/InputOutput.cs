@@ -19,6 +19,22 @@ namespace GameboyEmulator
 		private const int DRAW_WIDTH         = GAME_WIDTH * SCALE;
 		private const int DRAW_HEIGHT        = GAME_HEIGHT * SCALE;
 
+		//Key mapping
+		private const Keyboard.Key UP_BUTTON     = Keyboard.Key.Up;
+		private const Keyboard.Key DOWN_BUTTON   = Keyboard.Key.Down;
+		private const Keyboard.Key LEFT_BUTTON   = Keyboard.Key.Left;
+		private const Keyboard.Key RIGHT_BUTTON  = Keyboard.Key.Right;
+		private const Keyboard.Key START_BUTTON  = Keyboard.Key.Enter;
+		private const Keyboard.Key SELECT_BUTTON = Keyboard.Key.Space;
+		private const Keyboard.Key A_BUTTON      = Keyboard.Key.S;
+		private const Keyboard.Key B_BUTTON      = Keyboard.Key.A;
+
+		//Color mapping
+		private static readonly Color BLACK_COLOR      = new Color(8, 24, 32);
+		private static readonly Color DARK_GRAY_COLOR  = new Color(52, 104, 86);
+		private static readonly Color LIGHT_GRAY_COLOR = new Color(136, 192, 112);
+		private static readonly Color WHITE_COLOR      = new Color(224, 248, 208);
+
 		private readonly VertexBuffer vertexBuffer;
 		private readonly Vertex[]     vertexArray;
 
@@ -50,14 +66,14 @@ namespace GameboyEmulator
 		{
 			return button switch
 			{
-				Joypad.Button.Up     => Keyboard.IsKeyPressed(Keyboard.Key.Up),
-				Joypad.Button.Down   => Keyboard.IsKeyPressed(Keyboard.Key.Down),
-				Joypad.Button.Left   => Keyboard.IsKeyPressed(Keyboard.Key.Left),
-				Joypad.Button.Right  => Keyboard.IsKeyPressed(Keyboard.Key.Right),
-				Joypad.Button.Start  => Keyboard.IsKeyPressed(Keyboard.Key.Enter),
-				Joypad.Button.Select => Keyboard.IsKeyPressed(Keyboard.Key.Space),
-				Joypad.Button.A      => Keyboard.IsKeyPressed(Keyboard.Key.S),
-				Joypad.Button.B      => Keyboard.IsKeyPressed(Keyboard.Key.A),
+				Joypad.Button.Up     => Keyboard.IsKeyPressed(UP_BUTTON),
+				Joypad.Button.Down   => Keyboard.IsKeyPressed(DOWN_BUTTON),
+				Joypad.Button.Left   => Keyboard.IsKeyPressed(LEFT_BUTTON),
+				Joypad.Button.Right  => Keyboard.IsKeyPressed(RIGHT_BUTTON),
+				Joypad.Button.Start  => Keyboard.IsKeyPressed(START_BUTTON),
+				Joypad.Button.Select => Keyboard.IsKeyPressed(SELECT_BUTTON),
+				Joypad.Button.A      => Keyboard.IsKeyPressed(A_BUTTON),
+				Joypad.Button.B      => Keyboard.IsKeyPressed(B_BUTTON),
 				_                    => throw new ArgumentOutOfRangeException(nameof(button), button, "Invalid button!")
 			};
 		}
@@ -149,10 +165,10 @@ namespace GameboyEmulator
 		{
 			return color switch
 			{
-				Ppu.Color.Black     => new Color(8, 24, 32),
-				Ppu.Color.DarkGray  => new Color(52, 104, 86),
-				Ppu.Color.LightGray => new Color(136, 192, 112),
-				Ppu.Color.White     => new Color(224, 248, 208),
+				Ppu.Color.Black     => BLACK_COLOR,
+				Ppu.Color.DarkGray  => DARK_GRAY_COLOR,
+				Ppu.Color.LightGray => LIGHT_GRAY_COLOR,
+				Ppu.Color.White     => WHITE_COLOR,
 				_                   => throw new ArgumentOutOfRangeException(nameof(color), color, "Invalid color!")
 			};
 		}
