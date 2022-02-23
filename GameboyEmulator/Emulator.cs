@@ -74,7 +74,8 @@ namespace GameboyEmulator
 			joypad.Update(true);
 
 			//Very inefficient way to average the emulator speed over the last second (with NUMBER_OF_SPEEDS_TO_AVERAGE = 60)
-			int speed        = 1600 / frameTime.ElapsedTime.AsMilliseconds();
+			int speed = 1600 / Math.Max(frameTime.ElapsedTime.AsMilliseconds(), 1);
+
 			int speedAverage = 0;
 
 			for (int i = 0; i < NUMBER_OF_SPEEDS_TO_AVERAGE; i++)

@@ -135,6 +135,8 @@ namespace GameboyEmulator
 
 		private int internalWindowCounter;
 
+		private bool wasEnabledLastFrame;
+
 		private readonly Emulator emulator;
 
 		public Ppu(Emulator emulator)
@@ -144,6 +146,23 @@ namespace GameboyEmulator
 
 		public void Update(int cycles)
 		{
+			//Reset ppu if disabled
+			if (!IsEnabled)
+			{
+				CurrentScanline       = 0;
+				drawScanlineCounter   = 0;
+				internalWindowCounter = 0;
+
+				mode0Requested       = false;
+				mode1Requested       = false;
+				mode2Requested       = false;
+				coincidenceRequested = false;
+				vBlankRequested      = false;
+				Mode                 = 0;
+
+				return;
+			}
+
 			drawScanlineCounter += cycles;
 
 			if (drawScanlineCounter >= 456)
@@ -208,6 +227,8 @@ namespace GameboyEmulator
 				drawScanlineCounter   = 0;
 				internalWindowCounter = 0;
 
+				wasEnabledLastFrame = IsEnabled;
+
 				emulator.screen.DrawFrame();
 			}
 			else
@@ -254,6 +275,9 @@ namespace GameboyEmulator
 
 		private void DrawScanline()
 		{
+			//The ppu only updates the screen one frame after being re-enabled
+			if (!wasEnabledLastFrame) return;
+
 			if (TilesEnabled) RenderTiles();
 			if (SpritesEnabled) RenderSprites();
 		}

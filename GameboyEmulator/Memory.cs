@@ -101,6 +101,12 @@ namespace GameboyEmulator
 					Logger.LogMessage($"Boot rom '{BOOT_ROM_FILE_PATH}' could not be opened!", Logger.LogLevel.Error);
 					throw new Exception("", e);
 				}
+
+				if (bootRom.Length != 0x100)
+				{
+					Logger.LogMessage("Invalid bootrom selected!", Logger.LogLevel.Error);
+					throw new InvalidDataException("Invalid bootrom selected!");
+				}
 			}
 			else
 			{
