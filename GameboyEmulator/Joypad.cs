@@ -72,10 +72,15 @@ namespace GameboyEmulator
 			{
 				hadFocusLastFrame = emulator.window.HasFocus();
 
-				downPressedThisFrame    = Keyboard.IsKeyPressed(Keyboard.Key.Down);
-				upPressedThisFrame      = Keyboard.IsKeyPressed(Keyboard.Key.Up);
-				leftPressedThisFrame    = Keyboard.IsKeyPressed(Keyboard.Key.Left);
-				rightPressedThisFrame   = Keyboard.IsKeyPressed(Keyboard.Key.Right);
+				upPressedThisFrame    = Keyboard.IsKeyPressed(Keyboard.Key.Up);
+				downPressedThisFrame  = Keyboard.IsKeyPressed(Keyboard.Key.Down);
+				leftPressedThisFrame  = Keyboard.IsKeyPressed(Keyboard.Key.Left);
+				rightPressedThisFrame = Keyboard.IsKeyPressed(Keyboard.Key.Right);
+
+				//Don't allow "impossible" inputs (🠕+🠗/🠔+🠖)
+				if (upPressedThisFrame && downPressedThisFrame) upPressedThisFrame      = downPressedThisFrame  = false;
+				if (leftPressedThisFrame && rightPressedThisFrame) leftPressedThisFrame = rightPressedThisFrame = false;
+
 				startPressedThisFrame   = Keyboard.IsKeyPressed(Keyboard.Key.Enter);
 				selectPressedThisFrame  = Keyboard.IsKeyPressed(Keyboard.Key.Space);
 				buttonBPressedThisFrame = Keyboard.IsKeyPressed(Keyboard.Key.A);

@@ -8,4 +8,3 @@
 - Implement save states/rewind
 - Implement sound
 - Controller support
-- Dont allow "impossible" inputs (🠔+🠖/🠕+🠗)
