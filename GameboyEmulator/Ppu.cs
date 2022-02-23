@@ -6,6 +6,14 @@ namespace GameboyEmulator
 {
 	public class Ppu
 	{
+		public enum Color
+		{
+			Black,
+			DarkGray,
+			LightGray,
+			White
+		}
+
 		private readonly struct Sprite
 		{
 			public readonly ushort oamAddress;
@@ -229,7 +237,7 @@ namespace GameboyEmulator
 
 				wasEnabledLastFrame = IsEnabled;
 
-				emulator.screen.DrawFrame();
+				emulator.inputOutput.DrawFrame();
 			}
 			else
 			{
@@ -324,8 +332,8 @@ namespace GameboyEmulator
 				int bufferXIndex = backgroundPixel;
 				int bufferYIndex = CurrentScanline;
 
-				emulator.screen.UpdateZBuffer(bufferXIndex, bufferYIndex, paletteIndex == 0);
-				emulator.screen.UpdatePixelBuffer(bufferXIndex, bufferYIndex, GetColor(TilePalette, paletteIndex));
+				emulator.inputOutput.UpdateZBuffer(bufferXIndex, bufferYIndex, paletteIndex == 0);
+				emulator.inputOutput.UpdatePixelBuffer(bufferXIndex, bufferYIndex, GetColor(TilePalette, paletteIndex));
 			}
 
 			//Window
@@ -361,8 +369,8 @@ namespace GameboyEmulator
 				int bufferXIndex = windowPixel < 0 ? 0 : windowPixel;
 				int bufferYIndex = CurrentScanline;
 
-				emulator.screen.UpdateZBuffer(bufferXIndex, bufferYIndex, paletteIndex == 0);
-				emulator.screen.UpdatePixelBuffer(bufferXIndex, bufferYIndex, GetColor(TilePalette, paletteIndex));
+				emulator.inputOutput.UpdateZBuffer(bufferXIndex, bufferYIndex, paletteIndex == 0);
+				emulator.inputOutput.UpdatePixelBuffer(bufferXIndex, bufferYIndex, GetColor(TilePalette, paletteIndex));
 			}
 		}
 
@@ -430,7 +438,7 @@ namespace GameboyEmulator
 					//Transparent Pixel
 					if (paletteIndex == 0) continue;
 
-					SFML.Graphics.Color color = GetColor(usingPalette0 ? SpritePalette0 : SpritePalette1, paletteIndex);
+					Color color = GetColor(usingPalette0 ? SpritePalette0 : SpritePalette1, paletteIndex);
 
 					int spriteDataIndexReverse = spriteDataIndex;
 
@@ -449,15 +457,15 @@ namespace GameboyEmulator
 					if (spriteBehindBackground)
 					{
 						//Sprite only shows if BG Color is 0
-						if (!emulator.screen.GetZBufferAt(bufferXIndex, bufferYIndex)) continue;
+						if (!emulator.inputOutput.GetZBufferAt(bufferXIndex, bufferYIndex)) continue;
 					}
 
-					emulator.screen.UpdatePixelBuffer(bufferXIndex, bufferYIndex, color);
+					emulator.inputOutput.UpdatePixelBuffer(bufferXIndex, bufferYIndex, color);
 				}
 			}
 		}
 
-		private static SFML.Graphics.Color GetColor(byte palette, byte paletteIndex)
+		private static Color GetColor(byte palette, byte paletteIndex)
 		{
 			int colorIdLo = paletteIndex * 2;
 			int colorIdHi = colorIdLo + 1;
@@ -467,10 +475,10 @@ namespace GameboyEmulator
 
 			return colorId switch
 			{
-				0 => Color.white,
-				1 => Color.lightGray,
-				2 => Color.darkGray,
-				_ => Color.black
+				0 => Color.White,
+				1 => Color.LightGray,
+				2 => Color.DarkGray,
+				_ => Color.Black
 			};
 		}
 	}

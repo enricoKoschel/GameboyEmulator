@@ -1,8 +1,6 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
-using SFML.Graphics;
-using SFML.System;
-using SFML.Window;
 
 namespace GameboyEmulator
 {
@@ -14,14 +12,13 @@ namespace GameboyEmulator
 		public readonly Memory               memory;
 		public readonly MemoryBankController memoryBankController;
 		public readonly Ppu                  ppu;
-		public readonly Screen               screen;
 		public readonly Timer                timer;
-		public readonly RenderWindow         window;
+		public readonly InputOutput          inputOutput;
 
-		private const    int   NUMBER_OF_SPEEDS_TO_AVERAGE = 60;
-		private readonly int[] lastSpeeds;
+		private const    int    NUMBER_OF_SPEEDS_TO_AVERAGE = 60;
+		private readonly long[] lastSpeeds;
 
-		public bool IsRunning => window.IsOpen;
+		public bool IsRunning => inputOutput.WindowIsOpen;
 
 		public Emulator()
 		{
@@ -31,27 +28,17 @@ namespace GameboyEmulator
 			memory               = new Memory(this);
 			memoryBankController = new MemoryBankController(this);
 			ppu                  = new Ppu(this);
-			screen               = new Screen(this);
 			timer                = new Timer(this);
+			inputOutput          = new InputOutput();
 
-			lastSpeeds = new int[NUMBER_OF_SPEEDS_TO_AVERAGE];
+			lastSpeeds = new long[NUMBER_OF_SPEEDS_TO_AVERAGE];
 
 			memory.LoadGame();
-
-			window = new RenderWindow(
-				new VideoMode(Screen.DRAW_WIDTH, Screen.DRAW_HEIGHT), "GameBoy Emulator", Styles.Close
-			);
-
-			window.SetActive();
-
-			//Gameboy runs at 60 fps
-			window.SetFramerateLimit(60);
-			window.Closed += OnClosed;
 		}
 
 		public void Update()
 		{
-			Clock frameTime = new Clock();
+			Stopwatch frameTime = new Stopwatch();
 
 			int cyclesThisFrame = 0;
 
@@ -74,9 +61,9 @@ namespace GameboyEmulator
 			joypad.Update(true);
 
 			//Very inefficient way to average the emulator speed over the last second (with NUMBER_OF_SPEEDS_TO_AVERAGE = 60)
-			int speed = 1600 / Math.Max(frameTime.ElapsedTime.AsMilliseconds(), 1);
+			long speed = 1600 / Math.Max(frameTime.ElapsedMilliseconds, 1);
 
-			int speedAverage = 0;
+			long speedAverage = 0;
 
 			for (int i = 0; i < NUMBER_OF_SPEEDS_TO_AVERAGE; i++)
 			{
@@ -94,13 +81,7 @@ namespace GameboyEmulator
 			speedAverage /= NUMBER_OF_SPEEDS_TO_AVERAGE;
 
 			//TODO use file name provided by args from console
-			window.SetTitle($"{Path.GetFileName(Memory.GAME_ROM_FILE_PATH)} | Speed: {speedAverage}%");
-		}
-
-		private static void OnClosed(object sender, EventArgs e)
-		{
-			RenderWindow window = (RenderWindow)sender;
-			window.Close();
+			inputOutput.SetWindowTitle($"{Path.GetFileName(Memory.GAME_ROM_FILE_PATH)} | Speed: {speedAverage}%");
 		}
 	}
 }

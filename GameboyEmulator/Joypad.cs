@@ -1,9 +1,19 @@
-﻿using SFML.Window;
-
-namespace GameboyEmulator
+﻿namespace GameboyEmulator
 {
 	public class Joypad
 	{
+		public enum Button
+		{
+			Up,
+			Down,
+			Left,
+			Right,
+			Start,
+			Select,
+			A,
+			B
+		}
+
 		private readonly Emulator emulator;
 
 		public Joypad(Emulator emulator)
@@ -70,21 +80,21 @@ namespace GameboyEmulator
 		{
 			if (frameDone)
 			{
-				hadFocusLastFrame = emulator.window.HasFocus();
+				hadFocusLastFrame = emulator.inputOutput.WindowHasFocus;
 
-				upPressedThisFrame    = Keyboard.IsKeyPressed(Keyboard.Key.Up);
-				downPressedThisFrame  = Keyboard.IsKeyPressed(Keyboard.Key.Down);
-				leftPressedThisFrame  = Keyboard.IsKeyPressed(Keyboard.Key.Left);
-				rightPressedThisFrame = Keyboard.IsKeyPressed(Keyboard.Key.Right);
+				upPressedThisFrame    = InputOutput.IsButtonPressed(Button.Up);
+				downPressedThisFrame  = InputOutput.IsButtonPressed(Button.Down);
+				leftPressedThisFrame  = InputOutput.IsButtonPressed(Button.Left);
+				rightPressedThisFrame = InputOutput.IsButtonPressed(Button.Right);
 
 				//Don't allow "impossible" inputs (🠕+🠗/🠔+🠖)
 				if (upPressedThisFrame && downPressedThisFrame) upPressedThisFrame      = downPressedThisFrame  = false;
 				if (leftPressedThisFrame && rightPressedThisFrame) leftPressedThisFrame = rightPressedThisFrame = false;
 
-				startPressedThisFrame   = Keyboard.IsKeyPressed(Keyboard.Key.Enter);
-				selectPressedThisFrame  = Keyboard.IsKeyPressed(Keyboard.Key.Space);
-				buttonBPressedThisFrame = Keyboard.IsKeyPressed(Keyboard.Key.A);
-				buttonAPressedThisFrame = Keyboard.IsKeyPressed(Keyboard.Key.S);
+				startPressedThisFrame   = InputOutput.IsButtonPressed(Button.Start);
+				selectPressedThisFrame  = InputOutput.IsButtonPressed(Button.Select);
+				buttonBPressedThisFrame = InputOutput.IsButtonPressed(Button.B);
+				buttonAPressedThisFrame = InputOutput.IsButtonPressed(Button.A);
 
 				//Only request Interrupt if Button was pressed this Frame
 				if (ButtonPressedThisFrame && ButtonPressedThisFrame != buttonPressedLastFrame)

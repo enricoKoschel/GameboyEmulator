@@ -65,7 +65,7 @@ namespace GameboyEmulator
 		private       bool   bootRomEnabled;
 
 		//TODO - Accept game file path as console parameter / make into property
-		public const string GAME_ROM_FILE_PATH = "../../../roms/mario.gb";
+		public const string GAME_ROM_FILE_PATH = "../../../roms/zelda.gb";
 		//private const string GAME_ROM_FILE_PATH = "../../../roms/test/blargg/instr_timing/instr_timing.gb";
 
 		private readonly Emulator emulator;
@@ -104,8 +104,8 @@ namespace GameboyEmulator
 
 				if (bootRom.Length != 0x100)
 				{
-					Logger.LogMessage("Invalid bootrom selected!", Logger.LogLevel.Error);
-					throw new InvalidDataException("Invalid bootrom selected!");
+					Logger.LogMessage("Invalid boot rom selected!", Logger.LogLevel.Error);
+					throw new InvalidDataException("Invalid boot rom selected!");
 				}
 			}
 			else
