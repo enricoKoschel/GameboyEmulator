@@ -12,7 +12,7 @@ namespace GameboyEmulator
 			Error
 		}
 
-		private static readonly StreamWriter logFile;
+		private static readonly StreamWriter LOG_FILE;
 
 		private static string CurrentTime              => DateTime.Now.ToString("HH:mm:ss.fff");
 		private static string CurrentTimeFileFormatted => DateTime.Now.ToString("yyyy-MM-dd__HH_mm_ss");
@@ -22,8 +22,8 @@ namespace GameboyEmulator
 
 		static Logger()
 		{
-			logFile           = CreateLogFile();
-			logFile.AutoFlush = true;
+			LOG_FILE           = CreateLogFile();
+			LOG_FILE.AutoFlush = true;
 		}
 
 		public static void LogMessage(string message, LogLevel loglevel, bool logToConsole = false)
@@ -32,7 +32,7 @@ namespace GameboyEmulator
 
 			if (logToConsole && ENABLE_CONSOLE_LOGGING) Console.WriteLine(logMessage);
 
-			logFile.WriteLine(logMessage);
+			LOG_FILE.WriteLine(logMessage);
 		}
 
 		private static StreamWriter CreateLogFile()

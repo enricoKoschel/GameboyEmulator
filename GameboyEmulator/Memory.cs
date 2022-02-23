@@ -64,7 +64,6 @@ namespace GameboyEmulator
 		private       bool   useBootRom         = false;
 		private       bool   bootRomEnabled;
 
-		//TODO - Accept game file path as console parameter / make into property
 		public const string GAME_ROM_FILE_PATH = "../../../roms/zelda.gb";
 		//private const string GAME_ROM_FILE_PATH = "../../../roms/test/blargg/instr_timing/instr_timing.gb";
 

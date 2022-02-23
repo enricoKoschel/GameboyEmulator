@@ -1,13 +1,17 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 
 namespace GameboyEmulator
 {
 	public class MemoryBankController
 	{
-		//A list of games and their corresponding mappers can be found here: https://gbhwdb.gekkio.fi/cartridges/
+		//Suppress warnings for not yet implemented mappers
+		[SuppressMessage("ReSharper", "UnusedMember.Local")]
 		private enum BankControllerType
 		{
+			//A list of games and their corresponding mappers can be found here: https://gbhwdb.gekkio.fi/cartridges/
+
 			RomOnly = 0x00,
 
 			//High priority - used by many games

@@ -2175,38 +2175,12 @@ namespace GameboyEmulator
 			throw new IndexOutOfRangeException($"Cannot access Bit {bit} of a Byte!");
 		}
 
-		private static bool GetBit(ushort data, int bit)
-		{
-			if (bit >= 0 && bit <= 15) return ToBool((data >> bit) & 1);
-
-			Logger.LogMessage($"Cannot access Bit {bit} of a Word!", Logger.LogLevel.Error);
-			throw new IndexOutOfRangeException($"Cannot access Bit {bit} of a Word!");
-		}
-
 		public static byte SetBit(byte data, int bit, bool state)
 		{
 			if (bit > 7 || bit < 0)
 			{
 				Logger.LogMessage($"Cannot access Bit {bit} of a Byte!", Logger.LogLevel.Error);
 				throw new IndexOutOfRangeException($"Cannot access Bit {bit} of a Byte!");
-			}
-
-			byte mask = (byte)(1 << bit);
-
-			if (state)
-				data |= mask;
-			else
-				data &= (byte)~mask;
-
-			return data;
-		}
-
-		private static ushort SetBit(ushort data, int bit, bool state)
-		{
-			if (bit > 15 || bit < 0)
-			{
-				Logger.LogMessage($"Cannot access Bit {bit} of a Word!", Logger.LogLevel.Error);
-				throw new IndexOutOfRangeException($"Cannot access Bit {bit} of a Word!");
 			}
 
 			byte mask = (byte)(1 << bit);

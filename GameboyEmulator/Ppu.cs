@@ -38,7 +38,6 @@ namespace GameboyEmulator
 		//Registers
 		private byte Mode
 		{
-			get => (byte)(LcdStatusRegister & 0b00000011);
 			set
 			{
 				if (value > 0x3)
@@ -66,11 +65,7 @@ namespace GameboyEmulator
 
 		public byte WindowX { get; set; }
 
-		private short WindowXCorrected
-		{
-			get => (short)(WindowX - 7);
-			set => WindowX = (byte)(value + 7);
-		}
+		private short WindowXCorrected => (short)(WindowX - 7);
 
 		public byte WindowY { get; set; }
 
@@ -82,33 +77,16 @@ namespace GameboyEmulator
 
 		private bool CoincidenceFlag
 		{
-			get => Cpu.GetBit(LcdStatusRegister, 2);
 			set => LcdStatusRegister = Cpu.SetBit(LcdStatusRegister, 2, value);
 		}
 
-		private bool CoincidenceInterruptEnabled
-		{
-			get => Cpu.GetBit(LcdStatusRegister, 6);
-			set => LcdStatusRegister = Cpu.SetBit(LcdStatusRegister, 6, value);
-		}
+		private bool CoincidenceInterruptEnabled => Cpu.GetBit(LcdStatusRegister, 6);
 
-		private bool Mode2InterruptEnabled
-		{
-			get => Cpu.GetBit(LcdStatusRegister, 5);
-			set => LcdStatusRegister = Cpu.SetBit(LcdStatusRegister, 5, value);
-		}
+		private bool Mode2InterruptEnabled => Cpu.GetBit(LcdStatusRegister, 5);
 
-		private bool Mode1InterruptEnabled
-		{
-			get => Cpu.GetBit(LcdStatusRegister, 4);
-			set => LcdStatusRegister = Cpu.SetBit(LcdStatusRegister, 4, value);
-		}
+		private bool Mode1InterruptEnabled => Cpu.GetBit(LcdStatusRegister, 4);
 
-		private bool Mode0InterruptEnabled
-		{
-			get => Cpu.GetBit(LcdStatusRegister, 3);
-			set => LcdStatusRegister = Cpu.SetBit(LcdStatusRegister, 3, value);
-		}
+		private bool Mode0InterruptEnabled => Cpu.GetBit(LcdStatusRegister, 3);
 
 		private ushort WindowTileMapBaseAddress => Cpu.GetBit(LcdControlRegister, 6) ? (ushort)0x9C00 : (ushort)0x9800;
 
