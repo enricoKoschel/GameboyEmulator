@@ -74,7 +74,7 @@ namespace GameboyEmulator
 			if (counterWithCycles > 0) return;
 
 			internalMainTimerCounter = InternalMainTimerCounterResetValue;
-			Update(-counterWithCycles);
+			UpdateMainTimer(-counterWithCycles);
 
 			if (TimerRegister == 255)
 			{

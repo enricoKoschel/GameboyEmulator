@@ -155,7 +155,7 @@ namespace GameboyEmulator
 				CoincidenceFlag      = false;
 
 				CurrentScanline++;
-				drawScanlineCounter = 0; //TODO maybe add remaining drawScanlineCounter above 456
+				drawScanlineCounter -= 456; //Maybe reset to 0?
 			}
 
 			SetStatus();
