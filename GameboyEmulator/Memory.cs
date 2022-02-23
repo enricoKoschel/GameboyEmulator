@@ -65,8 +65,8 @@ namespace GameboyEmulator
 		private       bool   bootRomEnabled;
 
 		//TODO - Accept game file path as console parameter / make into property
-		private const string GAME_ROM_FILE_PATH = "../../../roms/mario.gb";
-		//private const string GAME_ROM_FILE_PATH = "../../../roms/test/Blargg/instr_timing/instr_timing.gb";
+		public const string GAME_ROM_FILE_PATH = "../../../roms/mario.gb";
+		//private const string GAME_ROM_FILE_PATH = "../../../roms/test/blargg/instr_timing/instr_timing.gb";
 
 		private readonly Emulator emulator;
 
