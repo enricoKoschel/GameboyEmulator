@@ -15,8 +15,13 @@ namespace GameboyEmulator
 		public readonly Timer                timer;
 		public readonly InputOutput          inputOutput;
 
-		private const    int    NUMBER_OF_SPEEDS_TO_AVERAGE = 60;
-		private readonly long[] lastSpeeds;
+		//4194304/70224 is the exact fps of the Gameboy
+		private const double GAMEBOY_FPS        = 4194304 / 70224.0;
+		private const double MAX_FPS            = GAMEBOY_FPS;
+		private const double MIN_TIME_PER_FRAME = MAX_FPS != 0 ? 1000 / MAX_FPS : 0;
+
+		private const    int   NUMBER_OF_SPEEDS_TO_AVERAGE = 60;
+		private readonly int[] lastSpeeds;
 
 		public bool IsRunning => inputOutput.WindowIsOpen;
 
@@ -31,7 +36,7 @@ namespace GameboyEmulator
 			timer                = new Timer(this);
 			inputOutput          = new InputOutput();
 
-			lastSpeeds = new long[NUMBER_OF_SPEEDS_TO_AVERAGE];
+			lastSpeeds = new int[NUMBER_OF_SPEEDS_TO_AVERAGE];
 
 			memory.LoadGame();
 		}
@@ -60,11 +65,23 @@ namespace GameboyEmulator
 
 			joypad.Update(true);
 
-			//Very inefficient way to average the emulator speed over the last second (with NUMBER_OF_SPEEDS_TO_AVERAGE = 60)
-			long speed = 1600 / Math.Max(frameTime.ElapsedMilliseconds, 1);
+			//Thread.Sleep is too imprecise for this use case, thus a busy loop has to be used
+			while (frameTime.Elapsed.TotalMilliseconds < MIN_TIME_PER_FRAME)
+			{
+			}
 
-			long speedAverage = 0;
+			UpdateWindowTitle(frameTime.Elapsed.TotalMilliseconds);
+		}
 
+		private void UpdateWindowTitle(double elapsedTime)
+		{
+			//One frame on the Gameboy takes about 16.74 milliseconds to render
+			//Dividing 1674 by the frame time gives us the emulation speed out of 100%
+			int speed = Convert.ToInt32(1674 / Math.Max(elapsedTime, 1));
+
+			int speedAverage = 0;
+
+			//Very inefficient way to average the emulator speed
 			for (int i = 0; i < NUMBER_OF_SPEEDS_TO_AVERAGE; i++)
 			{
 				speedAverage += lastSpeeds[i];
