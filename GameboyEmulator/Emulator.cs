@@ -16,9 +16,10 @@ namespace GameboyEmulator
 		public readonly InputOutput          inputOutput;
 
 		//4194304/70224 is the exact fps of the Gameboy
-		private const double GAMEBOY_FPS        = 4194304 / 70224.0;
-		private const double MAX_FPS            = GAMEBOY_FPS;
-		private const double MIN_TIME_PER_FRAME = MAX_FPS != 0 ? 1000 / MAX_FPS : 0;
+		public const double GAMEBOY_FPS = 4194304 / 70224.0;
+
+		public  double MaxFps          { get; set; }
+		private double MinTimePerFrame => MaxFps != 0 ? 1000 / MaxFps : 0;
 
 		private const    int   NUMBER_OF_SPEEDS_TO_AVERAGE = 60;
 		private readonly int[] lastSpeeds;
@@ -34,9 +35,11 @@ namespace GameboyEmulator
 			memoryBankController = new MemoryBankController(this);
 			ppu                  = new Ppu(this);
 			timer                = new Timer(this);
-			inputOutput          = new InputOutput();
+			inputOutput          = new InputOutput(this);
 
 			lastSpeeds = new int[NUMBER_OF_SPEEDS_TO_AVERAGE];
+
+			MaxFps = GAMEBOY_FPS;
 
 			memory.LoadGame();
 		}
@@ -64,9 +67,10 @@ namespace GameboyEmulator
 			}
 
 			joypad.Update(true);
+			inputOutput.Update();
 
 			//Thread.Sleep is too imprecise for this use case, thus a busy loop has to be used
-			while (frameTime.Elapsed.TotalMilliseconds < MIN_TIME_PER_FRAME)
+			while (frameTime.Elapsed.TotalMilliseconds < MinTimePerFrame)
 			{
 			}
 

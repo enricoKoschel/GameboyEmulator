@@ -28,6 +28,7 @@ namespace GameboyEmulator
 		private const Keyboard.Key SELECT_BUTTON = Keyboard.Key.Space;
 		private const Keyboard.Key A_BUTTON      = Keyboard.Key.S;
 		private const Keyboard.Key B_BUTTON      = Keyboard.Key.A;
+		private const Keyboard.Key SPEED_BUTTON  = Keyboard.Key.Add;
 
 		//Color mapping
 		private static readonly Color BLACK_COLOR      = new Color(8, 24, 32);
@@ -40,8 +41,12 @@ namespace GameboyEmulator
 
 		private readonly bool[,] zBuffer;
 
-		public InputOutput()
+		private readonly Emulator emulator;
+
+		public InputOutput(Emulator emulator)
 		{
+			this.emulator = emulator;
+
 			window = new RenderWindow(
 				new VideoMode(DRAW_WIDTH, DRAW_HEIGHT), "GameBoy Emulator", Styles.Close
 			);
@@ -116,6 +121,12 @@ namespace GameboyEmulator
 			}
 		}
 
+		public void Update()
+		{
+			if (Keyboard.IsKeyPressed(SPEED_BUTTON)) emulator.MaxFps = 0;
+			else emulator.MaxFps                                     = Emulator.GAMEBOY_FPS;
+		}
+
 		public void UpdatePixelBuffer(int x, int y, Ppu.Color color)
 		{
 			int index = x * 4 + y * GAME_WIDTH * 4;
@@ -159,7 +170,7 @@ namespace GameboyEmulator
 			for (int i = 0; i < NUMBER_OF_VERTICES; i++) vertexArray[i].Color = ConvertGameboyToSfmlColor(color);
 		}
 
-		private Color ConvertGameboyToSfmlColor(Ppu.Color color)
+		private static Color ConvertGameboyToSfmlColor(Ppu.Color color)
 		{
 			return color switch
 			{
