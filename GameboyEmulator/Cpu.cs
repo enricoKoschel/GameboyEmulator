@@ -1015,7 +1015,7 @@ namespace GameboyEmulator
 				case 0xE8:
 					stackPointer = AddUnsignedImmediateToStackPointer();
 					return 16;
-				//JP (HL)
+				//JP HL
 				case 0xE9:
 					programCounter = HlRegister;
 					return 4;
