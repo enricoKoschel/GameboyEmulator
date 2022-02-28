@@ -61,6 +61,8 @@ namespace GameboyEmulator
 
 		private bool bootRomEnabled;
 
+		private DateTime lastTimeRamWasSaved = DateTime.Now;
+
 		private readonly Emulator emulator;
 
 		public Memory(Emulator emulator)
@@ -148,9 +150,12 @@ namespace GameboyEmulator
 			Logger.LogMessage("Game was loaded.", Logger.LogLevel.Info);
 		}
 
-		private void SaveCartridgeRam()
+		public void SaveCartridgeRam()
 		{
-			if (!File.Exists(emulator.saveFilePath)) File.Create(emulator.saveFilePath).Close();
+			if (cartridgeRam == null || cartridgeRam.Length == 0) return;
+			if (DateTime.Now < lastTimeRamWasSaved.AddSeconds(1)) return;
+
+			lastTimeRamWasSaved = DateTime.Now;
 
 			File.WriteAllBytes(emulator.saveFilePath, cartridgeRam);
 		}
@@ -158,6 +163,7 @@ namespace GameboyEmulator
 		private void LoadCartridgeRam()
 		{
 			if (File.Exists(emulator.saveFilePath)) cartridgeRam = File.ReadAllBytes(emulator.saveFilePath);
+			else File.Create(emulator.saveFilePath).Close();
 		}
 
 		private void InitializeRegisters()

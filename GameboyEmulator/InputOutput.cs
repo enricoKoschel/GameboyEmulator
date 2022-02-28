@@ -123,8 +123,8 @@ namespace GameboyEmulator
 
 		public void Update()
 		{
-			if (Keyboard.IsKeyPressed(SPEED_BUTTON)) emulator.MaxFps = 0;
-			else emulator.MaxFps                                     = Emulator.GAMEBOY_FPS;
+			if (WindowHasFocus && Keyboard.IsKeyPressed(SPEED_BUTTON)) emulator.MaxFps = 0;
+			else emulator.MaxFps                                                       = Emulator.GAMEBOY_FPS;
 		}
 
 		public void UpdatePixelBuffer(int x, int y, Ppu.Color color)

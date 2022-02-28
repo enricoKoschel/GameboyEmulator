@@ -77,6 +77,9 @@ namespace GameboyEmulator
 			joypad.Update(true);
 			inputOutput.Update();
 
+			//Save cartridge ram at the end of every frame so that no data is lost
+			memory.SaveCartridgeRam();
+
 			//Thread.Sleep is too imprecise for this use case, thus a busy loop has to be used
 			while (frameTime.Elapsed.TotalMilliseconds < MinTimePerFrame)
 			{
