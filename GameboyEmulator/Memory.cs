@@ -120,6 +120,22 @@ namespace GameboyEmulator
 				throw new Exception("", e);
 			}
 
+			//A cartridge has to be at least 0x150 bytes large to contain a full cartridge header
+			if (cartridgeRom.Length < 0x150)
+			{
+				Logger.LogMessage("Invalid game rom selected!", Logger.LogLevel.Error);
+				throw new InvalidDataException("Invalid game rom selected!");
+			}
+
+			//Pad the cartridge size to at least 0x8000 bytes (32KB)
+			if (cartridgeRom.Length < 0x8000) Array.Resize(ref cartridgeRom, 0x8000);
+
+			//Pad the cartridge size to the next highest power of 2
+			double log = Math.Log2(cartridgeRom.Length);
+			if (!(Math.Abs(log - (int)log) < Double.Epsilon))
+				Array.Resize(ref cartridgeRom, (int)Math.Pow(2, Math.Ceiling(log)));
+
+
 			//Detect current Memorybanking Mode
 			emulator.memoryBankController.InitializeBanking();
 
