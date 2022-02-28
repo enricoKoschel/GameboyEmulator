@@ -24,9 +24,12 @@ namespace GameboyEmulator
 		private const    int   NUMBER_OF_SPEEDS_TO_AVERAGE = 60;
 		private readonly int[] lastSpeeds;
 
+		public readonly string bootRomFilePath;
+		public readonly string gameRomFilePath;
+
 		public bool IsRunning => inputOutput.WindowIsOpen;
 
-		public Emulator()
+		public Emulator(string gameRomFilePath, string bootRomFilePath)
 		{
 			cpu                  = new Cpu(this);
 			interrupts           = new Interrupts(this);
@@ -36,6 +39,9 @@ namespace GameboyEmulator
 			ppu                  = new Ppu(this);
 			timer                = new Timer(this);
 			inputOutput          = new InputOutput(this);
+
+			this.gameRomFilePath = gameRomFilePath;
+			this.bootRomFilePath = bootRomFilePath;
 
 			lastSpeeds = new int[NUMBER_OF_SPEEDS_TO_AVERAGE];
 
@@ -101,8 +107,7 @@ namespace GameboyEmulator
 
 			speedAverage /= NUMBER_OF_SPEEDS_TO_AVERAGE;
 
-			//TODO use file name provided by args from console
-			inputOutput.SetWindowTitle($"{Path.GetFileName(Memory.GAME_ROM_FILE_PATH)} | Speed: {speedAverage}%");
+			inputOutput.SetWindowTitle($"{Path.GetFileName(gameRomFilePath)} | Speed: {speedAverage}%");
 		}
 	}
 }

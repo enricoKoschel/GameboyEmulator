@@ -127,7 +127,7 @@ namespace GameboyEmulator
 
 			numberOfRomBanks = (byte)Math.Pow(2, numberOfRomBanksRaw + 1);
 
-			Logger.LogMessage($"{numberOfRomBanks} ROM bank(s) determined.", Logger.LogLevel.Info, true);
+			Logger.LogMessage($"{numberOfRomBanks} ROM bank(s) determined.", Logger.LogLevel.Info);
 
 			byte numberOfRamBanksRaw = emulator.memory.Read(0x149, true);
 			switch (numberOfRamBanksRaw)
@@ -153,7 +153,7 @@ namespace GameboyEmulator
 					throw new InvalidDataException("Cartridge has invalid number of RAM banks!");
 			}
 
-			Logger.LogMessage($"{NumberOfRamBanks} RAM bank(s) determined.", Logger.LogLevel.Info, true);
+			Logger.LogMessage($"{NumberOfRamBanks} RAM bank(s) determined.", Logger.LogLevel.Info);
 
 			currentMemoryBankingMode = MemoryBankingMode.SimpleRomBanking;
 

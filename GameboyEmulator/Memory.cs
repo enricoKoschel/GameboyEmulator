@@ -59,13 +59,7 @@ namespace GameboyEmulator
 
 		private const ushort DMA_FINISH_ADDRESS = 0xFEA0;
 
-		//File paths
-		private const string BOOT_ROM_FILE_PATH = "../../../roms/boot.gb";
-		private       bool   useBootRom         = false;
-		private       bool   bootRomEnabled;
-
-		//public const string GAME_ROM_FILE_PATH = "../../../roms/zelda.gb";
-		public const string GAME_ROM_FILE_PATH = "../../../roms/test/extra/dmg-acid2.gb";
+		private bool bootRomEnabled;
 
 		private readonly Emulator emulator;
 
@@ -87,17 +81,20 @@ namespace GameboyEmulator
 
 		public void LoadGame()
 		{
-			if (useBootRom)
+			if (emulator.bootRomFilePath != String.Empty)
 			{
 				bootRomEnabled = true;
 
 				try
 				{
-					bootRom = File.ReadAllBytes(BOOT_ROM_FILE_PATH);
+					bootRom = File.ReadAllBytes(emulator.bootRomFilePath);
 				}
 				catch (Exception e)
 				{
-					Logger.LogMessage($"Boot rom '{BOOT_ROM_FILE_PATH}' could not be opened!", Logger.LogLevel.Error);
+					Logger.LogMessage(
+						$"Boot rom '{emulator.bootRomFilePath}' could not be opened!", Logger.LogLevel.Error
+					);
+
 					throw new Exception("", e);
 				}
 
@@ -115,11 +112,11 @@ namespace GameboyEmulator
 
 			try
 			{
-				cartridgeRom = File.ReadAllBytes(GAME_ROM_FILE_PATH);
+				cartridgeRom = File.ReadAllBytes(emulator.gameRomFilePath);
 			}
 			catch (Exception e)
 			{
-				Logger.LogMessage($"Game rom '{GAME_ROM_FILE_PATH}' could not be opened!", Logger.LogLevel.Error);
+				Logger.LogMessage($"Game rom '{emulator.gameRomFilePath}' could not be opened!", Logger.LogLevel.Error);
 				throw new Exception("", e);
 			}
 
