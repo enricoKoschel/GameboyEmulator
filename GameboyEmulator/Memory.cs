@@ -76,7 +76,11 @@ namespace GameboyEmulator
 
 		private void AllocateCartridgeRam(byte numberOfRamBanks)
 		{
-			if (numberOfRamBanks > 0) cartridgeRam = new byte[numberOfRamBanks * 0x2000];
+			if (numberOfRamBanks == 0) return;
+
+			//If a save file exists, load it into cartridge ram and resize ram to the actual size
+			LoadCartridgeRam();
+			Array.Resize(ref cartridgeRam, numberOfRamBanks * 0x2000);
 		}
 
 		public void LoadGame()
@@ -142,6 +146,18 @@ namespace GameboyEmulator
 			AllocateCartridgeRam(emulator.memoryBankController.NumberOfRamBanks);
 
 			Logger.LogMessage("Game was loaded.", Logger.LogLevel.Info);
+		}
+
+		private void SaveCartridgeRam()
+		{
+			if (!File.Exists(emulator.saveFilePath)) File.Create(emulator.saveFilePath).Close();
+
+			File.WriteAllBytes(emulator.saveFilePath, cartridgeRam);
+		}
+
+		private void LoadCartridgeRam()
+		{
+			if (File.Exists(emulator.saveFilePath)) cartridgeRam = File.ReadAllBytes(emulator.saveFilePath);
 		}
 
 		private void InitializeRegisters()
@@ -345,13 +361,14 @@ namespace GameboyEmulator
 
 			else if (IsInRange(address, CARTRIDGE_RAM_BASE_ADDRESS, CARTRIDGE_RAM_LAST_ADDRESS))
 			{
-				if (cartridgeRam != null && emulator.memoryBankController.IsRamEnabled)
-				{
-					cartridgeRam[
-						emulator.memoryBankController.ConvertAddressInRamBank(
-							(ushort)(address - CARTRIDGE_RAM_BASE_ADDRESS)
-						)] = data;
-				}
+				if (cartridgeRam == null || !emulator.memoryBankController.IsRamEnabled) return;
+
+				cartridgeRam[
+					emulator.memoryBankController.ConvertAddressInRamBank(
+						(ushort)(address - CARTRIDGE_RAM_BASE_ADDRESS)
+					)] = data;
+
+				SaveCartridgeRam();
 			}
 
 			else if (IsInRange(address, WORK_RAM_BASE_ADDRESS, WORK_RAM_LAST_ADDRESS))

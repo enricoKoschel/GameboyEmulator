@@ -6,4 +6,3 @@
 - Implement save states/rewind
 - Implement sound
 - Controller support
-- Implement saving ram to file

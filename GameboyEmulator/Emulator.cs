@@ -26,6 +26,7 @@ namespace GameboyEmulator
 
 		public readonly string bootRomFilePath;
 		public readonly string gameRomFilePath;
+		public readonly string saveFilePath;
 
 		public bool IsRunning => inputOutput.WindowIsOpen;
 
@@ -42,6 +43,7 @@ namespace GameboyEmulator
 
 			this.gameRomFilePath = gameRomFilePath;
 			this.bootRomFilePath = bootRomFilePath;
+			saveFilePath         = Path.ChangeExtension(gameRomFilePath, "sav");
 
 			lastSpeeds = new int[NUMBER_OF_SPEEDS_TO_AVERAGE];
 
