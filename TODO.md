@@ -1,6 +1,5 @@
 # TODO
 
-- Better saving of ram (not every time it gets written to)
 - Implement other memory bank controllers
 - Implement STOP opcode
 - Implement GUI
