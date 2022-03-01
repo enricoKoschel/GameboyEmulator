@@ -87,7 +87,7 @@ namespace GameboyEmulator
 
 		public void LoadGame()
 		{
-			if (emulator.bootRomFilePath != String.Empty)
+			if (!String.IsNullOrWhiteSpace(emulator.bootRomFilePath))
 			{
 				bootRomEnabled = true;
 

@@ -13,9 +13,13 @@ namespace GameboyEmulator
 
 			switch (args.Length)
 			{
+				case 0:
+					gameRomFilePath = Config.GetRomConfig("GAME");
+					bootRomFilePath = Config.GetRomConfig("BOOT");
+					break;
 				case 1:
 					gameRomFilePath = args[0];
-					bootRomFilePath = String.Empty;
+					bootRomFilePath = Config.GetRomConfig("BOOT");
 					break;
 				case 2:
 					gameRomFilePath = args[0];
