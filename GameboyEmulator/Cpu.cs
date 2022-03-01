@@ -1,5 +1,4 @@
 ﻿using System;
-using System.IO;
 
 namespace GameboyEmulator
 {
@@ -199,8 +198,10 @@ namespace GameboyEmulator
 					return 4;
 				//STOP
 				case 0x10:
-					Logger.LogMessage("STOP Opcode not implemented yet", Logger.LogLevel.Error);
-					throw new NotImplementedException("STOP Opcode not implemented yet");
+					Logger.LogMessage("STOP Opcode not implemented yet", Logger.LogLevel.Error, true);
+
+					Environment.Exit(1);
+					return 0; //Useless return but the program does not compile without it
 				//LD DE,nn
 				case 0x11:
 					DeRegister = Load16BitImmediate();
@@ -1099,12 +1100,12 @@ namespace GameboyEmulator
 				//Invalid Opcode
 				default:
 					Logger.LogMessage(
-						$"Invalid Opcode 0x{opcode:X} encountered at 0x{programCounter - 1:X}!", Logger.LogLevel.Error
+						$"Invalid Opcode 0x{opcode:X} encountered at 0x{programCounter - 1:X}!", Logger.LogLevel.Error,
+						true
 					);
 
-					throw new InvalidDataException(
-						$"Invalid Opcode 0x{opcode:X} encountered at 0x{programCounter - 1:X}!"
-					);
+					Environment.Exit(1);
+					return 0; //Useless return but the program does not compile without it
 			}
 		}
 
@@ -2340,7 +2341,7 @@ namespace GameboyEmulator
 			if (carryFlag != null) CarryFlag         = (bool)carryFlag;
 		}
 
-		public void InitializeRegisters()
+		public void InitialiseRegisters()
 		{
 			AfRegister     = 0x01B0;
 			BcRegister     = 0x0013;

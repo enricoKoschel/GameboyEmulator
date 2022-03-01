@@ -100,18 +100,17 @@ namespace GameboyEmulator
 
 		public bool IsRamEnabled { get; private set; }
 
-		public void InitializeBanking()
+		public void InitialiseBanking()
 		{
 			currentBankControllerType = (BankControllerType)emulator.memory.Read(0x147, true);
 			if (!Enum.IsDefined(typeof(BankControllerType), currentBankControllerType))
 			{
 				Logger.LogMessage(
-					$"Invalid memory bank controller with id '{currentBankControllerType}'", Logger.LogLevel.Error
+					$"Cartridge uses invalid memory bank controller with id '{currentBankControllerType}'",
+					Logger.LogLevel.Error, true
 				);
 
-				throw new InvalidDataException(
-					$"Invalid memory bank controller with id '{currentBankControllerType}'"
-				);
+				Environment.Exit(1);
 			}
 
 			Logger.LogMessage(
@@ -121,8 +120,9 @@ namespace GameboyEmulator
 			byte numberOfRomBanksRaw = emulator.memory.Read(0x148, true);
 			if (numberOfRomBanksRaw > 0x08)
 			{
-				Logger.LogMessage("Cartridge has invalid number of ROM banks!", Logger.LogLevel.Error);
-				throw new InvalidDataException("Cartridge has invalid number of ROM banks!");
+				Logger.LogMessage("Cartridge has an invalid number of ROM banks!", Logger.LogLevel.Error, true);
+
+				Environment.Exit(1);
 			}
 
 			numberOfRomBanks = (byte)Math.Pow(2, numberOfRomBanksRaw + 1);
@@ -149,8 +149,10 @@ namespace GameboyEmulator
 					NumberOfRamBanks = 8;
 					break;
 				default:
-					Logger.LogMessage("Cartridge has invalid number of RAM banks!", Logger.LogLevel.Error);
-					throw new InvalidDataException("Cartridge has invalid number of RAM banks!");
+					Logger.LogMessage("Cartridge has an invalid number of RAM banks!", Logger.LogLevel.Error, true);
+
+					Environment.Exit(1);
+					break;
 			}
 
 			Logger.LogMessage($"{NumberOfRamBanks} RAM bank(s) determined.", Logger.LogLevel.Info);
@@ -184,12 +186,11 @@ namespace GameboyEmulator
 				{
 					Logger.LogMessage(
 						$"Memory Bank Controller '{currentBankControllerType.ToString()}' is not implemented yet!",
-						Logger.LogLevel.Error
+						Logger.LogLevel.Error, true
 					);
 
-					throw new NotImplementedException(
-						$"Memory Bank Controller '{currentBankControllerType.ToString()}' is not implemented yet!"
-					);
+					Environment.Exit(1);
+					break;
 				}
 			}
 		}
@@ -261,12 +262,11 @@ namespace GameboyEmulator
 				{
 					Logger.LogMessage(
 						$"Memory Bank Controller '{currentBankControllerType.ToString()}' is not implemented yet!",
-						Logger.LogLevel.Error
+						Logger.LogLevel.Error, true
 					);
 
-					throw new NotImplementedException(
-						$"Memory Bank Controller '{currentBankControllerType.ToString()}' is not implemented yet!"
-					);
+					Environment.Exit(1);
+					return 0; //Useless return but the program does not return without it
 				}
 			}
 		}

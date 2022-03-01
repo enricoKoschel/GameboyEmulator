@@ -42,9 +42,9 @@ namespace GameboyEmulator
 			string logFilePath = $"{LOG_DIRECTORY_PATH}{CurrentTimeFileFormatted}-{{0}}.txt";
 			int    fileNumber  = 1;
 
-			while (File.Exists(string.Format(logFilePath, fileNumber))) fileNumber++;
+			while (File.Exists(String.Format(logFilePath, fileNumber))) fileNumber++;
 
-			string uniqueLogFilePath = string.Format(logFilePath, fileNumber);
+			string uniqueLogFilePath = String.Format(logFilePath, fileNumber);
 
 			return new StreamWriter(File.Create(uniqueLogFilePath));
 		}

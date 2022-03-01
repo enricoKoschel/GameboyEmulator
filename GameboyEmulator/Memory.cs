@@ -95,42 +95,47 @@ namespace GameboyEmulator
 				{
 					bootRom = File.ReadAllBytes(emulator.bootRomFilePath);
 				}
-				catch (Exception e)
+				catch
 				{
 					Logger.LogMessage(
-						$"Boot rom '{emulator.bootRomFilePath}' could not be opened!", Logger.LogLevel.Error
+						$"Boot rom '{emulator.bootRomFilePath}' could not be opened!", Logger.LogLevel.Error, true
 					);
 
-					throw new Exception("", e);
+					Environment.Exit(1);
 				}
 
 				if (bootRom.Length != 0x100)
 				{
-					Logger.LogMessage("Invalid boot rom selected!", Logger.LogLevel.Error);
-					throw new InvalidDataException("Invalid boot rom selected!");
+					Logger.LogMessage("Invalid boot rom selected!", Logger.LogLevel.Error, true);
+
+					Environment.Exit(1);
 				}
 			}
 			else
 			{
 				bootRomEnabled = false;
-				InitializeRegisters();
+				InitialiseRegisters();
 			}
 
 			try
 			{
 				cartridgeRom = File.ReadAllBytes(emulator.gameRomFilePath);
 			}
-			catch (Exception e)
+			catch
 			{
-				Logger.LogMessage($"Game rom '{emulator.gameRomFilePath}' could not be opened!", Logger.LogLevel.Error);
-				throw new Exception("", e);
+				Logger.LogMessage(
+					$"Game rom '{emulator.gameRomFilePath}' could not be opened!", Logger.LogLevel.Error, true
+				);
+
+				Environment.Exit(1);
 			}
 
 			//A cartridge has to be at least 0x150 bytes large to contain a full cartridge header
 			if (cartridgeRom.Length < 0x150)
 			{
-				Logger.LogMessage("Invalid game rom selected!", Logger.LogLevel.Error);
-				throw new InvalidDataException("Invalid game rom selected!");
+				Logger.LogMessage("Invalid game rom selected!", Logger.LogLevel.Error, true);
+
+				Environment.Exit(1);
 			}
 
 			//Pad the cartridge size to at least 0x8000 bytes (32KB)
@@ -143,7 +148,7 @@ namespace GameboyEmulator
 
 
 			//Detect current Memorybanking Mode
-			emulator.memoryBankController.InitializeBanking();
+			emulator.memoryBankController.InitialiseBanking();
 
 			AllocateCartridgeRam(emulator.memoryBankController.NumberOfRamBanks);
 
@@ -166,13 +171,13 @@ namespace GameboyEmulator
 			else File.Create(emulator.saveFilePath).Close();
 		}
 
-		private void InitializeRegisters()
+		private void InitialiseRegisters()
 		{
-			emulator.cpu.InitializeRegisters();
-			InitializeMemory();
+			emulator.cpu.InitialiseRegisters();
+			InitialiseMemory();
 		}
 
-		private void InitializeMemory()
+		private void InitialiseMemory()
 		{
 			Write(0xFF05, 0x00);
 			Write(0xFF06, 0x00);
