@@ -528,6 +528,9 @@ namespace GameboyEmulator
 
 		public static bool IsInRange(int number, int lowerBoundInclusive, int upperBoundInclusive)
 		{
+			if (lowerBoundInclusive > upperBoundInclusive)
+				(upperBoundInclusive, lowerBoundInclusive) = (lowerBoundInclusive, upperBoundInclusive);
+
 			return number >= lowerBoundInclusive && number <= upperBoundInclusive;
 		}
 	}

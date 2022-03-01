@@ -1,5 +1,7 @@
 # TODO
 
+- Add pause key
+- Add the ability to resize the window (change scale)
 - Implement other memory bank controllers
 - Implement STOP opcode
 - Implement GUI
