@@ -88,6 +88,7 @@ namespace GameboyEmulator
 ;A = 83 (S)
 ;B = 65 (A)
 ;SPEED = 16 (Shift)
+;PAUSE = 17 (LCtrl)
 
 UP = 38
 DOWN = 40
@@ -98,6 +99,7 @@ SELECT = 32
 A = 83
 B = 65
 SPEED = 16
+PAUSE = 17
 
 ;Uses HEX color values WITHOUT the leading # (123456)
 [Colors]

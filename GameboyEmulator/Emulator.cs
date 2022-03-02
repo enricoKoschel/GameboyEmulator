@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
+using System.Threading;
 
 namespace GameboyEmulator
 {
@@ -29,6 +30,7 @@ namespace GameboyEmulator
 		public readonly string saveFilePath;
 
 		public bool IsRunning => inputOutput.WindowIsOpen;
+		public bool isPaused = false;
 
 		public Emulator(string gameRomFilePath, string bootRomFilePath)
 		{
@@ -54,6 +56,15 @@ namespace GameboyEmulator
 
 		public void Update()
 		{
+			while (isPaused)
+			{
+				Thread.Sleep(16);
+
+				//Drawing the frame allows events to be dispatched (moving the window for example)
+				inputOutput.DrawFrame(true);
+				inputOutput.Update();
+			}
+
 			Stopwatch frameTime = new Stopwatch();
 
 			int cyclesThisFrame = 0;

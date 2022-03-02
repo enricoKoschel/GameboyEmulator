@@ -29,6 +29,7 @@ namespace GameboyEmulator
 		private const Keyboard.Key DEFAULT_A_BUTTON      = Keyboard.Key.S;
 		private const Keyboard.Key DEFAULT_B_BUTTON      = Keyboard.Key.A;
 		private const Keyboard.Key DEFAULT_SPEED_BUTTON  = Keyboard.Key.LShift;
+		private const Keyboard.Key DEFAULT_PAUSE_BUTTON  = Keyboard.Key.LControl;
 
 		private static Keyboard.Key upButton;
 		private static Keyboard.Key downButton;
@@ -39,6 +40,7 @@ namespace GameboyEmulator
 		private static Keyboard.Key aButton;
 		private static Keyboard.Key bButton;
 		private static Keyboard.Key speedButton;
+		private static Keyboard.Key pauseButton;
 
 		//Color mapping
 		private static readonly Color DEFAULT_BLACK_COLOR      = new Color(8, 24, 32);
@@ -135,6 +137,10 @@ namespace GameboyEmulator
 			speedButton = Config.GetControlConfig("SPEED") == -1
 							  ? DEFAULT_SPEED_BUTTON
 							  : ConvertJsKeyCodeToSfml(Config.GetControlConfig("SPEED"));
+
+			pauseButton = Config.GetControlConfig("PAUSE") == -1
+							  ? DEFAULT_PAUSE_BUTTON
+							  : ConvertJsKeyCodeToSfml(Config.GetControlConfig("PAUSE"));
 		}
 
 		private static void InitialiseColors()
@@ -256,6 +262,8 @@ namespace GameboyEmulator
 		{
 			if (WindowHasFocus && Keyboard.IsKeyPressed(speedButton)) emulator.MaxFps = 0;
 			else emulator.MaxFps                                                      = Emulator.GAMEBOY_FPS;
+
+			emulator.isPaused = WindowHasFocus && Keyboard.IsKeyPressed(pauseButton);
 		}
 
 		public void UpdatePixelBuffer(int x, int y, Ppu.Color color)
@@ -280,7 +288,7 @@ namespace GameboyEmulator
 			return zBuffer[x, y];
 		}
 
-		public void DrawFrame()
+		public void DrawFrame(bool paused = false)
 		{
 			if (!WindowIsOpen)
 			{
@@ -290,7 +298,8 @@ namespace GameboyEmulator
 
 			window.DispatchEvents();
 
-			vertexBuffer.Update(vertexArray);
+			//Dont update vertexBuffer if paused, so no unfinished frame gets drawn
+			if (!paused) vertexBuffer.Update(vertexArray);
 			vertexBuffer.Draw(window, RenderStates.Default);
 
 			window.Display();
