@@ -17,7 +17,7 @@ namespace GameboyEmulator
 		private static string CurrentTime              => DateTime.Now.ToString("HH:mm:ss.fff");
 		private static string CurrentTimeFileFormatted => DateTime.Now.ToString("yyyy-MM-dd__HH_mm_ss");
 
-		private const string LOG_DIRECTORY_PATH     = "../../../logs/";
+		private const string LOG_DIRECTORY_PATH     = "logs/";
 		private const bool   ENABLE_CONSOLE_LOGGING = true;
 
 		static Logger()
