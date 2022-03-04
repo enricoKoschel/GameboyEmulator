@@ -115,8 +115,8 @@ public static class Config
 ;RIGHT = 39 (Right arrow)
 ;START = 13 (Enter)
 ;SELECT = 32 (Space)
-;A = 83 (S)
-;B = 65 (A)
+;A = 83 (S key)
+;B = 65 (A key)
 ;SPEED = 16 (Shift)
 ;PAUSE = 17 (LCtrl)
 
