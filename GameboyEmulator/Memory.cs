@@ -404,7 +404,10 @@ namespace GameboyEmulator
 				switch (address & 0xFF)
 				{
 					case 0x00:
-						emulator.joypad.JoypadRegister = data;
+						//Only bits 4 and 5 of the joypad register are writeable
+						emulator.joypad.JoypadRegister =
+							(byte)((emulator.joypad.JoypadRegister & 0b11001111) | (data & 0b00110000));
+
 						break;
 					case 0x01:
 					case 0x02:
