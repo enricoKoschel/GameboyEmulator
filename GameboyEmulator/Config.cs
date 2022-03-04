@@ -3,104 +3,105 @@ using System.Globalization;
 using System.IO;
 using IniParser;
 
-namespace GameboyEmulator
+namespace GameboyEmulator;
+
+public static class Config
 {
-	public static class Config
+	private const string CONFIG_FILE_PATH = "settings.ini";
+
+	private static readonly IniData CONFIG_DATA;
+
+	static Config()
 	{
-		private const string CONFIG_FILE_PATH = "settings.ini";
+		if (!File.Exists(CONFIG_FILE_PATH)) CreateDefaultConfigFile();
 
-		private static readonly IniData CONFIG_DATA;
+		CONFIG_DATA = new IniDataParser().Parse(File.ReadAllText(CONFIG_FILE_PATH));
+	}
 
-		static Config()
-		{
-			if (!File.Exists(CONFIG_FILE_PATH)) CreateDefaultConfigFile();
+	public static int GetControlConfig(string key)
+	{
+		string value = CONFIG_DATA["Controls"][key];
 
-			CONFIG_DATA = new IniDataParser().Parse(File.ReadAllText(CONFIG_FILE_PATH));
-		}
+		bool validInt = Int32.TryParse(value, out int output);
 
-		public static int GetControlConfig(string key)
-		{
-			string value = CONFIG_DATA["Controls"][key];
+		//Ensures a valid key was provided by the ini file
+		if (validInt && (Memory.IsInRange(output, 65, 90)   //A-Z
+					  || Memory.IsInRange(output, 48, 57)   //0-9
+					  || Memory.IsInRange(output, 37, 40)   //Arrow keys
+					  || Memory.IsInRange(output, 96, 105)  //Numpad0-Numpad9
+					  || Memory.IsInRange(output, 112, 123) //F1-F12
+					  || output
+							 is 27  //Esc
+							 or 17  //Ctrl
+							 or 16  //Shift
+							 or 18  //Alt
+							 or 32  //Space
+							 or 13  //Enter
+							 or 8   //Backspace
+							 or 9   //Tab
+							 or 33  //PageUp
+							 or 34  //PageDown
+							 or 35  //End
+							 or 36  //Home
+							 or 45  //Insert
+							 or 46  //Delete
+							 or 107 //NumpadAdd
+							 or 109 //NumpadSubtract
+							 or 106 //NumpadMultiply
+							 or 111 //NumpadDivide
+							 or 19  //Pause
+						)) return output;
 
-			bool validInt = Int32.TryParse(value, out int output);
+		return -1;
+	}
 
-			//Ensures a valid key was provided by the ini file
-			if (validInt && (Memory.IsInRange(output, 65, 90)   //A-Z
-						  || Memory.IsInRange(output, 48, 57)   //0-9
-						  || output == 27                       //Esc
-						  || output == 17                       //Ctrl
-						  || output == 16                       //Shift
-						  || output == 18                       //Alt
-						  || output == 32                       //Space
-						  || output == 13                       //Enter
-						  || output == 8                        //Backspace
-						  || output == 9                        //Tab
-						  || output == 33                       //PageUp
-						  || output == 34                       //PageDown
-						  || output == 35                       //End
-						  || output == 36                       //Home
-						  || output == 45                       //Insert
-						  || output == 46                       //Delete
-						  || output == 107                      //NumpadAdd
-						  || output == 109                      //NumpadSubtract
-						  || output == 106                      //NumpadMultiply
-						  || output == 111                      //NumpadDivide
-						  || Memory.IsInRange(output, 37, 40)   //Arrow keys
-						  || Memory.IsInRange(output, 96, 105)  //Numpad0-Numpad9
-						  || Memory.IsInRange(output, 112, 123) //F1-F12
-						  || output == 19                       //Pause
-							)) return output;
+	public static int GetColorConfig(string color)
+	{
+		string value = CONFIG_DATA["Colors"][color];
 
-			return -1;
-		}
+		bool validInt = Int32.TryParse(value, NumberStyles.HexNumber, null, out int output);
 
-		public static int GetColorConfig(string color)
-		{
-			string value = CONFIG_DATA["Colors"][color];
+		if (validInt && output <= 0xFFFFFF) return output;
 
-			bool validInt = Int32.TryParse(value, NumberStyles.HexNumber, null, out int output);
+		return -1;
+	}
 
-			if (validInt && output <= 0xFFFFFF) return output;
+	public static string GetSaveLocationConfig()
+	{
+		return CONFIG_DATA["Saving"]["LOCATION"];
+	}
 
-			return -1;
-		}
+	public static bool GetSaveEnabledConfig()
+	{
+		string value = CONFIG_DATA["Saving"]["ENABLE"];
 
-		public static string GetSaveLocationConfig()
-		{
-			return CONFIG_DATA["Saving"]["LOCATION"];
-		}
+		bool validBool = Boolean.TryParse(value, out bool output);
 
-		public static bool GetSaveEnabledConfig()
-		{
-			string value = CONFIG_DATA["Saving"]["ENABLE"];
+		return !validBool || output;
+	}
 
-			bool validBool = Boolean.TryParse(value, out bool output);
+	public static string GetLogLocationConfig()
+	{
+		return CONFIG_DATA["Logging"]["LOCATION"];
+	}
 
-			return !validBool || output;
-		}
+	public static bool GetLogEnabledConfig()
+	{
+		string value = CONFIG_DATA["Logging"]["ENABLE"];
 
-		public static string GetLogLocationConfig()
-		{
-			return CONFIG_DATA["Logging"]["LOCATION"];
-		}
+		bool validBool = Boolean.TryParse(value, out bool output);
 
-		public static bool GetLogEnabledConfig()
-		{
-			string value = CONFIG_DATA["Logging"]["ENABLE"];
+		return !validBool || output;
+	}
 
-			bool validBool = Boolean.TryParse(value, out bool output);
+	public static string GetRomConfig(string rom)
+	{
+		return CONFIG_DATA["Roms"][rom];
+	}
 
-			return !validBool || output;
-		}
-
-		public static string GetRomConfig(string rom)
-		{
-			return CONFIG_DATA["Roms"][rom];
-		}
-
-		private static void CreateDefaultConfigFile()
-		{
-			const string defaultConfig = @"[Controls]
+	private static void CreateDefaultConfigFile()
+	{
+		const string defaultConfig = @"[Controls]
 ;Uses JavaScript Keycodes (https://keycode.info)
 ;Supported Keys are:
 ;A-Z, 0-9, Esc, LCtrl, LShift, LAlt, Space, Enter, Backspace,
@@ -174,7 +175,6 @@ LOCATION=./logs/
 GAME =
 BOOT =";
 
-			File.WriteAllText(CONFIG_FILE_PATH, defaultConfig);
-		}
+		File.WriteAllText(CONFIG_FILE_PATH, defaultConfig);
 	}
 }
