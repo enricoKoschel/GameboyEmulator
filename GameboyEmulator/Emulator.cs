@@ -45,13 +45,22 @@ namespace GameboyEmulator
 
 			this.gameRomFilePath = gameRomFilePath;
 			this.bootRomFilePath = bootRomFilePath;
-			saveFilePath         = Path.ChangeExtension(gameRomFilePath, "sav");
+
+			string saveFileDirectory = Path.GetDirectoryName(Config.GetSaveLocationConfig() + "/");
+			if (String.IsNullOrWhiteSpace(saveFileDirectory)) saveFileDirectory = "./saves/";
+
+			string saveFileName = Path.ChangeExtension(Path.GetFileName(gameRomFilePath), ".sav");
+			saveFilePath = $"{saveFileDirectory}/{saveFileName}";
 
 			lastSpeeds = new int[NUMBER_OF_SPEEDS_TO_AVERAGE];
 
 			MaxFps = GAMEBOY_FPS;
 
 			memory.LoadGame();
+
+			//Only create save directory if saving is enabled and cartridge ram exists
+			if (Config.GetSavesEnabledConfig() && memoryBankController.CartridgeRamExists)
+				Directory.CreateDirectory(saveFileDirectory);
 		}
 
 		public void Update()

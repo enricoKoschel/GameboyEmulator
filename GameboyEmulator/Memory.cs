@@ -61,7 +61,8 @@ namespace GameboyEmulator
 
 		private bool bootRomEnabled;
 
-		private DateTime lastTimeRamWasSaved = DateTime.Now;
+		private DateTime lastTimeRamWasSaved     = DateTime.Now;
+		private bool     ramChangedSinceLastSave = true;
 
 		private readonly Emulator emulator;
 
@@ -157,18 +158,21 @@ namespace GameboyEmulator
 
 		public void SaveCartridgeRam()
 		{
-			if (!emulator.memoryBankController.CartridgeRamExists) return;
+			if (!ramChangedSinceLastSave || !emulator.memoryBankController.CartridgeRamExists ||
+				!Config.GetSavesEnabledConfig()) return;
+
 			if (DateTime.Now < lastTimeRamWasSaved.AddSeconds(1)) return;
 
-			lastTimeRamWasSaved = DateTime.Now;
+			lastTimeRamWasSaved     = DateTime.Now;
+			ramChangedSinceLastSave = false;
 
 			File.WriteAllBytes(emulator.saveFilePath, cartridgeRam);
 		}
 
 		private void LoadCartridgeRam()
 		{
-			if (File.Exists(emulator.saveFilePath)) cartridgeRam = File.ReadAllBytes(emulator.saveFilePath);
-			else File.Create(emulator.saveFilePath).Close();
+			if (Config.GetSavesEnabledConfig() && File.Exists(emulator.saveFilePath))
+				cartridgeRam = File.ReadAllBytes(emulator.saveFilePath);
 		}
 
 		private void InitialiseRegisters()
@@ -380,7 +384,7 @@ namespace GameboyEmulator
 						(ushort)(address - CARTRIDGE_RAM_BASE_ADDRESS)
 					)] = data;
 
-				SaveCartridgeRam();
+				ramChangedSinceLastSave = true;
 			}
 
 			else if (IsInRange(address, WORK_RAM_BASE_ADDRESS, WORK_RAM_LAST_ADDRESS))

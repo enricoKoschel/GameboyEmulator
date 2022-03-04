@@ -65,6 +65,20 @@ namespace GameboyEmulator
 			return -1;
 		}
 
+		public static string GetSaveLocationConfig()
+		{
+			return CONFIG_DATA["Saving"]["LOCATION"];
+		}
+
+		public static bool GetSavesEnabledConfig()
+		{
+			string value = CONFIG_DATA["Saving"]["ENABLE"];
+
+			bool validBool = Boolean.TryParse(value, out bool output);
+
+			return !validBool || output;
+		}
+
 		public static string GetRomConfig(string rom)
 		{
 			return CONFIG_DATA["Roms"][rom];
@@ -72,12 +86,13 @@ namespace GameboyEmulator
 
 		private static void CreateDefaultConfigFile()
 		{
-			const string defaultConfig = @";Uses JavaScript Keycodes (https://keycode.info)
+			const string defaultConfig = @"[Controls]
+;Uses JavaScript Keycodes (https://keycode.info)
 ;Supported Keys are:
 ;A-Z, 0-9, Esc, LCtrl, LShift, LAlt, Space, Enter, Backspace,
 ;Tab, PageUp, PageDown, End, Home, Insert, Delete,  NumpadAdd, NumpadSubtract, NumpadMultiply,
 ;NumDivide, Arrow keys, Numpad0-Numpad9, F1-F12, Pause
-[Controls]
+
 ;Default:
 ;UP = 38 (Up arrow)
 ;DOWN = 40 (Down arrow)
@@ -101,8 +116,9 @@ B = 65
 SPEED = 16
 PAUSE = 17
 
-;Uses HEX color values WITHOUT the leading # (123456)
 [Colors]
+;Uses HEX color values WITHOUT the leading # (123456)
+
 ;Default:
 ;BLACK = 081820
 ;DARK_GRAY = 346856
@@ -114,8 +130,21 @@ DARK_GRAY = 346856
 LIGHT_GRAY = 88c070
 WHITE = e0f8d0
 
-;The roms provided by the console parameters have priority over these settings
+[Saving]
+;LOCATION can be an absolute or a relative path
+;The path is relative to the emulator executable
+;Disabling saving also disables loading
+
+;Default:
+;ENABLE=TRUE
+;LOCATION=./saves/
+ENABLE=true
+LOCATION=./saves/
+
+
 [Roms]
+;The roms provided by the console parameters have priority over these settings
+
 ;Default:
 ;GAME =
 ;BOOT =
