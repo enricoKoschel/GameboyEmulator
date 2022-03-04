@@ -1,6 +1,5 @@
 # TODO
 
-- Add ability to disable logging and log location to settings.ini
 - Implement better waiting at the end of a frame (Thread.Sleep() + correcting)
 - Add the ability to resize the window (change scale)
 - Implement other memory bank controllers

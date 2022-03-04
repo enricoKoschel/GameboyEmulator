@@ -17,17 +17,25 @@ namespace GameboyEmulator
 		private static string CurrentTime              => DateTime.Now.ToString("HH:mm:ss.fff");
 		private static string CurrentTimeFileFormatted => DateTime.Now.ToString("yyyy-MM-dd__HH_mm_ss");
 
-		private const string LOG_DIRECTORY_PATH     = "logs/";
-		private const bool   ENABLE_CONSOLE_LOGGING = true;
+		private static readonly string LOG_DIRECTORY_PATH;
+		private const           bool   ENABLE_CONSOLE_LOGGING = true;
 
 		static Logger()
 		{
+			if (!Config.GetLogEnabledConfig()) return;
+
+			LOG_DIRECTORY_PATH = Path.GetDirectoryName(Config.GetLogLocationConfig() + "/");
+			if (String.IsNullOrWhiteSpace(LOG_DIRECTORY_PATH)) LOG_DIRECTORY_PATH = "./logs";
+			LOG_DIRECTORY_PATH += "/";
+
 			LOG_FILE           = CreateLogFile();
 			LOG_FILE.AutoFlush = true;
 		}
 
 		public static void LogMessage(string message, LogLevel loglevel, bool logToConsole = false)
 		{
+			if (!Config.GetLogEnabledConfig()) return;
+
 			string logMessage = $"[{CurrentTime}][{LogLevelToString(loglevel)}] {message}";
 
 			if (logToConsole && ENABLE_CONSOLE_LOGGING) Console.WriteLine(logMessage);

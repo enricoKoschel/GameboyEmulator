@@ -59,7 +59,7 @@ namespace GameboyEmulator
 			memory.LoadGame();
 
 			//Only create save directory if saving is enabled and cartridge ram exists
-			if (Config.GetSavesEnabledConfig() && memoryBankController.CartridgeRamExists)
+			if (Config.GetSaveEnabledConfig() && memoryBankController.CartridgeRamExists)
 				Directory.CreateDirectory(saveFileDirectory);
 		}
 

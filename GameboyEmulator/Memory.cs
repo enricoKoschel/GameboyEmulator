@@ -159,7 +159,7 @@ namespace GameboyEmulator
 		public void SaveCartridgeRam()
 		{
 			if (!ramChangedSinceLastSave || !emulator.memoryBankController.CartridgeRamExists ||
-				!Config.GetSavesEnabledConfig()) return;
+				!Config.GetSaveEnabledConfig()) return;
 
 			if (DateTime.Now < lastTimeRamWasSaved.AddSeconds(1)) return;
 
@@ -171,7 +171,7 @@ namespace GameboyEmulator
 
 		private void LoadCartridgeRam()
 		{
-			if (Config.GetSavesEnabledConfig() && File.Exists(emulator.saveFilePath))
+			if (Config.GetSaveEnabledConfig() && File.Exists(emulator.saveFilePath))
 				cartridgeRam = File.ReadAllBytes(emulator.saveFilePath);
 		}
 

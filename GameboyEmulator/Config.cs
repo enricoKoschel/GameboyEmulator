@@ -70,9 +70,23 @@ namespace GameboyEmulator
 			return CONFIG_DATA["Saving"]["LOCATION"];
 		}
 
-		public static bool GetSavesEnabledConfig()
+		public static bool GetSaveEnabledConfig()
 		{
 			string value = CONFIG_DATA["Saving"]["ENABLE"];
+
+			bool validBool = Boolean.TryParse(value, out bool output);
+
+			return !validBool || output;
+		}
+
+		public static string GetLogLocationConfig()
+		{
+			return CONFIG_DATA["Logging"]["LOCATION"];
+		}
+
+		public static bool GetLogEnabledConfig()
+		{
+			string value = CONFIG_DATA["Logging"]["ENABLE"];
 
 			bool validBool = Boolean.TryParse(value, out bool output);
 
@@ -141,6 +155,15 @@ WHITE = e0f8d0
 ENABLE=true
 LOCATION=./saves/
 
+[Logging]
+;LOCATION can be an absolute or a relative path
+;The path is relative to the emulator executable
+
+;Default:
+;ENABLE=true
+;LOCATION=./logs/
+ENABLE=true
+LOCATION=./logs/
 
 [Roms]
 ;The roms provided by the console parameters have priority over these settings
