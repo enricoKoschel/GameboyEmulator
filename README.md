@@ -20,10 +20,11 @@ If you decide to build this repository yourself, all dependencies will be downlo
 You can build this repository yourself by
 
 1. Downloading the code
-2. Navigating to the folder in which the .csproj file lies (normally */GameboyEmulator/GameboyEmulator/*)
-3. Running 'dotnet build -c release' inside the console
+2. Navigating to the folder in which the .csproj file lies  
+   (normally `<repository_root>/GameboyEmulator/`)
+3. Running `dotnet build -c release` inside the console
 
-You will find the executable inside the folder */bin/release/netcoreapp6.0/*
+You will find the executable inside the folder `/bin/release/netcoreapp6.0/`
 
 # Controls
 
@@ -42,5 +43,5 @@ The default controls are as follows
 | Speed    | Shift        |
 | Pause    | Left control |
 
-These controls can be changed inside the **settings.ini** file, which gets created in the same directory as the
+These controls can be changed inside the ***settings.ini*** file, which gets created in the same directory as the
 executable after the first launch.
