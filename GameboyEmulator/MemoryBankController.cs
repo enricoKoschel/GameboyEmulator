@@ -88,6 +88,8 @@ namespace GameboyEmulator
 
 		public byte NumberOfRamBanks { get; private set; }
 
+		public bool CartridgeRamExists => NumberOfRamBanks > 0;
+
 		private byte CurrentRomBank
 		{
 			get => (byte)(((currentRomBankUpper & 0b00000011) << 5) | (currentRomBankLower & 0b00011111));

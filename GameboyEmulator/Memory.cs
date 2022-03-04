@@ -157,7 +157,7 @@ namespace GameboyEmulator
 
 		public void SaveCartridgeRam()
 		{
-			if (cartridgeRam == null || cartridgeRam.Length == 0) return;
+			if (!emulator.memoryBankController.CartridgeRamExists) return;
 			if (DateTime.Now < lastTimeRamWasSaved.AddSeconds(1)) return;
 
 			lastTimeRamWasSaved = DateTime.Now;
@@ -235,7 +235,7 @@ namespace GameboyEmulator
 
 			if (IsInRange(address, CARTRIDGE_RAM_BASE_ADDRESS, CARTRIDGE_RAM_LAST_ADDRESS))
 			{
-				if (cartridgeRam != null && emulator.memoryBankController.IsRamEnabled)
+				if (emulator.memoryBankController.CartridgeRamExists && emulator.memoryBankController.IsRamEnabled)
 				{
 					return cartridgeRam[
 						emulator.memoryBankController.ConvertAddressInRamBank(
@@ -372,7 +372,8 @@ namespace GameboyEmulator
 
 			else if (IsInRange(address, CARTRIDGE_RAM_BASE_ADDRESS, CARTRIDGE_RAM_LAST_ADDRESS))
 			{
-				if (cartridgeRam == null || !emulator.memoryBankController.IsRamEnabled) return;
+				if (!emulator.memoryBankController.CartridgeRamExists ||
+					!emulator.memoryBankController.IsRamEnabled) return;
 
 				cartridgeRam[
 					emulator.memoryBankController.ConvertAddressInRamBank(
