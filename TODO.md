@@ -1,5 +1,6 @@
 # TODO
 
+- Implement all checks at startup (checksums, logo, etc.)
 - Implement better waiting at the end of a frame (Thread.Sleep() + correcting)
 - Add the ability to resize the window (change scale)
 - Implement other memory bank controllers
