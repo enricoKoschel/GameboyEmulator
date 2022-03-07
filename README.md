@@ -5,7 +5,8 @@ For test progress see [TESTING.md](TESTING.md).
 
 # Dependencies
 
-If you decide to build this repository yourself, all dependencies will be downloaded by NuGet at build time.
+To build this project [.NET 6.0](https://docs.microsoft.com/en-us/dotnet/core/install/) is required.  
+Libraries used will be downloaded automatically while building.
 
 # Libraries used
 
@@ -24,7 +25,17 @@ You can build this repository yourself by
    (normally `<repository_root>/GameboyEmulator/`)
 3. Running `dotnet build -c release` inside the console
 
-You will find the executable inside the folder `/bin/release/netcoreapp6.0/`
+# Run
+
+After building the repository you can run the program in 2 ways. Either you
+
+1. Navigate to `<repository_root>/GameboyEmulator/bin/release/netcoreapp6.0`
+2. Execute `GameboyEmulator.exe` on Windows or just `GameboyEmulator` on Linux
+
+or you
+
+1. Navigate to `<repository_root>/GameboyEmulator/bin/release/netcoreapp6.0`
+2. Run `dotnet GameboyEmulator.dll` on Windows or ` dotnet GameboyEmulator` on Linux
 
 # Controls
 
