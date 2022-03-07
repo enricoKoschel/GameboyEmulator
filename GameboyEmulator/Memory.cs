@@ -350,6 +350,9 @@ public class Memory
 				case 0x4D:
 					//0xFF4D is used to detect a GameBoy Color, a regular GameBoy always returns 0xFF
 					return 0xFF;
+				case 0x50:
+					//Reading from 0xFF50 returns 1 for bits 7-1 and the boot rom state for bit 0
+					return (byte)(0b11111110 | (bootRomEnabled ? 0 : 1));
 				default:
 					//Unused IO ports return 0xFF
 					return 0xFF;
@@ -508,7 +511,7 @@ public class Memory
 					break;
 				case 0x50:
 					//Writing to this address disables the boot rom
-					DisableBootRom();
+					if (bootRomEnabled && (data & 0b00000001) == 1) DisableBootRom();
 					break;
 			}
 		}
