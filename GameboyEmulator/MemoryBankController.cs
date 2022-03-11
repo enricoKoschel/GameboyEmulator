@@ -268,7 +268,7 @@ public class MemoryBankController
 				);
 
 				Environment.Exit(1);
-				return 0; //Useless return but the program does not return without it
+				return 0; //Useless return but the program does not compile without it
 			}
 		}
 	}

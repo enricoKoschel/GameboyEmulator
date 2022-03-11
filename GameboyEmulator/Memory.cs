@@ -528,6 +528,15 @@ public class Memory
 
 	private void DirectMemoryAccess(byte sourceAddressLo)
 	{
+		//TODO Maybe all addresses are allowed and some are treated as echo ram?
+		/*"what happens when the source address for OAM DMA is FE00?
+		passing all the other mooneye oam tests including timing, just failing sources-GS"
+		"it's treated as echo ram of DE00
+		C000-FFFF oam dma source is always treated as wram"
+		"oh so it's essentially just like an extended echo region?"
+		"in most cases echo ram is only E000-FDFF. oam dma is one of the exceptions here which have the entire E000-FFFF region as echo ram for dma source"
+		"i see, thanks!
+		just got that test passing now"*/
 		if (sourceAddressLo > 0xF1) return;
 
 		ushort sourceAddress      = (ushort)(sourceAddressLo * 0x100);
