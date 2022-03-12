@@ -15,9 +15,12 @@ public class Emulator
 	public readonly Ppu                  ppu;
 	public readonly Timer                timer;
 	public readonly InputOutput          inputOutput;
+	public readonly Apu                  apu;
 
-	//4194304/70224 is the exact fps of the Gameboy
-	public const double GAMEBOY_FPS = 4194304 / 70224.0;
+	public const int GAMEBOY_CLOCK_SPEED = 4194304;
+
+	//Clock speed/70224 is the exact fps of the Gameboy
+	public const double GAMEBOY_FPS = GAMEBOY_CLOCK_SPEED / 70224.0;
 
 	public  double MaxFps          { get; set; }
 	private double MinTimePerFrame => MaxFps != 0 ? 1000 / MaxFps : 0;
@@ -42,6 +45,7 @@ public class Emulator
 		ppu                  = new Ppu(this);
 		timer                = new Timer(this);
 		inputOutput          = new InputOutput(this);
+		apu                  = new Apu();
 
 		this.gameRomFilePath = gameRomFilePath;
 		this.bootRomFilePath = bootRomFilePath;

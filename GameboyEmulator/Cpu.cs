@@ -2158,7 +2158,7 @@ public class Cpu
 	}
 
 	//Word functions
-	private static ushort MakeWord(byte hi, byte lo)
+	public static ushort MakeWord(byte hi, byte lo)
 	{
 		return (ushort)((hi << 8) | lo);
 	}
