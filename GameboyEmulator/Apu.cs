@@ -1,4 +1,8 @@
-﻿namespace GameboyEmulator;
+﻿using System;
+using System.Collections.Generic;
+using SFML.Audio;
+
+namespace GameboyEmulator;
 
 public class Apu
 {
@@ -41,8 +45,13 @@ public class Apu
 	}
 
 	//Only the lower 3 bits of Channel2FrequencyRegisterHi are used
-	public ushort Channel2FrequencyRegister =>
+	private ushort Channel2FrequencyRegister =>
 		(ushort)(Cpu.MakeWord(Channel2FrequencyRegisterHi, Channel2FrequencyRegisterLo) & 0x7FF);
+
+	private byte Channel2WavePatternDuty => (byte)((Channel2SoundLengthWavePatternRegister & 0b11000000) >> 6);
+
+	private int channel2FrequencyTimer;
+	private int channel2waveDutyPosition;
 
 	//Channel 3 registers
 	private bool internalChannel3SoundOnOffRegister;
@@ -111,6 +120,20 @@ public class Apu
 
 	private readonly byte[] wavePatternRam;
 
+	/*
+		00 - 12.5% (_-------_-------_-------)
+		01 - 25%   (__------__------__------)
+		10 - 50%   (____----____----____----)
+		11 - 75%   (______--______--______--)
+	*/
+	private static readonly bool[,] WAVE_DUTY_TABLE =
+	{
+		{ false, true, true, true, true, true, true, true },
+		{ false, false, true, true, true, true, true, true },
+		{ false, false, false, false, true, true, true, true },
+		{ false, false, false, false, false, false, true, true }
+	};
+
 	private const int SAMPLE_RATE = 44100;
 
 	private int internalApuCounter;
@@ -120,10 +143,12 @@ public class Apu
 		wavePatternRam = new byte[0x10];
 	}
 
-	public void Update(int cycles)
+	private List<short> a = new();
+
+	public void Update(int cycles, bool frameDone)
 	{
 		UpdateChannel1();
-		UpdateChannel2();
+		UpdateChannel2(cycles);
 		UpdateChannel3();
 		UpdateChannel4();
 
@@ -134,6 +159,20 @@ public class Apu
 			internalApuCounter -= Emulator.GAMEBOY_CLOCK_SPEED;
 
 			//TODO Save current state of APU as sample
+
+
+			a.Add((short)((GetCurrentChannel2Amplitude() ? 1 : 0) * 3000));
+		}
+
+		if (frameDone)
+		{
+			SoundBuffer b = new(a.ToArray(), 1, SAMPLE_RATE);
+			a.Clear();
+
+			Sound s = new(b);
+			s.Play();
+
+			while (s.Status == SoundStatus.Playing) ;
 		}
 	}
 
@@ -141,8 +180,16 @@ public class Apu
 	{
 	}
 
-	private void UpdateChannel2()
+	private void UpdateChannel2(int cycles)
 	{
+		channel2FrequencyTimer -= cycles;
+
+		if (channel2FrequencyTimer > 0) return;
+
+		channel2FrequencyTimer += (2048 - Channel2FrequencyRegister) * 4;
+
+		channel2waveDutyPosition += 1;
+		channel2waveDutyPosition %= 8;
 	}
 
 	private void UpdateChannel3()
@@ -150,6 +197,23 @@ public class Apu
 	}
 
 	private void UpdateChannel4()
+	{
+	}
+
+	private void GetCurrentChannel1Amplitude()
+	{
+	}
+
+	private bool GetCurrentChannel2Amplitude()
+	{
+		return WAVE_DUTY_TABLE[Channel2WavePatternDuty, channel2waveDutyPosition];
+	}
+
+	private void GetCurrentChannel3Amplitude()
+	{
+	}
+
+	private void GetCurrentChannel4Amplitude()
 	{
 	}
 

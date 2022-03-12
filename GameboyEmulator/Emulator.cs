@@ -95,10 +95,12 @@ public class Emulator
 			ppu.Update(cycles);
 			timer.Update(cycles);
 			joypad.Update(false);
+			apu.Update(cycles, false);
 			interrupts.Update();
 		}
 
 		joypad.Update(true);
+		apu.Update(0, true);
 		inputOutput.Update();
 
 		//Save cartridge ram at the end of every frame so that no data is lost
