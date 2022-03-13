@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using SFML.Audio;
 
 namespace GameboyEmulator;
@@ -51,7 +50,7 @@ public class Apu
 	private byte Channel2WavePatternDuty => (byte)((Channel2SoundLengthWavePatternRegister & 0b11000000) >> 6);
 
 	private int channel2FrequencyTimer;
-	private int channel2waveDutyPosition;
+	private int channel2WaveDutyPosition;
 
 	//Channel 3 registers
 	private bool internalChannel3SoundOnOffRegister;
@@ -136,7 +135,8 @@ public class Apu
 
 	private const int SAMPLE_RATE = 44100;
 
-	private int internalApuCounter;
+	private int internalMainApuCounter;
+	private int internalFrameSequencerCounter;
 
 	public Apu()
 	{
@@ -152,14 +152,15 @@ public class Apu
 		UpdateChannel3();
 		UpdateChannel4();
 
-		internalApuCounter += SAMPLE_RATE * cycles;
+		UpdateFrameSequencer(cycles);
 
-		if (internalApuCounter >= Emulator.GAMEBOY_CLOCK_SPEED)
+		internalMainApuCounter += SAMPLE_RATE * cycles;
+
+		if (internalMainApuCounter >= Emulator.GAMEBOY_CLOCK_SPEED)
 		{
-			internalApuCounter -= Emulator.GAMEBOY_CLOCK_SPEED;
+			internalMainApuCounter -= Emulator.GAMEBOY_CLOCK_SPEED;
 
 			//TODO Save current state of APU as sample
-
 
 			a.Add((short)((GetCurrentChannel2Amplitude() ? 1 : 0) * 3000));
 		}
@@ -171,8 +172,16 @@ public class Apu
 
 			Sound s = new(b);
 			s.Play();
+		}
+	}
 
-			while (s.Status == SoundStatus.Playing) ;
+	private void UpdateFrameSequencer(int cycles)
+	{
+		if ((internalFrameSequencerCounter += cycles) >= 8192)
+		{
+			internalFrameSequencerCounter -= 8192;
+
+			//TODO Update Length, envelope and sweep functions
 		}
 	}
 
@@ -188,8 +197,8 @@ public class Apu
 
 		channel2FrequencyTimer += (2048 - Channel2FrequencyRegister) * 4;
 
-		channel2waveDutyPosition += 1;
-		channel2waveDutyPosition %= 8;
+		channel2WaveDutyPosition++;
+		channel2WaveDutyPosition %= 8;
 	}
 
 	private void UpdateChannel3()
@@ -206,7 +215,11 @@ public class Apu
 
 	private bool GetCurrentChannel2Amplitude()
 	{
-		return WAVE_DUTY_TABLE[Channel2WavePatternDuty, channel2waveDutyPosition];
+		if (!Cpu.GetBit(SoundOutputTerminalSelectRegister, 5) &&
+			!Cpu.GetBit(SoundOutputTerminalSelectRegister, 1) &&
+			!Cpu.GetBit(SoundOnOffRegister, 7)) return false;
+
+		return WAVE_DUTY_TABLE[Channel2WavePatternDuty, channel2WaveDutyPosition];
 	}
 
 	private void GetCurrentChannel3Amplitude()
