@@ -25,6 +25,8 @@ public class Emulator
 	public  double MaxFps          { get; set; }
 	private double MinTimePerFrame => MaxFps != 0 ? 1000 / MaxFps : 0;
 
+	public int CurrentSpeed => lastSpeeds[NUMBER_OF_SPEEDS_TO_AVERAGE - 1];
+
 	private const    int   NUMBER_OF_SPEEDS_TO_AVERAGE = 60;
 	private readonly int[] lastSpeeds;
 
@@ -45,7 +47,7 @@ public class Emulator
 		ppu                  = new Ppu(this);
 		timer                = new Timer(this);
 		inputOutput          = new InputOutput(this);
-		apu                  = new Apu();
+		apu                  = new Apu(this);
 
 		this.gameRomFilePath = gameRomFilePath;
 		this.bootRomFilePath = bootRomFilePath;
@@ -95,12 +97,11 @@ public class Emulator
 			ppu.Update(cycles);
 			timer.Update(cycles);
 			joypad.Update(false);
-			apu.Update(cycles, false);
+			apu.Update(cycles);
 			interrupts.Update();
 		}
 
 		joypad.Update(true);
-		apu.Update(0, true);
 		inputOutput.Update();
 
 		//Save cartridge ram at the end of every frame so that no data is lost

@@ -1,9 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using SFML.Audio;
+using SFML.System;
 
 namespace GameboyEmulator;
 
-public class Apu
+public class Apu : SoundStream
 {
 	//Channel 1 registers
 	private byte internalChannel1SweepRegister;
@@ -138,19 +140,31 @@ public class Apu
 	private int internalMainApuCounter;
 	private int internalFrameSequencerCounter;
 
-	public Apu()
+	private Emulator emulator;
+
+	public Apu(Emulator emulator)
 	{
+		this.emulator = emulator;
+
 		wavePatternRam = new byte[0x10];
+
+		a = new List<short>();
+
+		Initialize(1, SAMPLE_RATE);
+
+		//Play();
 	}
 
-	private List<short> a = new();
+	private List<short> a;
 
-	public void Update(int cycles, bool frameDone)
+	public void Update(int cycles)
 	{
 		UpdateChannel1();
 		UpdateChannel2(cycles);
 		UpdateChannel3();
 		UpdateChannel4();
+
+		Play();
 
 		UpdateFrameSequencer(cycles);
 
@@ -164,15 +178,21 @@ public class Apu
 
 			a.Add((short)((GetCurrentChannel2Amplitude() ? 1 : 0) * 3000));
 		}
+	}
 
-		if (frameDone)
-		{
-			SoundBuffer b = new(a.ToArray(), 1, SAMPLE_RATE);
-			a.Clear();
+	protected override bool OnGetData(out short[] samples)
+	{
+		Console.WriteLine("ongetdata");
+		samples = a.ToArray();
+		a.Clear();
 
-			Sound s = new(b);
-			s.Play();
-		}
+		return true;
+	}
+
+	protected override void OnSeek(Time timeOffset)
+	{
+		Console.WriteLine("onseek");
+		return;
 	}
 
 	private void UpdateFrameSequencer(int cycles)
