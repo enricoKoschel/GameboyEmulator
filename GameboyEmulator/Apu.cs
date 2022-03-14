@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading;
 using SFML.Audio;
 using SFML.System;
 
@@ -151,8 +152,6 @@ public class Apu : SoundStream
 		a = new List<short>();
 
 		Initialize(1, SAMPLE_RATE);
-
-		//Play();
 	}
 
 	private List<short> a;
@@ -164,8 +163,6 @@ public class Apu : SoundStream
 		UpdateChannel3();
 		UpdateChannel4();
 
-		Play();
-
 		UpdateFrameSequencer(cycles);
 
 		internalMainApuCounter += SAMPLE_RATE * cycles;
@@ -176,22 +173,45 @@ public class Apu : SoundStream
 
 			//TODO Save current state of APU as sample
 
+			m.WaitOne();
 			a.Add((short)((GetCurrentChannel2Amplitude() ? 1 : 0) * 3000));
+			m.ReleaseMutex();
+
+			if (a.Count > SAMPLE_RATE / 10 && Status != SoundStatus.Playing)
+			{
+				Initialize(1, SAMPLE_RATE);
+				Play();
+			}
 		}
+
+		//if (Status != SoundStatus.Playing) Play();
 	}
+
+	private Mutex m = new();
 
 	protected override bool OnGetData(out short[] samples)
 	{
 		Console.WriteLine("ongetdata");
+
+		if (a.Count == 0)
+		{
+			samples = new[] { (short)0 };
+			return false;
+		}
+
+		m.WaitOne();
+
 		samples = a.ToArray();
 		a.Clear();
+
+		m.ReleaseMutex();
 
 		return true;
 	}
 
 	protected override void OnSeek(Time timeOffset)
 	{
-		Console.WriteLine("onseek");
+		Console.WriteLine($"onseek {timeOffset}");
 		return;
 	}
 
