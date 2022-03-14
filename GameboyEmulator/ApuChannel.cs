@@ -10,34 +10,35 @@ public class ApuChannel : SoundStream
 {
 	private List<short> sampleBuffer;
 	private int         bufferSize;
-	private uint        sampleRate;
+	private int         sampleRate;
 	private Mutex       mutex;
 
-	public ApuChannel(uint channels, uint sampleRate, int bufferSize)
+	public ApuChannel(int channels, int sampleRate, int bufferSize)
 	{
 		this.sampleRate = sampleRate;
-		this.bufferSize = bufferSize;
+		this.bufferSize = bufferSize * channels;
 
-		sampleBuffer = new List<short>(bufferSize);
+		sampleBuffer = new List<short>(bufferSize * channels);
 
 		mutex = new Mutex();
 
-		Initialize(channels, sampleRate);
+		Initialize((uint)channels, (uint)sampleRate);
 		Play();
 	}
 
-	public void AddSample(short sample)
+	public void AddSamplePair(short sampleLeft, short sampleRight)
 	{
 		mutex.WaitOne();
-		sampleBuffer.Add(sample);
+		sampleBuffer.Add(sampleLeft);
+		sampleBuffer.Add(sampleRight);
 		mutex.ReleaseMutex();
 	}
 
 	protected override bool OnGetData(out short[] samples)
 	{
-		Console.WriteLine("shesh");
-
-		while (sampleBuffer.Count < bufferSize) ;
+		while (sampleBuffer.Count < bufferSize)
+		{
+		}
 
 		mutex.WaitOne();
 

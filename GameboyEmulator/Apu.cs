@@ -107,15 +107,37 @@ public class Apu
 	}
 
 	//Controls registers
-	public byte ChannelControlRegister            { get; set; }
+	public byte ChannelControlRegister { get; set; }
+
+	private bool VinLeftEnabled  => Cpu.GetBit(ChannelControlRegister, 7);
+	private bool VinRightEnabled => Cpu.GetBit(ChannelControlRegister, 3);
+
+	private byte LeftChannelVolume  => (byte)((ChannelControlRegister & 0b01110000) >> 4);
+	private byte RightChannelVolume => (byte)(ChannelControlRegister & 0b00000111);
+
 	public byte SoundOutputTerminalSelectRegister { get; set; }
 
-	private byte internalSoundOnOffRegister;
+	private bool Channel4LeftEnabled  => Cpu.GetBit(SoundOutputTerminalSelectRegister, 7);
+	private bool Channel3LeftEnabled  => Cpu.GetBit(SoundOutputTerminalSelectRegister, 6);
+	private bool Channel2LeftEnabled  => Cpu.GetBit(SoundOutputTerminalSelectRegister, 5);
+	private bool Channel1LeftEnabled  => Cpu.GetBit(SoundOutputTerminalSelectRegister, 4);
+	private bool Channel4RightEnabled => Cpu.GetBit(SoundOutputTerminalSelectRegister, 3);
+	private bool Channel3RightEnabled => Cpu.GetBit(SoundOutputTerminalSelectRegister, 2);
+	private bool Channel2RightEnabled => Cpu.GetBit(SoundOutputTerminalSelectRegister, 1);
+	private bool Channel1RightEnabled => Cpu.GetBit(SoundOutputTerminalSelectRegister, 0);
+
+	private bool soundEnabled;
+	private bool channel4Playing;
+	private bool channel3Playing;
+	private bool channel2Playing;
+	private bool channel1Playing;
 
 	public byte SoundOnOffRegister
 	{
-		get => (byte)(internalSoundOnOffRegister & 0b10001111);
-		set => internalSoundOnOffRegister = (byte)(value & 0b10000000);
+		get => Cpu.MakeByte(
+			soundEnabled, true, true, true, channel4Playing, channel3Playing, channel2Playing, channel1Playing
+		);
+		set => soundEnabled = (value & 0b10000000) != 0;
 	}
 
 	private readonly byte[] wavePatternRam;
@@ -126,26 +148,34 @@ public class Apu
 		10 - 50%   (____----____----____----)
 		11 - 75%   (______--______--______--)
 	*/
-	private static readonly bool[,] WAVE_DUTY_TABLE =
+	private static readonly byte[,] WAVE_DUTY_TABLE =
 	{
-		{ false, true, true, true, true, true, true, true },
-		{ false, false, true, true, true, true, true, true },
-		{ false, false, false, false, true, true, true, true },
-		{ false, false, false, false, false, false, true, true }
+		{ 0, 1, 1, 1, 1, 1, 1, 1 },
+		{ 0, 0, 1, 1, 1, 1, 1, 1 },
+		{ 0, 0, 0, 0, 1, 1, 1, 1 },
+		{ 0, 0, 0, 0, 0, 0, 1, 1 }
 	};
 
-	private const int SAMPLE_RATE = 44100;
+	private const int SAMPLE_RATE       = 48000;
+	private const int VOLUME_MULTIPLIER = 400;
 
 	private int internalMainApuCounter;
 	private int internalFrameSequencerCounter;
 
 	private Emulator emulator;
 
+	private ApuChannel channel1;
+	private ApuChannel channel2;
+	private ApuChannel channel3;
+	private ApuChannel channel4;
+
 	public Apu(Emulator emulator)
 	{
 		this.emulator = emulator;
 
 		wavePatternRam = new byte[0x10];
+
+		channel2 = new ApuChannel(2, SAMPLE_RATE, SAMPLE_RATE / 10);
 	}
 
 	public void Update(int cycles)
@@ -163,14 +193,12 @@ public class Apu
 		{
 			internalMainApuCounter -= Emulator.GAMEBOY_CLOCK_SPEED;
 
-			//TODO Save current state of APU as sample
-
 			//TODO Play sound with adjusted sample rate when speed changes by changing what gets written into the sample list
-			if (emulator.CurrentSpeed == 100) ch2.AddSample(GetCurrentChannel2AmplitudeLeft());
+			if (emulator.CurrentSpeed >= 105) return;
+
+			channel2.AddSamplePair(GetCurrentChannel2AmplitudeLeft(), GetCurrentChannel2AmplitudeRight());
 		}
 	}
-
-	private ApuChannel ch2 = new(1, SAMPLE_RATE, SAMPLE_RATE / 10);
 
 	private void UpdateFrameSequencer(int cycles)
 	{
@@ -216,20 +244,20 @@ public class Apu
 
 	private short GetCurrentChannel2AmplitudeLeft()
 	{
-		if (!Cpu.GetBit(SoundOutputTerminalSelectRegister, 5) &&
-			!Cpu.GetBit(SoundOutputTerminalSelectRegister, 1) &&
-			!Cpu.GetBit(SoundOnOffRegister, 7)) return 0;
+		if (!soundEnabled || !Channel2LeftEnabled) return 0;
 
-		return (short)((WAVE_DUTY_TABLE[Channel2WavePatternDuty, channel2WaveDutyPosition] ? 1 : 0) * 3000);
+		double volume = LeftChannelVolume * VOLUME_MULTIPLIER;
+
+		return (short)(WAVE_DUTY_TABLE[Channel2WavePatternDuty, channel2WaveDutyPosition] * volume);
 	}
 
 	private short GetCurrentChannel2AmplitudeRight()
 	{
-		if (!Cpu.GetBit(SoundOutputTerminalSelectRegister, 5) &&
-			!Cpu.GetBit(SoundOutputTerminalSelectRegister, 1) &&
-			!Cpu.GetBit(SoundOnOffRegister, 7)) return 0;
+		if (!soundEnabled || !Channel2RightEnabled) return 0;
 
-		return (short)((WAVE_DUTY_TABLE[Channel2WavePatternDuty, channel2WaveDutyPosition] ? 1 : 0) * 3000);
+		double volume = RightChannelVolume * VOLUME_MULTIPLIER;
+
+		return (short)(WAVE_DUTY_TABLE[Channel2WavePatternDuty, channel2WaveDutyPosition] * volume);
 	}
 
 	private void GetCurrentChannel3AmplitudeLeft()
