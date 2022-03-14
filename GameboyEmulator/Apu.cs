@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading;
-using SFML.Audio;
-using SFML.System;
 
 namespace GameboyEmulator;
 
-public class Apu : SoundStream
+public class Apu
 {
 	//Channel 1 registers
 	private byte internalChannel1SweepRegister;
@@ -148,13 +146,7 @@ public class Apu : SoundStream
 		this.emulator = emulator;
 
 		wavePatternRam = new byte[0x10];
-
-		a = new List<short>();
-
-		Initialize(1, SAMPLE_RATE);
 	}
-
-	private List<short> a;
 
 	public void Update(int cycles)
 	{
@@ -173,47 +165,12 @@ public class Apu : SoundStream
 
 			//TODO Save current state of APU as sample
 
-			m.WaitOne();
-			a.Add((short)((GetCurrentChannel2Amplitude() ? 1 : 0) * 3000));
-			m.ReleaseMutex();
-
-			if (a.Count > SAMPLE_RATE / 10 && Status != SoundStatus.Playing)
-			{
-				Initialize(1, SAMPLE_RATE);
-				Play();
-			}
+			//TODO Play sound with adjusted sample rate when speed changes by changing what gets written into the sample list
+			if (emulator.CurrentSpeed == 100) ch2.AddSample(GetCurrentChannel2AmplitudeLeft());
 		}
-
-		//if (Status != SoundStatus.Playing) Play();
 	}
 
-	private Mutex m = new();
-
-	protected override bool OnGetData(out short[] samples)
-	{
-		Console.WriteLine("ongetdata");
-
-		if (a.Count == 0)
-		{
-			samples = new[] { (short)0 };
-			return false;
-		}
-
-		m.WaitOne();
-
-		samples = a.ToArray();
-		a.Clear();
-
-		m.ReleaseMutex();
-
-		return true;
-	}
-
-	protected override void OnSeek(Time timeOffset)
-	{
-		Console.WriteLine($"onseek {timeOffset}");
-		return;
-	}
+	private ApuChannel ch2 = new(1, SAMPLE_RATE, SAMPLE_RATE / 10);
 
 	private void UpdateFrameSequencer(int cycles)
 	{
@@ -249,24 +206,45 @@ public class Apu : SoundStream
 	{
 	}
 
-	private void GetCurrentChannel1Amplitude()
+	private void GetCurrentChannel1AmplitudeLeft()
 	{
 	}
 
-	private bool GetCurrentChannel2Amplitude()
+	private void GetCurrentChannel1AmplitudeRight()
+	{
+	}
+
+	private short GetCurrentChannel2AmplitudeLeft()
 	{
 		if (!Cpu.GetBit(SoundOutputTerminalSelectRegister, 5) &&
 			!Cpu.GetBit(SoundOutputTerminalSelectRegister, 1) &&
-			!Cpu.GetBit(SoundOnOffRegister, 7)) return false;
+			!Cpu.GetBit(SoundOnOffRegister, 7)) return 0;
 
-		return WAVE_DUTY_TABLE[Channel2WavePatternDuty, channel2WaveDutyPosition];
+		return (short)((WAVE_DUTY_TABLE[Channel2WavePatternDuty, channel2WaveDutyPosition] ? 1 : 0) * 3000);
 	}
 
-	private void GetCurrentChannel3Amplitude()
+	private short GetCurrentChannel2AmplitudeRight()
+	{
+		if (!Cpu.GetBit(SoundOutputTerminalSelectRegister, 5) &&
+			!Cpu.GetBit(SoundOutputTerminalSelectRegister, 1) &&
+			!Cpu.GetBit(SoundOnOffRegister, 7)) return 0;
+
+		return (short)((WAVE_DUTY_TABLE[Channel2WavePatternDuty, channel2WaveDutyPosition] ? 1 : 0) * 3000);
+	}
+
+	private void GetCurrentChannel3AmplitudeLeft()
 	{
 	}
 
-	private void GetCurrentChannel4Amplitude()
+	private void GetCurrentChannel3AmplitudeRight()
+	{
+	}
+
+	private void GetCurrentChannel4AmplitudeLeft()
+	{
+	}
+
+	private void GetCurrentChannel4AmplitudeRight()
 	{
 	}
 
