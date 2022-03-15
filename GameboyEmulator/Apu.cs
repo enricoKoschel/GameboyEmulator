@@ -110,20 +110,18 @@ public class Apu
 
 	public byte SoundOutputTerminalSelectRegister { get; set; }
 
-	private bool Channel4LeftEnabled  => Cpu.GetBit(SoundOutputTerminalSelectRegister, 7);
-	private bool Channel3LeftEnabled  => Cpu.GetBit(SoundOutputTerminalSelectRegister, 6);
-	private bool Channel1LeftEnabled  => Cpu.GetBit(SoundOutputTerminalSelectRegister, 4);
-	private bool Channel4RightEnabled => Cpu.GetBit(SoundOutputTerminalSelectRegister, 3);
-	private bool Channel3RightEnabled => Cpu.GetBit(SoundOutputTerminalSelectRegister, 2);
-	private bool Channel1RightEnabled => Cpu.GetBit(SoundOutputTerminalSelectRegister, 0);
-
 	public bool SoundEnabled { get; private set; }
+
+	private bool channel1Enabled = true;
+	private bool channel2Enabled = false;
+	private bool channel3Enabled = false;
+	private bool channel4Enabled = false;
 
 	public byte SoundOnOffRegister
 	{
 		get => Cpu.MakeByte(
 			SoundEnabled, true, true, true, false /*channel4.Playing*/, false /*channel3.Playing*/, channel2.Playing,
-			false /*channel4.Playing*/
+			channel1.Playing
 		);
 		set => SoundEnabled = (value & 0b10000000) != 0;
 	}
@@ -145,14 +143,15 @@ public class Apu
 	};
 
 	private const int SAMPLE_RATE       = 48000;
-	public const  int VOLUME_MULTIPLIER = 100;
+	public const  int VOLUME_MULTIPLIER = 50;
 
 	private int internalMainApuCounter;
 
 	private readonly Emulator emulator;
 
-	//private ApuChannel channel1;
+	private readonly ApuChannel1 channel1;
 	private readonly ApuChannel2 channel2;
+
 	//private ApuChannel channel3;
 	//private ApuChannel channel4;
 
@@ -162,12 +161,14 @@ public class Apu
 
 		wavePatternRam = new byte[0x10];
 
-		channel2 = new ApuChannel2(this, SAMPLE_RATE, SAMPLE_RATE / 10);
+		if (channel1Enabled) channel1 = new ApuChannel1(this, SAMPLE_RATE, SAMPLE_RATE / 10);
+		if (channel2Enabled) channel2 = new ApuChannel2(this, SAMPLE_RATE, SAMPLE_RATE / 10);
 	}
 
 	public void Update(int cycles)
 	{
-		channel2.Update(cycles);
+		if (channel1Enabled) channel1.Update(cycles);
+		if (channel2Enabled) channel2.Update(cycles);
 
 		internalMainApuCounter += SAMPLE_RATE * cycles;
 
@@ -178,7 +179,8 @@ public class Apu
 		//TODO Play sound with adjusted sample rate when speed changes by changing what gets written into the sample list
 		if (emulator.CurrentSpeed >= 105) return;
 
-		channel2.CollectSample();
+		if (channel1Enabled) channel1.CollectSample();
+		if (channel2Enabled) channel2.CollectSample();
 	}
 
 	public byte GetWavePatternRamAtIndex(int index)

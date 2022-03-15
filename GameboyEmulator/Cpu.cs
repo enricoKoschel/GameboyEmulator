@@ -2165,24 +2165,24 @@ public class Cpu
 
 	public static byte MakeByte(bool bit7, bool bit6, bool bit5, bool bit4, bool bit3, bool bit2, bool bit1, bool bit0)
 	{
-		int bit7b = (bit7 ? 1 : 0) << 7;
-		int bit6b = (bit6 ? 1 : 0) << 6;
-		int bit5b = (bit5 ? 1 : 0) << 5;
-		int bit4b = (bit4 ? 1 : 0) << 4;
-		int bit3b = (bit3 ? 1 : 0) << 3;
-		int bit2b = (bit2 ? 1 : 0) << 2;
-		int bit1b = (bit1 ? 1 : 0) << 1;
-		int bit0b = bit0 ? 1 : 0;
+		int bit7B = (bit7 ? 1 : 0) << 7;
+		int bit6B = (bit6 ? 1 : 0) << 6;
+		int bit5B = (bit5 ? 1 : 0) << 5;
+		int bit4B = (bit4 ? 1 : 0) << 4;
+		int bit3B = (bit3 ? 1 : 0) << 3;
+		int bit2B = (bit2 ? 1 : 0) << 2;
+		int bit1B = (bit1 ? 1 : 0) << 1;
+		int bit0B = bit0 ? 1 : 0;
 
-		return (byte)(bit7b | bit6b | bit5b | bit4b | bit3b | bit2b | bit1b | bit0b);
+		return (byte)(bit7B | bit6B | bit5B | bit4B | bit3B | bit2B | bit1B | bit0B);
 	}
 
-	private static byte GetLoByte(ushort word)
+	public static byte GetLoByte(ushort word)
 	{
 		return (byte)(word & 0xFF);
 	}
 
-	private static byte GetHiByte(ushort word)
+	public static byte GetHiByte(ushort word)
 	{
 		return (byte)(word >> 8);
 	}

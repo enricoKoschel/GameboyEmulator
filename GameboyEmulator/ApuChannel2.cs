@@ -7,7 +7,7 @@ public class ApuChannel2 : ApuChannel
 
 	private byte InitialVolume           => (byte)((apu.Channel2VolumeEnvelopeRegister & 0b11110000) >> 4);
 	private bool VolumeEnvelopeDirection => Cpu.GetBit(apu.Channel2VolumeEnvelopeRegister, 3);
-	private byte EnvelopeSweepPeriod     => (byte)(apu.Channel2VolumeEnvelopeRegister & 0b00000111);
+	private byte VolumeSweepPeriod       => (byte)(apu.Channel2VolumeEnvelopeRegister & 0b00000111);
 
 	private bool Restart
 	{
@@ -55,9 +55,9 @@ public class ApuChannel2 : ApuChannel
 			enabled = true;
 			Playing = true;
 
-			lengthTimer = 64 - SoundLength;
+			if (lengthTimer == 0) lengthTimer = 64 - SoundLength;
 
-			periodTimer           = EnvelopeSweepPeriod;
+			periodTimer           = VolumeSweepPeriod;
 			currentEnvelopeVolume = InitialVolume;
 		}
 
@@ -90,25 +90,27 @@ public class ApuChannel2 : ApuChannel
 
 	private void UpdateLength()
 	{
+		//TODO untested - very likely does not work
 		if (!EnableLength) return;
 
-		if (--lengthTimer == 0) enabled = false;
+		if (--lengthTimer != 0) return;
+
+		Playing = false;
+		enabled = false;
 	}
 
 	private void UpdateVolume()
 	{
-		if (EnvelopeSweepPeriod == 0) return;
+		if (VolumeSweepPeriod == 0) return;
 
 		if (periodTimer > 0) periodTimer--;
 
 		if (periodTimer != 0) return;
 
-		periodTimer = EnvelopeSweepPeriod;
+		periodTimer = VolumeSweepPeriod;
 
 		if (VolumeEnvelopeDirection && currentEnvelopeVolume < 0xF) currentEnvelopeVolume++;
 		else if (!VolumeEnvelopeDirection && currentEnvelopeVolume > 0) currentEnvelopeVolume--;
-
-		//TODO update volume
 	}
 
 	public void CollectSample()
