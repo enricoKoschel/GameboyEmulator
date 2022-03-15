@@ -1,32 +1,31 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading;
 using SFML.Audio;
 using SFML.System;
 
 namespace GameboyEmulator;
 
-public class ApuChannel : SoundStream
+public abstract class ApuChannel : SoundStream
 {
 	private List<short> sampleBuffer;
 	private int         bufferSize;
 	private int         sampleRate;
 	private Mutex       mutex;
 
-	public ApuChannel(int channels, int sampleRate, int bufferSize)
+	protected ApuChannel(int sampleRate, int bufferSize)
 	{
 		this.sampleRate = sampleRate;
-		this.bufferSize = bufferSize * channels;
+		this.bufferSize = bufferSize * 2;
 
-		sampleBuffer = new List<short>(bufferSize * channels);
+		sampleBuffer = new List<short>(bufferSize * 2);
 
 		mutex = new Mutex();
 
-		Initialize((uint)channels, (uint)sampleRate);
+		Initialize(2, (uint)sampleRate);
 		Play();
 	}
 
-	public void AddSamplePair(short sampleLeft, short sampleRight)
+	protected void AddSamplePair(short sampleLeft, short sampleRight)
 	{
 		mutex.WaitOne();
 		sampleBuffer.Add(sampleLeft);
