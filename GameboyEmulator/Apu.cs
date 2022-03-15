@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading;
-
-namespace GameboyEmulator;
+﻿namespace GameboyEmulator;
 
 public class Apu
 {
@@ -113,7 +109,7 @@ public class Apu
 	public bool SoundEnabled { get; private set; }
 
 	private bool channel1Enabled = true;
-	private bool channel2Enabled = false;
+	private bool channel2Enabled = true;
 	private bool channel3Enabled = false;
 	private bool channel4Enabled = false;
 
