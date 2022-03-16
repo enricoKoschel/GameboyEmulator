@@ -58,6 +58,8 @@ public class InputOutput
 
 	private readonly bool[,] zBuffer;
 
+	private bool pauseWasPressed;
+
 	private readonly Emulator emulator;
 
 	public InputOutput(Emulator emulator)
@@ -259,7 +261,13 @@ public class InputOutput
 		if (WindowHasFocus && Keyboard.IsKeyPressed(speedButton)) emulator.MaxFps = 0;
 		else emulator.MaxFps                                                      = Emulator.GAMEBOY_FPS;
 
-		emulator.isPaused = WindowHasFocus && Keyboard.IsKeyPressed(pauseButton);
+		if (WindowHasFocus && Keyboard.IsKeyPressed(pauseButton) && !pauseWasPressed)
+		{
+			emulator.isPaused = !emulator.isPaused;
+			pauseWasPressed   = true;
+		}
+
+		if (!Keyboard.IsKeyPressed(pauseButton)) pauseWasPressed = false;
 	}
 
 	public void UpdatePixelBuffer(int x, int y, Ppu.Color color)

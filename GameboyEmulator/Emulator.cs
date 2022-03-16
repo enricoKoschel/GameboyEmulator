@@ -139,6 +139,10 @@ public class Emulator
 
 		speedAverage /= NUMBER_OF_SPEEDS_TO_AVERAGE;
 
-		inputOutput.SetWindowTitle($"{Path.GetFileName(gameRomFilePath)} | Speed: {speedAverage}%");
+		inputOutput.SetWindowTitle(
+			isPaused
+				? $"{Path.GetFileName(gameRomFilePath)} | paused"
+				: $"{Path.GetFileName(gameRomFilePath)} | Speed: {speedAverage}%"
+		);
 	}
 }
