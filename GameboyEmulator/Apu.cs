@@ -11,21 +11,32 @@ public class Apu
 		set => internalChannel1SweepRegister = (byte)(value & 0b01111111);
 	}
 
-	public byte Channel1SoundLengthWavePatternRegister { get; set; }
-	public byte Channel1VolumeEnvelopeRegister         { get; set; }
-	public byte Channel1FrequencyRegisterLo            { get; set; }
+	private byte internalChannel1SoundLengthWavePatternRegister;
+
+	public byte Channel1SoundLengthWavePatternRegister
+	{
+		get => internalChannel1SoundLengthWavePatternRegister;
+		set
+		{
+			internalChannel1SoundLengthWavePatternRegister = value;
+			channel1.SoundLengthWritten();
+		}
+	}
+
+	public byte Channel1VolumeEnvelopeRegister { get; set; }
+	public byte Channel1FrequencyRegisterLo    { get; set; }
 
 	private byte internalChannel1FrequencyRegisterHi;
 
 	public byte Channel1FrequencyRegisterHi
 	{
 		get => (byte)(internalChannel1FrequencyRegisterHi & 0b11000111);
-		set => internalChannel1FrequencyRegisterHi = (byte)(value & 0b11000111);
+		set
+		{
+			internalChannel1FrequencyRegisterHi = (byte)(value & 0b11000111);
+			channel1.TriggerWritten();
+		}
 	}
-
-	//Only the lower 3 bits of Channel1FrequencyRegisterHi are used
-	public ushort Channel1FrequencyRegister =>
-		(ushort)(Cpu.MakeWord(Channel1FrequencyRegisterHi, Channel1FrequencyRegisterLo) & 0x7FF);
 
 	//Channel 2 registers
 	public byte Channel2SoundLengthWavePatternRegister { get; set; }
@@ -109,7 +120,7 @@ public class Apu
 	public bool SoundEnabled { get; private set; }
 
 	private bool channel1Enabled = true;
-	private bool channel2Enabled = true;
+	private bool channel2Enabled = false;
 	private bool channel3Enabled = false;
 	private bool channel4Enabled = false;
 

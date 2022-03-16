@@ -55,7 +55,7 @@ public class ApuChannel2 : ApuChannel
 			enabled = true;
 			Playing = true;
 
-			if (lengthTimer == 0) lengthTimer = 64 - SoundLength;
+			if (lengthTimer == 0) lengthTimer = 64;
 
 			periodTimer           = VolumeSweepPeriod;
 			currentEnvelopeVolume = InitialVolume;
@@ -90,7 +90,7 @@ public class ApuChannel2 : ApuChannel
 
 	private void UpdateLength()
 	{
-		//TODO untested - very likely does not work
+		//TODO doesnt work
 		if (!EnableLength) return;
 
 		if (--lengthTimer != 0) return;
@@ -101,6 +101,7 @@ public class ApuChannel2 : ApuChannel
 
 	private void UpdateVolume()
 	{
+		//TODO maybe works
 		if (VolumeSweepPeriod == 0) return;
 
 		if (periodTimer > 0) periodTimer--;

@@ -1,4 +1,6 @@
-﻿namespace GameboyEmulator;
+﻿using System;
+
+namespace GameboyEmulator;
 
 public class ApuChannel1 : ApuChannel
 {
@@ -13,11 +15,8 @@ public class ApuChannel1 : ApuChannel
 	private bool SweepDirection       => Cpu.GetBit(apu.Channel1SweepRegister, 3);
 	private byte SweepAmount          => (byte)(apu.Channel1SweepRegister & 0b00000111);
 
-	private bool Restart
-	{
-		get => Cpu.GetBit(apu.Channel1FrequencyRegisterHi, 7);
-		set => apu.Channel1FrequencyRegisterHi = Cpu.SetBit(apu.Channel1FrequencyRegisterHi, 7, value);
-	}
+	private bool Trigger => Cpu.GetBit(apu.Channel1FrequencyRegisterHi, 7);
+
 
 	private bool EnableLength => Cpu.GetBit(apu.Channel1FrequencyRegisterHi, 6);
 
@@ -47,14 +46,13 @@ public class ApuChannel1 : ApuChannel
 	private int lengthTimer;
 
 	private int currentEnvelopeVolume;
-	private int periodTimer;
+	private int volumePeriodTimer;
 
 	private int  sweepTimer;
 	private int  shadowFrequency;
 	private bool sweepEnabled;
 
-	public  bool Playing { get; private set; }
-	private bool enabled = true;
+	public bool Playing { get; private set; }
 
 	private readonly Apu apu;
 
@@ -65,32 +63,11 @@ public class ApuChannel1 : ApuChannel
 
 	public void Update(int cycles)
 	{
-		if (Restart)
-		{
-			Restart = false;
-
-			enabled = true;
-			Playing = true;
-
-			if (lengthTimer == 0) lengthTimer = 64 - SoundLength;
-
-			periodTimer           = VolumeSweepPeriod;
-			currentEnvelopeVolume = InitialVolume;
-
-			shadowFrequency = FrequencyRegister;
-			sweepTimer      = FrequencySweepPeriod != 0 ? FrequencySweepPeriod : 8;
-			sweepEnabled    = FrequencySweepPeriod != 0 || SweepAmount != 0;
-
-			//For overflow check
-			if (SweepAmount != 0) CalculateNewFrequency();
-		}
-
-		if (!enabled) return;
+		if (!Playing) return;
 
 		UpdateFrameSequencer(cycles);
 
 		frequencyTimer -= cycles;
-
 		if (frequencyTimer > 0) return;
 
 		frequencyTimer += (2048 - FrequencyRegister) * 4;
@@ -99,15 +76,48 @@ public class ApuChannel1 : ApuChannel
 		waveDutyPosition %= 8;
 	}
 
+	public void SoundLengthWritten()
+	{
+		lengthTimer = 64 - SoundLength;
+	}
+
+	private bool b;
+
+	public void TriggerWritten()
+	{
+		if (!Trigger) return;
+
+		Console.WriteLine($"{((b = !b) ? " " : "")}trigger");
+
+		bool dacEnabled = InitialVolume != 0 || VolumeEnvelopeDirection;
+
+		Playing = true;
+
+		if (lengthTimer == 0) lengthTimer = 64;
+
+		volumePeriodTimer = VolumeSweepPeriod;
+		//Console.WriteLine($"{apu.Channel1VolumeEnvelopeRegister:X}");
+		currentEnvelopeVolume = InitialVolume;
+
+		shadowFrequency = FrequencyRegister;
+		sweepTimer      = FrequencySweepPeriod != 0 ? FrequencySweepPeriod : 8;
+		sweepEnabled    = FrequencySweepPeriod != 0 || SweepAmount != 0;
+
+		//For overflow check
+		if (SweepAmount != 0) CalculateNewFrequency();
+
+		if (!dacEnabled) Playing = false;
+	}
+
 	private void UpdateFrameSequencer(int cycles)
 	{
 		if ((frameSequencerCounter += cycles) < 8192) return;
 
 		frameSequencerCounter -= 8192;
 
-		if (currentFrameSequencerTick % 2 == 0) UpdateLength();
+		//if (currentFrameSequencerTick % 2 == 0) UpdateLength();
 		if (currentFrameSequencerTick == 7) UpdateVolume();
-		if (currentFrameSequencerTick is 2 or 6) UpdateSweep();
+		//if (currentFrameSequencerTick is 2 or 6) UpdateSweep();
 
 		currentFrameSequencerTick++;
 		currentFrameSequencerTick %= 8;
@@ -115,34 +125,33 @@ public class ApuChannel1 : ApuChannel
 
 	private void UpdateLength()
 	{
-		//TODO untested - very likely does not work
+		//TODO probably works
 		if (!EnableLength) return;
 
 		if (--lengthTimer != 0) return;
 
 		Playing = false;
-		enabled = false;
 	}
 
 	private void UpdateVolume()
 	{
+		//TODO maybe works
+		if (volumePeriodTimer > 0) volumePeriodTimer--;
+		if (volumePeriodTimer != 0) return;
+
 		if (VolumeSweepPeriod == 0) return;
 
-		if (periodTimer > 0) periodTimer--;
+		volumePeriodTimer = VolumeSweepPeriod;
 
-		if (periodTimer != 0) return;
+		int newVolume = currentEnvelopeVolume + (VolumeEnvelopeDirection ? 1 : -1);
 
-		periodTimer = VolumeSweepPeriod;
-
-		if (VolumeEnvelopeDirection && currentEnvelopeVolume < 0xF) currentEnvelopeVolume++;
-		else if (!VolumeEnvelopeDirection && currentEnvelopeVolume > 0) currentEnvelopeVolume--;
+		if (newVolume is >= 0 and < 16) currentEnvelopeVolume = newVolume;
 	}
 
 	private void UpdateSweep()
 	{
 		//TODO does not work
 		if (sweepTimer > 0) sweepTimer--;
-
 		if (sweepTimer != 0) return;
 
 		sweepTimer = FrequencySweepPeriod != 0 ? FrequencySweepPeriod : 8;
@@ -164,10 +173,11 @@ public class ApuChannel1 : ApuChannel
 	{
 		int newFrequency = shadowFrequency >> SweepAmount;
 
-		if (SweepDirection) newFrequency = shadowFrequency - newFrequency;
-		else newFrequency                = shadowFrequency + newFrequency;
+		if (SweepDirection) newFrequency = -newFrequency;
 
-		if (newFrequency >= 2048) enabled = false;
+		newFrequency += shadowFrequency;
+
+		if (newFrequency >= 2048) Playing = false;
 
 		return newFrequency;
 	}
