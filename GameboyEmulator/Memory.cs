@@ -306,37 +306,37 @@ public class Memory
 			case 0x0F:
 				return emulator.interrupts.InterruptFlagRegister;
 			case 0x10:
-				return emulator.apu.Channel1SweepRegister;
+				return (byte)(emulator.apu.Channel1SweepRegister | 0b10000000);
 			case 0x11:
-				return emulator.apu.Channel1SoundLengthWavePatternRegister;
+				return (byte)(emulator.apu.Channel1SoundLengthWavePatternRegister | 0b00111111);
 			case 0x12:
 				return emulator.apu.Channel1VolumeEnvelopeRegister;
 			case 0x13:
 				//Write only
 				return 0xFF;
 			case 0x14:
-				return emulator.apu.Channel1FrequencyRegisterHi;
+				return (byte)(emulator.apu.Channel1FrequencyRegisterHi | 0b10111111);
 			case 0x16:
-				return emulator.apu.Channel2SoundLengthWavePatternRegister;
+				return (byte)(emulator.apu.Channel2SoundLengthWavePatternRegister | 0b00111111);
 			case 0x17:
 				return emulator.apu.Channel2VolumeEnvelopeRegister;
 			case 0x18:
 				//Write only
 				return 0xFF;
 			case 0x19:
-				return emulator.apu.Channel2FrequencyRegisterHi;
+				return (byte)(emulator.apu.Channel2FrequencyRegisterHi | 0b10111111);
 			case 0x1A:
-				return emulator.apu.Channel3SoundOnOffRegister;
+				return (byte)(emulator.apu.Channel3SoundOnOffRegister | 0b01111111);
 			case 0x1B:
 				//Write only
 				return 0xFF;
 			case 0x1C:
-				return emulator.apu.Channel3SelectOutputLevelRegister;
+				return (byte)(emulator.apu.Channel3SelectOutputLevelRegister | 0b10011111);
 			case 0x1D:
 				//Write only
 				return 0xFF;
 			case 0x1E:
-				return emulator.apu.Channel3FrequencyRegisterHi;
+				return (byte)(emulator.apu.Channel3FrequencyRegisterHi | 0b10111111);
 			case 0x20:
 				//Write only
 				return 0xFF;
@@ -345,13 +345,13 @@ public class Memory
 			case 0x22:
 				return emulator.apu.Channel4PolynomialCounterRegister;
 			case 0x23:
-				return emulator.apu.Channel4CounterConsecutiveRegister;
+				return (byte)(emulator.apu.Channel4CounterConsecutiveRegister | 0b10111111);
 			case 0x24:
 				return emulator.apu.ChannelControlRegister;
 			case 0x25:
 				return emulator.apu.SoundOutputTerminalSelectRegister;
 			case 0x26:
-				return emulator.apu.SoundOnOffRegister;
+				return (byte)(emulator.apu.SoundOnOffRegister | 0b01110000);
 			case 0x40:
 				return emulator.ppu.LcdControlRegister;
 			case 0x41:

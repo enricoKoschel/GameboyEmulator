@@ -63,7 +63,17 @@ public class ApuChannel1 : ApuChannel
 
 	public void Update(int cycles)
 	{
-		if (!Playing) return;
+		//The frame sequencer still gets ticked but no components get updated when the apu is disabled
+		if (!apu.SoundEnabled) UpdateFrameSequencer(cycles, false, true);
+
+		CheckDacEnabled();
+
+		if (!Playing)
+		{
+			//The length still gets updated when the channel is disabled
+			UpdateFrameSequencer(cycles, true);
+			return;
+		}
 
 		UpdateFrameSequencer(cycles);
 
@@ -81,22 +91,15 @@ public class ApuChannel1 : ApuChannel
 		lengthTimer = 64 - SoundLength;
 	}
 
-	private bool b;
-
 	public void TriggerWritten()
 	{
-		if (!Trigger) return;
-
-		Console.WriteLine($"{((b = !b) ? " " : "")}trigger");
-
-		bool dacEnabled = InitialVolume != 0 || VolumeEnvelopeDirection;
+		if (!apu.SoundEnabled || !Trigger) return;
 
 		Playing = true;
 
 		if (lengthTimer == 0) lengthTimer = 64;
 
-		volumePeriodTimer = VolumeSweepPeriod;
-		//Console.WriteLine($"{apu.Channel1VolumeEnvelopeRegister:X}");
+		volumePeriodTimer     = VolumeSweepPeriod;
 		currentEnvelopeVolume = InitialVolume;
 
 		shadowFrequency = FrequencyRegister;
@@ -106,18 +109,42 @@ public class ApuChannel1 : ApuChannel
 		//For overflow check
 		if (SweepAmount != 0) CalculateNewFrequency();
 
+		CheckDacEnabled();
+	}
+
+	private void CheckDacEnabled()
+	{
+		bool dacEnabled          = InitialVolume != 0 || VolumeEnvelopeDirection;
 		if (!dacEnabled) Playing = false;
 	}
 
-	private void UpdateFrameSequencer(int cycles)
+	public void Reset()
+	{
+		frequencyTimer = 0;
+
+		waveDutyPosition = 0;
+
+		currentFrameSequencerTick = 0;
+
+		lengthTimer = 0;
+
+		currentEnvelopeVolume = 0;
+		volumePeriodTimer     = 0;
+
+		sweepTimer      = 0;
+		shadowFrequency = 0;
+		sweepEnabled    = false;
+	}
+
+	private void UpdateFrameSequencer(int cycles, bool onlyLength = false, bool onlyTick = false)
 	{
 		if ((frameSequencerCounter += cycles) < 8192) return;
 
 		frameSequencerCounter -= 8192;
 
-		//if (currentFrameSequencerTick % 2 == 0) UpdateLength();
-		if (currentFrameSequencerTick == 7) UpdateVolume();
-		//if (currentFrameSequencerTick is 2 or 6) UpdateSweep();
+		if (!onlyTick && currentFrameSequencerTick % 2 == 0) UpdateLength();
+		if (!onlyTick && !onlyLength && currentFrameSequencerTick == 7) UpdateVolume();
+		if (!onlyTick && !onlyLength && currentFrameSequencerTick is 2 or 6) UpdateSweep();
 
 		currentFrameSequencerTick++;
 		currentFrameSequencerTick %= 8;

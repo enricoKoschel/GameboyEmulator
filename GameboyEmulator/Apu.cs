@@ -152,8 +152,8 @@ public class Apu
 	public byte SoundOnOffRegister
 	{
 		get => Cpu.MakeByte(
-			SoundEnabled, true, true, true, false /*channel4.Playing*/, false /*channel3.Playing*/, channel2.Playing,
-			channel1.Playing
+			SoundEnabled, true, true, true, false /*channel4.Playing*/, false /*channel3.Playing*/,
+			false /*channel2.Playing*/, channel1.Playing
 		);
 		set => SoundEnabled = (value & 0b10000000) != 0;
 	}
@@ -182,8 +182,8 @@ public class Apu
 	private readonly Emulator emulator;
 
 	private readonly ApuChannel1 channel1;
-	private readonly ApuChannel2 channel2;
 
+	//private readonly ApuChannel2 channel2;
 	//private ApuChannel channel3;
 	//private ApuChannel channel4;
 
@@ -193,14 +193,23 @@ public class Apu
 
 		wavePatternRam = new byte[0x10];
 
-		if (channel1Enabled) channel1 = new ApuChannel1(this, SAMPLE_RATE, SAMPLE_RATE / 10);
-		if (channel2Enabled) channel2 = new ApuChannel2(this, SAMPLE_RATE, SAMPLE_RATE / 10);
+		channel1 = new ApuChannel1(this, SAMPLE_RATE, SAMPLE_RATE / 10);
+		//channel2 = new ApuChannel2(this, SAMPLE_RATE, SAMPLE_RATE / 10);
 	}
 
 	public void Update(int cycles)
 	{
-		if (channel1Enabled) channel1.Update(cycles);
-		if (channel2Enabled) channel2.Update(cycles);
+		if (!SoundEnabled)
+		{
+			Reset();
+			channel1.Reset();
+
+			//Update is still required, because the internal frame sequencer still ticks when the apu is disabled
+			channel1.Update(cycles);
+		}
+
+		channel1.Update(cycles);
+		//channel2.Update(cycles);
 
 		internalMainApuCounter += SAMPLE_RATE * cycles;
 
@@ -212,19 +221,78 @@ public class Apu
 		if (emulator.CurrentSpeed >= 105) return;
 
 		if (channel1Enabled) channel1.CollectSample();
-		if (channel2Enabled) channel2.CollectSample();
+		//if (channel2Enabled) channel2.CollectSample();
+	}
+
+	private void Reset()
+	{
+		internalChannel1SweepRegister = 0;
+		Channel1SweepRegister         = 0;
+
+		internalChannel1SoundLengthWavePatternRegister = 0;
+		Channel1SoundLengthWavePatternRegister         = 0;
+
+		Channel1VolumeEnvelopeRegister = 0;
+
+		Channel1FrequencyRegisterLo = 0;
+
+		internalChannel1FrequencyRegisterHi = 0;
+		Channel1FrequencyRegisterHi         = 0;
+
+		Channel2SoundLengthWavePatternRegister = 0;
+
+		Channel2VolumeEnvelopeRegister = 0;
+
+		Channel2FrequencyRegisterLo = 0;
+
+		internalChannel2FrequencyRegisterHi = 0;
+		Channel2FrequencyRegisterHi         = 0;
+
+		internalChannel3SoundOnOffRegister = false;
+		Channel3SoundOnOffRegister         = 0;
+
+		Channel3SoundLengthRegister = 0;
+
+		internalChannel3SelectOutputLevelRegister = 0;
+		Channel3SelectOutputLevelRegister         = 0;
+
+		Channel3FrequencyRegisterLo = 0;
+
+		internalChannel3FrequencyRegisterHi = 0;
+		Channel3FrequencyRegisterHi         = 0;
+
+		internalChannel4SoundLengthRegister = 0;
+		Channel4SoundLengthRegister         = 0;
+
+		Channel4VolumeEnvelopeRegister = 0;
+
+		Channel4PolynomialCounterRegister = 0;
+
+		internalChannel4CounterConsecutiveRegister = 0;
+		Channel4CounterConsecutiveRegister         = 0;
+
+		ChannelControlRegister = 0;
+
+		SoundOutputTerminalSelectRegister = 0;
+
+		channel1Enabled = false;
+		channel2Enabled = false;
+		channel3Enabled = false;
+		channel4Enabled = false;
+
+		internalMainApuCounter = 0;
 	}
 
 	public byte GetWavePatternRamAtIndex(int index)
 	{
 		//TODO implement actual behaviour for CH3 enabled
-		return internalChannel3SoundOnOffRegister ? (byte)0xFF : wavePatternRam[index];
+		return /*internalChannel3SoundOnOffRegister ? (byte)0xFF : */wavePatternRam[index];
 	}
 
 	public void SetWavePatternRamAtIndex(int index, byte data)
 	{
 		//TODO implement actual behaviour for CH3 enabled
-		if (internalChannel3SoundOnOffRegister) return;
+		//if (internalChannel3SoundOnOffRegister) return;
 
 		wavePatternRam[index] = data;
 	}
