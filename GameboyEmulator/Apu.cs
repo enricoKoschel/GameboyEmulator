@@ -5,6 +5,7 @@ public class Apu
 	//Channel 1 registers
 	private byte internalChannel1SweepRegister;
 
+	//NR10
 	public byte Channel1SweepRegister
 	{
 		get => (byte)(internalChannel1SweepRegister & 0b01111111);
@@ -13,6 +14,7 @@ public class Apu
 
 	private byte internalChannel1SoundLengthWavePatternRegister;
 
+	//NR11
 	public byte Channel1SoundLengthWavePatternRegister
 	{
 		get => internalChannel1SoundLengthWavePatternRegister;
@@ -23,11 +25,15 @@ public class Apu
 		}
 	}
 
+	//NR12
 	public byte Channel1VolumeEnvelopeRegister { get; set; }
-	public byte Channel1FrequencyRegisterLo    { get; set; }
+
+	//NR13
+	public byte Channel1FrequencyRegisterLo { get; set; }
 
 	private byte internalChannel1FrequencyRegisterHi;
 
+	//NR14
 	public byte Channel1FrequencyRegisterHi
 	{
 		get => (byte)(internalChannel1FrequencyRegisterHi & 0b11000111);
@@ -39,14 +45,19 @@ public class Apu
 	}
 
 	//Channel 2 registers
+
+	//NR21
 	public byte Channel2SoundLengthWavePatternRegister { get; set; }
 
+	//NR22
 	public byte Channel2VolumeEnvelopeRegister { get; set; }
 
+	//NR23
 	public byte Channel2FrequencyRegisterLo { get; set; }
 
 	private byte internalChannel2FrequencyRegisterHi;
 
+	//NR24
 	public byte Channel2FrequencyRegisterHi
 	{
 		get => (byte)(internalChannel2FrequencyRegisterHi & 0b11000111);
@@ -56,26 +67,31 @@ public class Apu
 	//Channel 3 registers
 	private bool internalChannel3SoundOnOffRegister;
 
+	//NR30
 	public byte Channel3SoundOnOffRegister
 	{
 		get => (byte)((internalChannel3SoundOnOffRegister ? 1 : 0) << 7);
 		set => internalChannel3SoundOnOffRegister = (value & 0b10000000) != 0;
 	}
 
+	//NR31
 	public byte Channel3SoundLengthRegister { get; set; }
 
 	private byte internalChannel3SelectOutputLevelRegister;
 
+	//NR32
 	public byte Channel3SelectOutputLevelRegister
 	{
 		get => (byte)(internalChannel3SelectOutputLevelRegister & 0b01100000);
 		set => internalChannel3SelectOutputLevelRegister = (byte)(value & 0b01100000);
 	}
 
+	//NR33
 	public byte Channel3FrequencyRegisterLo { get; set; }
 
 	private byte internalChannel3FrequencyRegisterHi;
 
+	//NR34
 	public byte Channel3FrequencyRegisterHi
 	{
 		get => (byte)(internalChannel3FrequencyRegisterHi & 0b11000111);
@@ -89,17 +105,22 @@ public class Apu
 	//Channel 4 registers
 	private byte internalChannel4SoundLengthRegister;
 
+	//NR41
 	public byte Channel4SoundLengthRegister
 	{
 		get => (byte)(internalChannel4SoundLengthRegister & 0b00111111);
 		set => internalChannel4SoundLengthRegister = (byte)(value & 0b00111111);
 	}
 
-	public byte Channel4VolumeEnvelopeRegister    { get; set; }
+	//NR42
+	public byte Channel4VolumeEnvelopeRegister { get; set; }
+
+	//NR43
 	public byte Channel4PolynomialCounterRegister { get; set; }
 
 	private byte internalChannel4CounterConsecutiveRegister;
 
+	//NR44
 	public byte Channel4CounterConsecutiveRegister
 	{
 		get => (byte)(internalChannel4CounterConsecutiveRegister & 0b11000000);
@@ -107,6 +128,8 @@ public class Apu
 	}
 
 	//Controls registers
+
+	//NR50
 	public byte ChannelControlRegister { get; set; }
 
 	private bool VinLeftEnabled  => Cpu.GetBit(ChannelControlRegister, 7);
@@ -115,6 +138,7 @@ public class Apu
 	public byte LeftChannelVolume  => (byte)((ChannelControlRegister & 0b01110000) >> 4);
 	public byte RightChannelVolume => (byte)(ChannelControlRegister & 0b00000111);
 
+	//NR51
 	public byte SoundOutputTerminalSelectRegister { get; set; }
 
 	public bool SoundEnabled { get; private set; }
@@ -124,6 +148,7 @@ public class Apu
 	private bool channel3Enabled = false;
 	private bool channel4Enabled = false;
 
+	//NR52
 	public byte SoundOnOffRegister
 	{
 		get => Cpu.MakeByte(
