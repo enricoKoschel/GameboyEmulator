@@ -31,7 +31,7 @@
 | cpu_instrs   | ✅                                            |
 | instr_timing | ✅                                            |
 | halt_bug     | ❌ (Fails with failure code ***IE IF IF DE*** |
-| mem_timing-2 | ❌                                            |
+| mem_timing-2 | ❌ (Requires sub-instruction timing)          |
 | dmg_sound    | ❌ (Sound is not implemented yet)             |
 | cgb_sound    | ❌ (Sound is not implemented yet)             |
 | oam_bug      | ❌ (OAM bug is not implemented yet)           |
