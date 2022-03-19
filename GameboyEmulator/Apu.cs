@@ -144,9 +144,9 @@ public class Apu
 	public bool SoundEnabled { get; private set; }
 
 	private bool channel1Enabled = true;
-	private bool channel2Enabled = false;
-	private bool channel3Enabled = false;
-	private bool channel4Enabled = false;
+	private bool channel2Enabled;
+	private bool channel3Enabled;
+	private bool channel4Enabled;
 
 	//NR52
 	public byte SoundOnOffRegister

@@ -19,10 +19,11 @@ public class Memory
 	//0xFFFF			Interrupt Enable Register
 	//ReSharper restore CommentTypo
 
-	private          byte[] bootRom;
-	private          byte[] cartridgeRom;
+	//bootRom, cartridgeRom and cartridgeRam are correctly set by LoadGame() before they are accessed
+	private          byte[] bootRom      = null!;
+	private          byte[] cartridgeRom = null!;
 	private readonly byte[] videoRam;
-	private          byte[] cartridgeRam;
+	private          byte[] cartridgeRam = null!;
 	private readonly byte[] workRam;
 	private readonly byte[] spriteAttributes;
 	private          byte   dmaRegister;

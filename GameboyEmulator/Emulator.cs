@@ -52,7 +52,7 @@ public class Emulator
 		this.gameRomFilePath = gameRomFilePath;
 		this.bootRomFilePath = bootRomFilePath;
 
-		string saveFileDirectory = Path.GetDirectoryName(Config.GetSaveLocationConfig() + "/");
+		string? saveFileDirectory = Path.GetDirectoryName(Config.GetSaveLocationConfig() + "/");
 		if (String.IsNullOrWhiteSpace(saveFileDirectory)) saveFileDirectory = "./saves/";
 
 		string saveFileName = Path.ChangeExtension(Path.GetFileName(gameRomFilePath), ".sav");

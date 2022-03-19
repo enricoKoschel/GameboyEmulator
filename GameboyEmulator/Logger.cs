@@ -12,24 +12,26 @@ public static class Logger
 		Error
 	}
 
-	private static readonly StreamWriter LOG_FILE;
+	private static readonly StreamWriter? LOG_FILE;
 
 	private static string CurrentTime              => DateTime.Now.ToString("HH:mm:ss.fff");
 	private static string CurrentTimeFileFormatted => DateTime.Now.ToString("yyyy-MM-dd__HH_mm_ss");
 
-	private static readonly string LOG_DIRECTORY_PATH;
-	private const           bool   ENABLE_CONSOLE_LOGGING = true;
+	private static readonly string? LOG_DIRECTORY_PATH;
+	private const           bool    ENABLE_CONSOLE_LOGGING = true;
 
 	static Logger()
 	{
 		if (!Config.GetLogEnabledConfig()) return;
 
-		LOG_DIRECTORY_PATH = Path.GetDirectoryName(Config.GetLogLocationConfig() + "/");
-		if (String.IsNullOrWhiteSpace(LOG_DIRECTORY_PATH)) LOG_DIRECTORY_PATH = "./logs";
+		string? tempLogDirectory = Path.GetDirectoryName(Config.GetLogLocationConfig() + "/");
+		LOG_DIRECTORY_PATH =  String.IsNullOrWhiteSpace(tempLogDirectory) ? "./logs" : tempLogDirectory;
 		LOG_DIRECTORY_PATH += "/";
 
-		LOG_FILE           = CreateLogFile();
-		LOG_FILE.AutoFlush = true;
+		LOG_FILE = CreateLogFile();
+
+		//LOG_FILE cannot be null when logging is enabled
+		LOG_FILE!.AutoFlush = true;
 	}
 
 	public static void LogMessage(string message, LogLevel loglevel, bool logToConsole = false)
@@ -40,12 +42,16 @@ public static class Logger
 
 		if (logToConsole && ENABLE_CONSOLE_LOGGING) Console.WriteLine(logMessage);
 
-		LOG_FILE.WriteLine(logMessage);
+		//LOG_FILE cannot be null when logging is enabled
+		LOG_FILE!.WriteLine(logMessage);
 	}
 
-	private static StreamWriter CreateLogFile()
+	private static StreamWriter? CreateLogFile()
 	{
-		Directory.CreateDirectory(LOG_DIRECTORY_PATH);
+		if (!Config.GetLogEnabledConfig()) return null;
+
+		//LOG_DIRECTORY_PATH cannot be null when logging is enabled
+		Directory.CreateDirectory(LOG_DIRECTORY_PATH!);
 
 		string logFilePath = $"{LOG_DIRECTORY_PATH}{CurrentTimeFileFormatted}-{{0}}.txt";
 		int    fileNumber  = 1;

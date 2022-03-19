@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace GameboyEmulator;
+﻿namespace GameboyEmulator;
 
 public class ApuChannel1 : ApuChannel
 {
