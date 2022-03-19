@@ -7,10 +7,10 @@ namespace GameboyEmulator;
 
 public abstract class ApuChannel : SoundStream
 {
-	private List<short> sampleBuffer;
-	private int         bufferSize;
-	private int         sampleRate;
-	private Mutex       mutex;
+	private readonly List<short> sampleBuffer;
+	private readonly int         bufferSize;
+	private          int         sampleRate;
+	private readonly Mutex       mutex;
 
 	protected ApuChannel(int sampleRate, int bufferSize)
 	{

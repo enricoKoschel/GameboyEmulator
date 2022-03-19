@@ -142,9 +142,16 @@ public class ApuChannel1 : ApuChannel
 
 		frameSequencerCounter -= 8192;
 
-		if (!onlyTick && currentFrameSequencerTick % 2 == 0) UpdateLength();
-		if (!onlyTick && !onlyLength && currentFrameSequencerTick == 7) UpdateVolume();
-		if (!onlyTick && !onlyLength && currentFrameSequencerTick is 2 or 6) UpdateSweep();
+		if (onlyTick)
+		{
+			currentFrameSequencerTick++;
+			currentFrameSequencerTick %= 8;
+			return;
+		}
+
+		if (currentFrameSequencerTick % 2 == 0) UpdateLength();
+		if (!onlyLength && currentFrameSequencerTick == 7) UpdateVolume();
+		if (!onlyLength && currentFrameSequencerTick is 2 or 6) UpdateSweep();
 
 		currentFrameSequencerTick++;
 		currentFrameSequencerTick %= 8;
