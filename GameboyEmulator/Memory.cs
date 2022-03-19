@@ -307,46 +307,46 @@ public class Memory
 			case 0x0F:
 				return emulator.interrupts.InterruptFlagRegister;
 			case 0x10:
-				return (byte)(emulator.apu.Channel1SweepRegister | 0b10000000);
+				return (byte)(emulator.apu.channel1.FrequencySweepRegister | 0b10000000);
 			case 0x11:
-				return (byte)(emulator.apu.Channel1SoundLengthWavePatternRegister | 0b00111111);
+				return (byte)(emulator.apu.channel1.SoundLengthWavePatternRegister | 0b00111111);
 			case 0x12:
-				return emulator.apu.Channel1VolumeEnvelopeRegister;
+				return emulator.apu.channel1.VolumeEnvelopeRegister;
 			case 0x13:
 				//Write only
 				return 0xFF;
 			case 0x14:
-				return (byte)(emulator.apu.Channel1FrequencyRegisterHi | 0b10111111);
+				return (byte)(emulator.apu.channel1.FrequencyRegisterHi | 0b10111111);
 			case 0x16:
-				return (byte)(emulator.apu.Channel2SoundLengthWavePatternRegister | 0b00111111);
+				return (byte)(emulator.apu.channel2.SoundLengthWavePatternRegister | 0b00111111);
 			case 0x17:
-				return emulator.apu.Channel2VolumeEnvelopeRegister;
+				return emulator.apu.channel2.VolumeEnvelopeRegister;
 			case 0x18:
 				//Write only
 				return 0xFF;
 			case 0x19:
-				return (byte)(emulator.apu.Channel2FrequencyRegisterHi | 0b10111111);
+				return (byte)(emulator.apu.channel2.FrequencyRegisterHi | 0b10111111);
 			case 0x1A:
-				return (byte)(emulator.apu.Channel3SoundOnOffRegister | 0b01111111);
+				return (byte)(emulator.apu.channel3.SoundOnOffRegister | 0b01111111);
 			case 0x1B:
 				//Write only
 				return 0xFF;
 			case 0x1C:
-				return (byte)(emulator.apu.Channel3SelectOutputLevelRegister | 0b10011111);
+				return (byte)(emulator.apu.channel3.SelectOutputLevelRegister | 0b10011111);
 			case 0x1D:
 				//Write only
 				return 0xFF;
 			case 0x1E:
-				return (byte)(emulator.apu.Channel3FrequencyRegisterHi | 0b10111111);
+				return (byte)(emulator.apu.channel3.FrequencyRegisterHi | 0b10111111);
 			case 0x20:
 				//Write only
 				return 0xFF;
 			case 0x21:
-				return emulator.apu.Channel4VolumeEnvelopeRegister;
+				return emulator.apu.channel4.VolumeEnvelopeRegister;
 			case 0x22:
-				return emulator.apu.Channel4PolynomialCounterRegister;
+				return emulator.apu.channel4.PolynomialCounterRegister;
 			case 0x23:
-				return (byte)(emulator.apu.Channel4CounterConsecutiveRegister | 0b10111111);
+				return (byte)(emulator.apu.channel4.CounterConsecutiveRegister | 0b10111111);
 			case 0x24:
 				return emulator.apu.ChannelControlRegister;
 			case 0x25:
@@ -477,58 +477,58 @@ public class Memory
 				emulator.interrupts.InterruptFlagRegister = data;
 				break;
 			case 0x10:
-				emulator.apu.Channel1SweepRegister = data;
+				emulator.apu.channel1.FrequencySweepRegister = data;
 				break;
 			case 0x11:
-				emulator.apu.Channel1SoundLengthWavePatternRegister = data;
+				emulator.apu.channel1.SoundLengthWavePatternRegister = data;
 				break;
 			case 0x12:
-				emulator.apu.Channel1VolumeEnvelopeRegister = data;
+				emulator.apu.channel1.VolumeEnvelopeRegister = data;
 				break;
 			case 0x13:
-				emulator.apu.Channel1FrequencyRegisterLo = data;
+				emulator.apu.channel1.FrequencyRegisterLo = data;
 				break;
 			case 0x14:
-				emulator.apu.Channel1FrequencyRegisterHi = data;
+				emulator.apu.channel1.FrequencyRegisterHi = data;
 				break;
 			case 0x16:
-				emulator.apu.Channel2SoundLengthWavePatternRegister = data;
+				emulator.apu.channel2.SoundLengthWavePatternRegister = data;
 				break;
 			case 0x17:
-				emulator.apu.Channel2VolumeEnvelopeRegister = data;
+				emulator.apu.channel2.VolumeEnvelopeRegister = data;
 				break;
 			case 0x18:
-				emulator.apu.Channel2FrequencyRegisterLo = data;
+				emulator.apu.channel2.FrequencyRegisterLo = data;
 				break;
 			case 0x19:
-				emulator.apu.Channel2FrequencyRegisterHi = data;
+				emulator.apu.channel2.FrequencyRegisterHi = data;
 				break;
 			case 0x1A:
-				emulator.apu.Channel3SoundOnOffRegister = data;
+				emulator.apu.channel3.SoundOnOffRegister = data;
 				break;
 			case 0x1B:
-				emulator.apu.Channel3SoundLengthRegister = data;
+				emulator.apu.channel3.SoundLengthRegister = data;
 				break;
 			case 0x1C:
-				emulator.apu.Channel3SelectOutputLevelRegister = data;
+				emulator.apu.channel3.SelectOutputLevelRegister = data;
 				break;
 			case 0x1D:
-				emulator.apu.Channel3FrequencyRegisterLo = data;
+				emulator.apu.channel3.FrequencyRegisterLo = data;
 				break;
 			case 0x1E:
-				emulator.apu.Channel3FrequencyRegisterHi = data;
+				emulator.apu.channel3.FrequencyRegisterHi = data;
 				break;
 			case 0x20:
-				emulator.apu.Channel4SoundLengthRegister = data;
+				emulator.apu.channel4.SoundLengthRegister = data;
 				break;
 			case 0x21:
-				emulator.apu.Channel4VolumeEnvelopeRegister = data;
+				emulator.apu.channel4.VolumeEnvelopeRegister = data;
 				break;
 			case 0x22:
-				emulator.apu.Channel4PolynomialCounterRegister = data;
+				emulator.apu.channel4.PolynomialCounterRegister = data;
 				break;
 			case 0x23:
-				emulator.apu.Channel4CounterConsecutiveRegister = data;
+				emulator.apu.channel4.CounterConsecutiveRegister = data;
 				break;
 			case 0x24:
 				emulator.apu.ChannelControlRegister = data;

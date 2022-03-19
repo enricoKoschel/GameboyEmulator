@@ -25,13 +25,22 @@ public abstract class ApuChannel : SoundStream
 		Play();
 	}
 
-	protected void AddSamplePair(short sampleLeft, short sampleRight)
+	private void AddSamplePair(short sampleLeft, short sampleRight)
 	{
 		mutex.WaitOne();
 		sampleBuffer.Add(sampleLeft);
 		sampleBuffer.Add(sampleRight);
 		mutex.ReleaseMutex();
 	}
+
+	public void CollectSample()
+	{
+		AddSamplePair(GetCurrentAmplitudeLeft(), GetCurrentAmplitudeRight());
+	}
+
+	protected abstract short GetCurrentAmplitudeLeft();
+
+	protected abstract short GetCurrentAmplitudeRight();
 
 	protected override bool OnGetData(out short[] samples)
 	{

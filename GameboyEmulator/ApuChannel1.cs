@@ -2,32 +2,72 @@
 
 public class ApuChannel1 : ApuChannel
 {
-	private byte SoundLength     => (byte)(apu.Channel1SoundLengthWavePatternRegister & 0b00111111);
-	private byte WavePatternDuty => (byte)((apu.Channel1SoundLengthWavePatternRegister & 0b11000000) >> 6);
+	private byte internalFrequencySweepRegister;
 
-	private byte InitialVolume           => (byte)((apu.Channel1VolumeEnvelopeRegister & 0b11110000) >> 4);
-	private bool VolumeEnvelopeDirection => Cpu.GetBit(apu.Channel1VolumeEnvelopeRegister, 3);
-	private byte VolumeSweepPeriod       => (byte)(apu.Channel1VolumeEnvelopeRegister & 0b00000111);
-
-	private byte FrequencySweepPeriod => (byte)((apu.Channel1SweepRegister & 0b01110000) >> 4);
-	private bool SweepDirection       => Cpu.GetBit(apu.Channel1SweepRegister, 3);
-	private byte SweepAmount          => (byte)(apu.Channel1SweepRegister & 0b00000111);
-
-	private bool Trigger => Cpu.GetBit(apu.Channel1FrequencyRegisterHi, 7);
-
-
-	private bool EnableLength => Cpu.GetBit(apu.Channel1FrequencyRegisterHi, 6);
-
-	//Only the lower 3 bits of Channel1FrequencyRegisterHi are used
-	private ushort FrequencyRegister
+	//NR10
+	public byte FrequencySweepRegister
 	{
-		get => (ushort)(Cpu.MakeWord(apu.Channel1FrequencyRegisterHi, apu.Channel1FrequencyRegisterLo) & 0x7FF);
+		get => (byte)(internalFrequencySweepRegister & 0b01111111);
+		set => internalFrequencySweepRegister = (byte)(value & 0b01111111);
+	}
+
+	private byte internalSoundLengthWavePatternRegister;
+
+	//NR11
+	public byte SoundLengthWavePatternRegister
+	{
+		get => internalSoundLengthWavePatternRegister;
 		set
 		{
-			apu.Channel1FrequencyRegisterHi =
-				(byte)((apu.Channel1FrequencyRegisterHi & 0b11111000) | (Cpu.GetHiByte(value) & 0b00000111));
+			internalSoundLengthWavePatternRegister = value;
+			SoundLengthWritten();
+		}
+	}
 
-			apu.Channel1FrequencyRegisterLo = Cpu.GetLoByte(value);
+	//NR12
+	public byte VolumeEnvelopeRegister { get; set; }
+
+	//NR13
+	public byte FrequencyRegisterLo { get; set; }
+
+	private byte internalFrequencyRegisterHi;
+
+	//NR14
+	public byte FrequencyRegisterHi
+	{
+		get => (byte)(internalFrequencyRegisterHi & 0b11000111);
+		set
+		{
+			internalFrequencyRegisterHi = (byte)(value & 0b11000111);
+			TriggerWritten();
+		}
+	}
+
+	private byte SoundLength     => (byte)(SoundLengthWavePatternRegister & 0b00111111);
+	private byte WavePatternDuty => (byte)((SoundLengthWavePatternRegister & 0b11000000) >> 6);
+
+	private byte InitialVolume           => (byte)((VolumeEnvelopeRegister & 0b11110000) >> 4);
+	private bool VolumeEnvelopeDirection => Cpu.GetBit(VolumeEnvelopeRegister, 3);
+	private byte VolumeSweepPeriod       => (byte)(VolumeEnvelopeRegister & 0b00000111);
+
+	private byte FrequencySweepPeriod => (byte)((FrequencySweepRegister & 0b01110000) >> 4);
+	private bool SweepDirection       => Cpu.GetBit(FrequencySweepRegister, 3);
+	private byte SweepAmount          => (byte)(FrequencySweepRegister & 0b00000111);
+
+	private bool Trigger => Cpu.GetBit(FrequencyRegisterHi, 7);
+
+	private bool EnableLength => Cpu.GetBit(FrequencyRegisterHi, 6);
+
+	//Only the lower 3 bits of FrequencyRegisterHi are used
+	private ushort FrequencyRegister
+	{
+		get => (ushort)(Cpu.MakeWord(FrequencyRegisterHi, FrequencyRegisterLo) & 0x7FF);
+		set
+		{
+			FrequencyRegisterHi =
+				(byte)((FrequencyRegisterHi & 0b11111000) | (Cpu.GetHiByte(value) & 0b00000111));
+
+			FrequencyRegisterLo = Cpu.GetLoByte(value);
 		}
 	}
 
@@ -62,7 +102,7 @@ public class ApuChannel1 : ApuChannel
 	public void Update(int cycles)
 	{
 		//The frame sequencer still gets ticked but no components get updated when the apu is disabled
-		if (!apu.SoundEnabled) UpdateFrameSequencer(cycles, false, true);
+		if (!apu.Enabled) UpdateFrameSequencer(cycles, false, true);
 
 		CheckDacEnabled();
 
@@ -84,14 +124,14 @@ public class ApuChannel1 : ApuChannel
 		waveDutyPosition %= 8;
 	}
 
-	public void SoundLengthWritten()
+	private void SoundLengthWritten()
 	{
 		lengthTimer = 64 - SoundLength;
 	}
 
-	public void TriggerWritten()
+	private void TriggerWritten()
 	{
-		if (!apu.SoundEnabled || !Trigger) return;
+		if (!apu.Enabled || !Trigger) return;
 
 		Playing = true;
 
@@ -118,6 +158,19 @@ public class ApuChannel1 : ApuChannel
 
 	public void Reset()
 	{
+		internalFrequencySweepRegister = 0;
+		FrequencySweepRegister         = 0;
+
+		internalSoundLengthWavePatternRegister = 0;
+		SoundLengthWavePatternRegister         = 0;
+
+		VolumeEnvelopeRegister = 0;
+
+		FrequencyRegisterLo = 0;
+
+		internalFrequencyRegisterHi = 0;
+		FrequencyRegisterHi         = 0;
+
 		frequencyTimer = 0;
 
 		waveDutyPosition = 0;
@@ -214,23 +267,18 @@ public class ApuChannel1 : ApuChannel
 		return newFrequency;
 	}
 
-	public void CollectSample()
+	protected override short GetCurrentAmplitudeLeft()
 	{
-		AddSamplePair(GetCurrentAmplitudeLeft(), GetCurrentAmplitudeRight());
-	}
-
-	private short GetCurrentAmplitudeLeft()
-	{
-		if (!apu.SoundEnabled || !LeftEnabled) return 0;
+		if (!apu.Enabled || !LeftEnabled) return 0;
 
 		double volume = currentEnvelopeVolume * apu.LeftChannelVolume * Apu.VOLUME_MULTIPLIER;
 
 		return (short)(Apu.WAVE_DUTY_TABLE[WavePatternDuty, waveDutyPosition] * volume);
 	}
 
-	private short GetCurrentAmplitudeRight()
+	protected override short GetCurrentAmplitudeRight()
 	{
-		if (!apu.SoundEnabled || !RightEnabled) return 0;
+		if (!apu.Enabled || !RightEnabled) return 0;
 
 		double volume = currentEnvelopeVolume * apu.RightChannelVolume * Apu.VOLUME_MULTIPLIER;
 
