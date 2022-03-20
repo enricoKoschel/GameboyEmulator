@@ -50,9 +50,9 @@ public class ApuChannel1 : ApuChannel
 	private bool VolumeEnvelopeDirection => Cpu.GetBit(VolumeEnvelopeRegister, 3);
 	private byte VolumeSweepPeriod       => (byte)(VolumeEnvelopeRegister & 0b00000111);
 
-	private byte FrequencySweepPeriod => (byte)((FrequencySweepRegister & 0b01110000) >> 4);
-	private bool SweepDirection       => Cpu.GetBit(FrequencySweepRegister, 3);
-	private byte SweepAmount          => (byte)(FrequencySweepRegister & 0b00000111);
+	private byte FrequencySweepPeriod      => (byte)((FrequencySweepRegister & 0b01110000) >> 4);
+	private bool SweepDirection            => Cpu.GetBit(FrequencySweepRegister, 3);
+	private byte FrequencySweepShiftAmount => (byte)(FrequencySweepRegister & 0b00000111);
 
 	private bool Trigger => Cpu.GetBit(FrequencyRegisterHi, 7);
 
@@ -142,10 +142,10 @@ public class ApuChannel1 : ApuChannel
 
 		shadowFrequency = FrequencyRegister;
 		sweepTimer      = FrequencySweepPeriod != 0 ? FrequencySweepPeriod : 8;
-		sweepEnabled    = FrequencySweepPeriod != 0 || SweepAmount != 0;
+		sweepEnabled    = FrequencySweepPeriod != 0 || FrequencySweepShiftAmount != 0;
 
 		//For overflow check
-		if (SweepAmount != 0) CalculateNewFrequency();
+		if (FrequencySweepShiftAmount != 0) CalculateNewFrequency();
 
 		CheckDacEnabled();
 	}
@@ -193,12 +193,7 @@ public class ApuChannel1 : ApuChannel
 
 		frameSequencerCounter -= 8192;
 
-		if (onlyTick)
-		{
-			currentFrameSequencerTick++;
-			currentFrameSequencerTick %= 8;
-			return;
-		}
+		if (onlyTick) return;
 
 		if (currentFrameSequencerTick % 2 == 0) UpdateLength();
 		if (!onlyLength && currentFrameSequencerTick == 7) UpdateVolume();
@@ -213,7 +208,7 @@ public class ApuChannel1 : ApuChannel
 		//TODO probably works
 		if (!EnableLength) return;
 
-		if (--lengthTimer != 0) return;
+		if (lengthTimer <= 0 || --lengthTimer != 0) return;
 
 		Playing = false;
 	}
@@ -245,7 +240,7 @@ public class ApuChannel1 : ApuChannel
 
 		int newFrequency = CalculateNewFrequency();
 
-		if (newFrequency >= 2048 || SweepAmount <= 0) return;
+		if (newFrequency >= 2048 || FrequencySweepShiftAmount <= 0) return;
 
 		FrequencyRegister = (ushort)newFrequency;
 		shadowFrequency   = newFrequency;
@@ -256,7 +251,7 @@ public class ApuChannel1 : ApuChannel
 
 	private int CalculateNewFrequency()
 	{
-		int newFrequency = shadowFrequency >> SweepAmount;
+		int newFrequency = shadowFrequency >> FrequencySweepShiftAmount;
 
 		if (SweepDirection) newFrequency = -newFrequency;
 
