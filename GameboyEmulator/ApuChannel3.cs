@@ -8,7 +8,7 @@ public class ApuChannel3 : ApuChannel
 	public byte SoundOnOffRegister
 	{
 		get => (byte)((internalSoundOnOffRegister ? 1 : 0) << 7);
-		set => internalSoundOnOffRegister = (value & 0b10000000) != 0;
+		set => internalSoundOnOffRegister = (value & 0b1000_0000) != 0;
 	}
 
 	//NR31
@@ -19,8 +19,8 @@ public class ApuChannel3 : ApuChannel
 	//NR32
 	public byte SelectOutputLevelRegister
 	{
-		get => (byte)(internalSelectOutputLevelRegister & 0b01100000);
-		set => internalSelectOutputLevelRegister = (byte)(value & 0b01100000);
+		get => (byte)(internalSelectOutputLevelRegister & 0b0110_0000);
+		set => internalSelectOutputLevelRegister = (byte)(value & 0b0110_0000);
 	}
 
 	//NR33
@@ -31,8 +31,8 @@ public class ApuChannel3 : ApuChannel
 	//NR34
 	public byte FrequencyRegisterHi
 	{
-		get => (byte)(internalFrequencyRegisterHi & 0b11000111);
-		set => internalFrequencyRegisterHi = (byte)(value & 0b11000111);
+		get => (byte)(internalFrequencyRegisterHi & 0b1100_0111);
+		set => internalFrequencyRegisterHi = (byte)(value & 0b1100_0111);
 	}
 
 	//Only the lower 3 bits of FrequencyRegisterHi are used

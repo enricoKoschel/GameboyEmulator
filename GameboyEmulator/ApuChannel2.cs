@@ -16,8 +16,8 @@ public class ApuChannel2 : ApuChannel
 	//NR24
 	public byte FrequencyRegisterHi
 	{
-		get => (byte)(internalFrequencyRegisterHi & 0b11000111);
-		set => internalFrequencyRegisterHi = (byte)(value & 0b11000111);
+		get => (byte)(internalFrequencyRegisterHi & 0b1100_0111);
+		set => internalFrequencyRegisterHi = (byte)(value & 0b1100_0111);
 	}
 
 	private bool LeftEnabled  => Cpu.GetBit(apu.SoundOutputTerminalSelectRegister, 5);

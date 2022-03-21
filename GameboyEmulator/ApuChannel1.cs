@@ -7,8 +7,8 @@ public class ApuChannel1 : ApuChannel
 	//NR10
 	public byte FrequencySweepRegister
 	{
-		get => (byte)(internalFrequencySweepRegister & 0b01111111);
-		set => internalFrequencySweepRegister = (byte)(value & 0b01111111);
+		get => (byte)(internalFrequencySweepRegister & 0b0111_1111);
+		set => internalFrequencySweepRegister = (byte)(value & 0b0111_1111);
 	}
 
 	private byte internalSoundLengthWavePatternRegister;
@@ -35,24 +35,24 @@ public class ApuChannel1 : ApuChannel
 	//NR14
 	public byte FrequencyRegisterHi
 	{
-		get => (byte)(internalFrequencyRegisterHi & 0b11000111);
+		get => (byte)(internalFrequencyRegisterHi & 0b1100_0111);
 		set
 		{
-			internalFrequencyRegisterHi = (byte)(value & 0b11000111);
+			internalFrequencyRegisterHi = (byte)(value & 0b1100_0111);
 			TriggerWritten();
 		}
 	}
 
-	private byte SoundLength     => (byte)(SoundLengthWavePatternRegister & 0b00111111);
-	private byte WavePatternDuty => (byte)((SoundLengthWavePatternRegister & 0b11000000) >> 6);
+	private byte SoundLength     => (byte)(SoundLengthWavePatternRegister & 0b0011_1111);
+	private byte WavePatternDuty => (byte)((SoundLengthWavePatternRegister & 0b1100_0000) >> 6);
 
-	private byte InitialVolume           => (byte)((VolumeEnvelopeRegister & 0b11110000) >> 4);
+	private byte InitialVolume           => (byte)((VolumeEnvelopeRegister & 0b1111_0000) >> 4);
 	private bool VolumeEnvelopeDirection => Cpu.GetBit(VolumeEnvelopeRegister, 3);
-	private byte VolumeSweepPeriod       => (byte)(VolumeEnvelopeRegister & 0b00000111);
+	private byte VolumeSweepPeriod       => (byte)(VolumeEnvelopeRegister & 0b0000_0111);
 
-	private byte FrequencySweepPeriod      => (byte)((FrequencySweepRegister & 0b01110000) >> 4);
+	private byte FrequencySweepPeriod      => (byte)((FrequencySweepRegister & 0b0111_0000) >> 4);
 	private bool SweepDirection            => Cpu.GetBit(FrequencySweepRegister, 3);
-	private byte FrequencySweepShiftAmount => (byte)(FrequencySweepRegister & 0b00000111);
+	private byte FrequencySweepShiftAmount => (byte)(FrequencySweepRegister & 0b0000_0111);
 
 	private bool Trigger => Cpu.GetBit(FrequencyRegisterHi, 7);
 
@@ -65,7 +65,7 @@ public class ApuChannel1 : ApuChannel
 		set
 		{
 			FrequencyRegisterHi =
-				(byte)((FrequencyRegisterHi & 0b11111000) | (Cpu.GetHiByte(value) & 0b00000111));
+				(byte)((FrequencyRegisterHi & 0b1111_1000) | (Cpu.GetHiByte(value) & 0b0000_0111));
 
 			FrequencyRegisterLo = Cpu.GetLoByte(value);
 		}

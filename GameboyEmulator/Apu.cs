@@ -10,8 +10,8 @@ public class Apu
 	private bool VinLeftEnabled  => Cpu.GetBit(ChannelControlRegister, 7);
 	private bool VinRightEnabled => Cpu.GetBit(ChannelControlRegister, 3);
 
-	public byte LeftChannelVolume  => (byte)((ChannelControlRegister & 0b01110000) >> 4);
-	public byte RightChannelVolume => (byte)(ChannelControlRegister & 0b00000111);
+	public byte LeftChannelVolume  => (byte)((ChannelControlRegister & 0b0111_0000) >> 4);
+	public byte RightChannelVolume => (byte)(ChannelControlRegister & 0b0000_0111);
 
 	//NR51
 	public byte SoundOutputTerminalSelectRegister { get; set; }
@@ -27,7 +27,7 @@ public class Apu
 		get => Cpu.MakeByte(
 			Enabled, true, true, true, channel4.Playing, channel3.Playing, channel2.Playing, channel1.Playing
 		);
-		set => Enabled = (value & 0b10000000) != 0;
+		set => Enabled = (value & 0b1000_0000) != 0;
 	}
 
 	public bool Enabled { get; private set; }

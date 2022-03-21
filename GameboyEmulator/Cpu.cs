@@ -87,8 +87,8 @@ public class Cpu
 	private byte FlagRegister
 	{
 		//Lower nibble of Flag Register should always be zero
-		get => (byte)(internalFlagRegister & 0b11110000);
-		set => internalFlagRegister = (byte)(value & 0b11110000);
+		get => (byte)(internalFlagRegister & 0b1111_0000);
+		set => internalFlagRegister = (byte)(value & 0b1111_0000);
 	}
 
 	private bool ZeroFlag

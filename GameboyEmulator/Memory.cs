@@ -307,37 +307,37 @@ public class Memory
 			case 0x0F:
 				return emulator.interrupts.InterruptFlagRegister;
 			case 0x10:
-				return (byte)(emulator.apu.channel1.FrequencySweepRegister | 0b10000000);
+				return (byte)(emulator.apu.channel1.FrequencySweepRegister | 0b1000_0000);
 			case 0x11:
-				return (byte)(emulator.apu.channel1.SoundLengthWavePatternRegister | 0b00111111);
+				return (byte)(emulator.apu.channel1.SoundLengthWavePatternRegister | 0b0011_1111);
 			case 0x12:
 				return emulator.apu.channel1.VolumeEnvelopeRegister;
 			case 0x13:
 				//Write only
 				return 0xFF;
 			case 0x14:
-				return (byte)(emulator.apu.channel1.FrequencyRegisterHi | 0b10111111);
+				return (byte)(emulator.apu.channel1.FrequencyRegisterHi | 0b1011_1111);
 			case 0x16:
-				return (byte)(emulator.apu.channel2.SoundLengthWavePatternRegister | 0b00111111);
+				return (byte)(emulator.apu.channel2.SoundLengthWavePatternRegister | 0b0011_1111);
 			case 0x17:
 				return emulator.apu.channel2.VolumeEnvelopeRegister;
 			case 0x18:
 				//Write only
 				return 0xFF;
 			case 0x19:
-				return (byte)(emulator.apu.channel2.FrequencyRegisterHi | 0b10111111);
+				return (byte)(emulator.apu.channel2.FrequencyRegisterHi | 0b1011_1111);
 			case 0x1A:
-				return (byte)(emulator.apu.channel3.SoundOnOffRegister | 0b01111111);
+				return (byte)(emulator.apu.channel3.SoundOnOffRegister | 0b0111_1111);
 			case 0x1B:
 				//Write only
 				return 0xFF;
 			case 0x1C:
-				return (byte)(emulator.apu.channel3.SelectOutputLevelRegister | 0b10011111);
+				return (byte)(emulator.apu.channel3.SelectOutputLevelRegister | 0b1001_1111);
 			case 0x1D:
 				//Write only
 				return 0xFF;
 			case 0x1E:
-				return (byte)(emulator.apu.channel3.FrequencyRegisterHi | 0b10111111);
+				return (byte)(emulator.apu.channel3.FrequencyRegisterHi | 0b1011_1111);
 			case 0x20:
 				//Write only
 				return 0xFF;
@@ -346,13 +346,13 @@ public class Memory
 			case 0x22:
 				return emulator.apu.channel4.PolynomialCounterRegister;
 			case 0x23:
-				return (byte)(emulator.apu.channel4.CounterConsecutiveRegister | 0b10111111);
+				return (byte)(emulator.apu.channel4.CounterConsecutiveRegister | 0b1011_1111);
 			case 0x24:
 				return emulator.apu.ChannelControlRegister;
 			case 0x25:
 				return emulator.apu.SoundOutputTerminalSelectRegister;
 			case 0x26:
-				return (byte)(emulator.apu.SoundOnOffRegister | 0b01110000);
+				return (byte)(emulator.apu.SoundOnOffRegister | 0b0111_0000);
 			case 0x40:
 				return emulator.ppu.LcdControlRegister;
 			case 0x41:
@@ -382,7 +382,7 @@ public class Memory
 				return 0xFF;
 			case 0x50:
 				//Reading from 0xFF50 returns 1 for bits 7-1 and the boot rom state for bit 0
-				return (byte)(0b11111110 | (bootRomEnabled ? 0 : 1));
+				return (byte)(0b1111_1110 | (bootRomEnabled ? 0 : 1));
 			default:
 				//Unused IO ports return 0xFF
 				return 0xFF;
@@ -453,7 +453,7 @@ public class Memory
 			case 0x00:
 				//Only bits 4 and 5 of the joypad register are writeable
 				emulator.joypad.JoypadRegister =
-					(byte)((emulator.joypad.JoypadRegister & 0b11001111) | (data & 0b00110000));
+					(byte)((emulator.joypad.JoypadRegister & 0b1100_1111) | (data & 0b0011_0000));
 
 				break;
 			case 0x01:
@@ -575,7 +575,7 @@ public class Memory
 				break;
 			case 0x50:
 				//Writing to this address disables the boot rom
-				if (bootRomEnabled && (data & 0b00000001) == 1) DisableBootRom();
+				if (bootRomEnabled && (data & 0b0000_0001) == 1) DisableBootRom();
 				break;
 		}
 	}

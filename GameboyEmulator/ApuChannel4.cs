@@ -7,8 +7,8 @@ public class ApuChannel4 : ApuChannel
 	//NR41
 	public byte SoundLengthRegister
 	{
-		get => (byte)(internalSoundLengthRegister & 0b00111111);
-		set => internalSoundLengthRegister = (byte)(value & 0b00111111);
+		get => (byte)(internalSoundLengthRegister & 0b0011_1111);
+		set => internalSoundLengthRegister = (byte)(value & 0b0011_1111);
 	}
 
 	//NR42
@@ -22,8 +22,8 @@ public class ApuChannel4 : ApuChannel
 	//NR44
 	public byte CounterConsecutiveRegister
 	{
-		get => (byte)(internalCounterConsecutiveRegister & 0b11000000);
-		set => internalCounterConsecutiveRegister = (byte)(value & 0b11000000);
+		get => (byte)(internalCounterConsecutiveRegister & 0b1100_0000);
+		set => internalCounterConsecutiveRegister = (byte)(value & 0b1100_0000);
 	}
 
 	private bool LeftEnabled  => Cpu.GetBit(apu.SoundOutputTerminalSelectRegister, 7);
