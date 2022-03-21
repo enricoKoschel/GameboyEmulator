@@ -51,7 +51,7 @@ public class ApuChannel1 : ApuChannel
 	private byte VolumeSweepPeriod       => (byte)(VolumeEnvelopeRegister & 0b0000_0111);
 
 	private byte FrequencySweepPeriod      => (byte)((FrequencySweepRegister & 0b0111_0000) >> 4);
-	private bool SweepDirection            => Cpu.GetBit(FrequencySweepRegister, 3);
+	private bool FrequencySweepDirection   => Cpu.GetBit(FrequencySweepRegister, 3);
 	private byte FrequencySweepShiftAmount => (byte)(FrequencySweepRegister & 0b0000_0111);
 
 	private bool Trigger => Cpu.GetBit(FrequencyRegisterHi, 7);
@@ -253,7 +253,7 @@ public class ApuChannel1 : ApuChannel
 	{
 		int newFrequency = shadowFrequency >> FrequencySweepShiftAmount;
 
-		if (SweepDirection) newFrequency = -newFrequency;
+		if (FrequencySweepDirection) newFrequency = -newFrequency;
 
 		newFrequency += shadowFrequency;
 

@@ -17,7 +17,7 @@ public class Apu
 	public byte SoundOutputTerminalSelectRegister { get; set; }
 
 	private bool channel1Enabled = true;
-	private bool channel2Enabled;
+	private bool channel2Enabled = true;
 	private bool channel3Enabled;
 	private bool channel4Enabled;
 
