@@ -44,15 +44,6 @@ public class ApuChannel4 : ApuChannel
 
 	public void Reset()
 	{
-		internalSoundLengthRegister = 0;
-		SoundLengthRegister         = 0;
-
-		VolumeEnvelopeRegister = 0;
-
-		PolynomialCounterRegister = 0;
-
-		internalCounterConsecutiveRegister = 0;
-		CounterConsecutiveRegister         = 0;
 	}
 
 	protected override short GetCurrentAmplitudeLeft()

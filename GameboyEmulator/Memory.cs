@@ -286,7 +286,7 @@ public class Memory
 	private byte ReadFromIoPorts(ushort address)
 	{
 		if (IsInRange(address, 0xFF30, 0xFF3F))
-			return emulator.apu.GetWavePatternRamAtIndex(address & 0xF);
+			return emulator.apu.channel3.GetWaveRamSamplePair(address & 0xF);
 
 		switch (address & 0xFF)
 		{
@@ -446,7 +446,7 @@ public class Memory
 	private void WriteToIoPorts(ushort address, byte data)
 	{
 		if (IsInRange(address, 0xFF30, 0xFF3F))
-			emulator.apu.SetWavePatternRamAtIndex(address & 0xF, data);
+			emulator.apu.channel3.SetWaveRamSamplePair(address & 0xF, data);
 
 		switch (address & 0xFF)
 		{

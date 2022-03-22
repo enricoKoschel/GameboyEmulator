@@ -18,7 +18,7 @@ public class Apu
 
 	private bool channel1Enabled = true;
 	private bool channel2Enabled = true;
-	private bool channel3Enabled;
+	private bool channel3Enabled = true;
 	private bool channel4Enabled;
 
 	//NR52
@@ -31,8 +31,6 @@ public class Apu
 	}
 
 	public bool Enabled { get; private set; }
-
-	private readonly byte[] wavePatternRam;
 
 	/*
 		00 - 12.5% (_-------_-------_-------)
@@ -63,8 +61,6 @@ public class Apu
 	public Apu(Emulator emulator)
 	{
 		this.emulator = emulator;
-
-		wavePatternRam = new byte[0x10];
 
 		channel1 = new ApuChannel1(this, SAMPLE_RATE, SAMPLE_RATE / 10);
 		channel2 = new ApuChannel2(this, SAMPLE_RATE, SAMPLE_RATE / 10);
@@ -116,19 +112,5 @@ public class Apu
 		SoundOutputTerminalSelectRegister = 0;
 
 		internalMainApuCounter = 0;
-	}
-
-	public byte GetWavePatternRamAtIndex(int index)
-	{
-		//TODO implement actual behaviour for CH3 enabled
-		return /*internalChannel3SoundOnOffRegister ? (byte)0xFF : */wavePatternRam[index];
-	}
-
-	public void SetWavePatternRamAtIndex(int index, byte data)
-	{
-		//TODO implement actual behaviour for CH3 enabled
-		//if (internalChannel3SoundOnOffRegister) return;
-
-		wavePatternRam[index] = data;
 	}
 }

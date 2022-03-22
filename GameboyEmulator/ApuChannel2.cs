@@ -45,6 +45,7 @@ public class ApuChannel2 : ApuChannel
 
 	private bool EnableLength => Cpu.GetBit(FrequencyRegisterHi, 6);
 
+	//Only the lower 3 bits of FrequencyRegisterHi are used
 	private ushort FrequencyRegister => (ushort)(Cpu.MakeWord(FrequencyRegisterHi, FrequencyRegisterLo) & 0x7FF);
 
 	private bool LeftEnabled  => Cpu.GetBit(apu.SoundOutputTerminalSelectRegister, 5);
@@ -123,7 +124,8 @@ public class ApuChannel2 : ApuChannel
 
 	public void Reset()
 	{
-		SoundLengthWavePatternRegister = 0;
+		internalSoundLengthWavePatternRegister = 0;
+		SoundLengthWavePatternRegister         = 0;
 
 		VolumeEnvelopeRegister = 0;
 
@@ -131,6 +133,17 @@ public class ApuChannel2 : ApuChannel
 
 		internalFrequencyRegisterHi = 0;
 		FrequencyRegisterHi         = 0;
+
+		frequencyTimer = 0;
+
+		waveDutyPosition = 0;
+
+		currentFrameSequencerTick = 0;
+
+		lengthTimer = 0;
+
+		currentEnvelopeVolume = 0;
+		volumePeriodTimer     = 0;
 	}
 
 	private void UpdateFrameSequencer(int cycles, bool onlyLength = false, bool onlyTick = false)
