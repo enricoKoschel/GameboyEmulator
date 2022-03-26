@@ -46,8 +46,10 @@ public class Apu
 		{ 0, 0, 0, 0, 0, 0, 1, 1 }
 	};
 
-	private const int SAMPLE_RATE       = 48000;
-	public const  int VOLUME_MULTIPLIER = 50;
+	private const int SAMPLE_RATE        = 48000;
+	private const int SAMPLE_BUFFER_SIZE = SAMPLE_RATE / 10;
+
+	public const int VOLUME_MULTIPLIER = 50;
 
 	private int internalMainApuCounter;
 
@@ -62,10 +64,10 @@ public class Apu
 	{
 		this.emulator = emulator;
 
-		channel1 = new ApuChannel1(this, SAMPLE_RATE, SAMPLE_RATE / 10);
-		channel2 = new ApuChannel2(this, SAMPLE_RATE, SAMPLE_RATE / 10);
-		channel3 = new ApuChannel3(this, SAMPLE_RATE, SAMPLE_RATE / 10);
-		channel4 = new ApuChannel4(this, SAMPLE_RATE, SAMPLE_RATE / 10);
+		channel1 = new ApuChannel1(this, SAMPLE_RATE, SAMPLE_BUFFER_SIZE);
+		channel2 = new ApuChannel2(this, SAMPLE_RATE, SAMPLE_BUFFER_SIZE);
+		channel3 = new ApuChannel3(this, SAMPLE_RATE, SAMPLE_BUFFER_SIZE);
+		channel4 = new ApuChannel4(this, SAMPLE_RATE, SAMPLE_BUFFER_SIZE);
 	}
 
 	public void Update(int cycles)
