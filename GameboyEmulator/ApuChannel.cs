@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading;
 using SFML.Audio;
 using SFML.System;
@@ -44,9 +45,9 @@ public abstract class ApuChannel : SoundStream
 
 	protected override bool OnGetData(out short[] samples)
 	{
-		while (sampleBuffer.Count < bufferSize)
-		{
-		}
+		Console.WriteLine(sampleBuffer.Count);
+
+		while (sampleBuffer.Count < bufferSize) Thread.Sleep(1);
 
 		mutex.WaitOne();
 
