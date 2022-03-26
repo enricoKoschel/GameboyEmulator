@@ -1,7 +1,8 @@
 # TODO
 
+- Fix bug where sample buffer is empty and audio lags a bit
 - Implement toggling APU channels on and off (F5-F8) and add the keys to the settings.ini
-- Implement APU channels 3&4
+- Implement APU channel 4
 - Implement obscure behaviour/hardware bugs for all APU channels
 - Implement all checks at startup (checksums, logo, etc.)
 - Implement better waiting at the end of a frame (Thread.Sleep() + correcting)
