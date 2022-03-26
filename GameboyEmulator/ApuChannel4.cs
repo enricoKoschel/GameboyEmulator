@@ -26,6 +26,20 @@ public class ApuChannel4 : ApuChannel
 		set => internalCounterConsecutiveRegister = (byte)(value & 0b1100_0000);
 	}
 
+	private byte InitialVolume           => (byte)((VolumeEnvelopeRegister & 0b1111_0000) >> 4);
+	private bool VolumeEnvelopeDirection => Cpu.GetBit(VolumeEnvelopeRegister, 3);
+	private byte VolumeSweepPeriod       => (byte)(VolumeEnvelopeRegister & 0b0000_0111);
+
+	private byte ShiftClockFrequency => (byte)((PolynomialCounterRegister & 0b1111_0000) >> 4);
+
+	private bool CounterStepWidth => Cpu.GetBit(PolynomialCounterRegister, 3);
+
+	private byte DividingRatio => (byte)(PolynomialCounterRegister & 0b0000_0111);
+
+	private bool Trigger => Cpu.GetBit(CounterConsecutiveRegister, 7);
+
+	private bool EnableLength => Cpu.GetBit(CounterConsecutiveRegister, 6);
+
 	private bool LeftEnabled  => Cpu.GetBit(apu.SoundOutputTerminalSelectRegister, 7);
 	private bool RightEnabled => Cpu.GetBit(apu.SoundOutputTerminalSelectRegister, 3);
 
