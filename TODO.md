@@ -1,5 +1,6 @@
 # TODO
 
+- Add inheritance/polymorphism to MBC
 - Draw previous frame with 50% opacity on top of current frame
 - Implement APU output with SFML textures
 - Fix bug where sample buffer is empty and audio lags a bit

@@ -45,7 +45,7 @@ public abstract class ApuChannel : SoundStream
 
 	protected override bool OnGetData(out short[] samples)
 	{
-		Console.WriteLine(sampleBuffer.Count);
+		//Console.WriteLine(sampleBuffer.Count);
 
 		while (sampleBuffer.Count < bufferSize) Thread.Sleep(1);
 
