@@ -24,7 +24,7 @@ public static class Config
 
 		bool validInt = Int32.TryParse(value, out int output);
 
-		//Ensures a valid key was provided by the ini file
+		//Ensure a valid key was provided by the ini file
 		if (validInt && (Memory.IsInRange(output, 65, 90)   //A-Z
 					  || Memory.IsInRange(output, 48, 57)   //0-9
 					  || Memory.IsInRange(output, 37, 40)   //Arrow keys
@@ -119,6 +119,7 @@ public static class Config
 ;B = 65 (A key)
 ;SPEED = 16 (Shift)
 ;PAUSE = 17 (LCtrl)
+;RESET = 27 (Esc)
 
 UP = 38
 DOWN = 40
@@ -130,6 +131,7 @@ A = 83
 B = 65
 SPEED = 16
 PAUSE = 17
+RESET = 27
 
 [Colors]
 ;Uses HEX color values WITHOUT the leading # (123456)

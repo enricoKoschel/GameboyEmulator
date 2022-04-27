@@ -2596,9 +2596,9 @@ public class Cpu
 	{
 		int correction = 0;
 
-		if (HalfCarryFlag || !SubtractFlag && (aRegister & 0xF) > 9) correction |= 6;
+		if (HalfCarryFlag || (!SubtractFlag && (aRegister & 0xF) > 9)) correction |= 6;
 
-		if (CarryFlag || !SubtractFlag && aRegister > 0x99)
+		if (CarryFlag || (!SubtractFlag && aRegister > 0x99))
 		{
 			correction |= 0x60;
 			CarryFlag  =  true;

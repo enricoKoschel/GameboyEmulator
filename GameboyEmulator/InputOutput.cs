@@ -30,6 +30,7 @@ public class InputOutput
 	private const Keyboard.Key DEFAULT_B_BUTTON      = Keyboard.Key.A;
 	private const Keyboard.Key DEFAULT_SPEED_BUTTON  = Keyboard.Key.LShift;
 	private const Keyboard.Key DEFAULT_PAUSE_BUTTON  = Keyboard.Key.LControl;
+	private const Keyboard.Key DEFAULT_RESET_BUTTON  = Keyboard.Key.Escape;
 
 	private static Keyboard.Key upButton;
 	private static Keyboard.Key downButton;
@@ -41,6 +42,7 @@ public class InputOutput
 	private static Keyboard.Key bButton;
 	private static Keyboard.Key speedButton;
 	private static Keyboard.Key pauseButton;
+	private static Keyboard.Key resetButton;
 
 	//Color mapping
 	private static readonly Color DEFAULT_BLACK_COLOR      = new(8, 24, 32);
@@ -139,6 +141,10 @@ public class InputOutput
 		pauseButton = Config.GetControlConfig("PAUSE") == -1
 						  ? DEFAULT_PAUSE_BUTTON
 						  : ConvertJsKeyCodeToSfml(Config.GetControlConfig("PAUSE"));
+
+		resetButton = Config.GetControlConfig("RESET") == -1
+						  ? DEFAULT_RESET_BUTTON
+						  : ConvertJsKeyCodeToSfml(Config.GetControlConfig("RESET"));
 	}
 
 	private static void InitialiseColors()
@@ -258,16 +264,20 @@ public class InputOutput
 
 	public void Update()
 	{
+		//Check for speed button
 		if (WindowHasFocus && Keyboard.IsKeyPressed(speedButton)) emulator.MaxFps = 0;
 		else emulator.MaxFps                                                      = Emulator.GAMEBOY_FPS;
 
+		//Check for pause button
 		if (WindowHasFocus && Keyboard.IsKeyPressed(pauseButton) && !pauseWasPressed)
 		{
 			emulator.isPaused = !emulator.isPaused;
 			pauseWasPressed   = true;
 		}
+		else if (!Keyboard.IsKeyPressed(pauseButton)) pauseWasPressed = false;
 
-		if (!Keyboard.IsKeyPressed(pauseButton)) pauseWasPressed = false;
+		//Check for reset button
+		if (WindowHasFocus && Keyboard.IsKeyPressed(resetButton)) emulator.Reset();
 	}
 
 	public void UpdatePixelBuffer(int x, int y, Ppu.Color color)
@@ -329,6 +339,11 @@ public class InputOutput
 	public void SetWindowTitle(string title)
 	{
 		window.SetTitle(title);
+	}
+
+	public void CloseWindow()
+	{
+		window.Close();
 	}
 
 	private static void OnClosed(object? sender, EventArgs e)

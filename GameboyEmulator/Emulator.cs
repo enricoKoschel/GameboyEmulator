@@ -7,15 +7,15 @@ namespace GameboyEmulator;
 
 public class Emulator
 {
-	public readonly Cpu                  cpu;
-	public readonly Interrupts           interrupts;
-	public readonly Joypad               joypad;
-	public readonly Memory               memory;
-	public readonly MemoryBankController memoryBankController;
-	public readonly Ppu                  ppu;
-	public readonly Timer                timer;
-	public readonly InputOutput          inputOutput;
-	public readonly Apu                  apu;
+	public Cpu                  cpu;
+	public Interrupts           interrupts;
+	public Joypad               joypad;
+	public Memory               memory;
+	public MemoryBankController memoryBankController;
+	public Ppu                  ppu;
+	public Timer                timer;
+	public InputOutput          inputOutput;
+	public Apu                  apu;
 
 	public const int GAMEBOY_CLOCK_SPEED = 4194304;
 
@@ -35,7 +35,7 @@ public class Emulator
 	public readonly string saveFilePath;
 
 	public bool IsRunning => inputOutput.WindowIsOpen;
-	public bool isPaused = false;
+	public bool isPaused;
 
 	public Emulator(string gameRomFilePath, string bootRomFilePath)
 	{
@@ -67,6 +67,26 @@ public class Emulator
 		//Only create save directory if saving is enabled and cartridge ram exists
 		if (Config.GetSaveEnabledConfig() && memoryBankController.CartridgeRamExists)
 			Directory.CreateDirectory(saveFileDirectory);
+	}
+
+	public void Reset()
+	{
+		inputOutput.CloseWindow();
+
+		cpu                  = new Cpu(this);
+		interrupts           = new Interrupts(this);
+		joypad               = new Joypad(this);
+		memory               = new Memory(this);
+		memoryBankController = new MemoryBankController(this);
+		ppu                  = new Ppu(this);
+		timer                = new Timer(this);
+		inputOutput          = new InputOutput(this);
+		apu                  = new Apu(this);
+
+		MaxFps   = GAMEBOY_FPS;
+		isPaused = false;
+
+		memory.LoadGame();
 	}
 
 	public void Update()
