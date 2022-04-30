@@ -14,7 +14,7 @@
   - Implement GUI
   - Implement save states/rewind
   - Controller support
-  - Scale window according to screen size
+  - Scale window according to screen size (or have screen scale in config)
 - Logger
   - Implement full logging of all opcodes, modules, etc. with configurable log levels
 - MBC
@@ -22,7 +22,6 @@
   - Implement other memory bank controllers
 - Config
   - Add audio master and channel enable to config file
-  - Change keymap to use key strings instead of key codes
 - CPU
   - Implement STOP opcode
   - Refactor opcode switch statements to make them shorter

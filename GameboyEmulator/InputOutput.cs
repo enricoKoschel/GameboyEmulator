@@ -62,10 +62,9 @@ public class InputOutput
 	private static Color lightGrayColor;
 	private static Color whiteColor;
 
-	private byte[]  pixelBuffer;
-	private Texture texture;
-	private Sprite  sprite;
-
+	private readonly byte[]  pixelBuffer;
+	private readonly Texture texture;
+	private readonly Sprite  sprite;
 
 	private readonly bool[,] zBuffer;
 
@@ -117,65 +116,50 @@ public class InputOutput
 
 	private static void InitialiseControls()
 	{
-		upButton = Config.GetControlConfig("UP") == -1
-					   ? DEFAULT_UP_BUTTON
-					   : ConvertJsKeyCodeToSfml(Config.GetControlConfig("UP"));
+		upButton = ConvertStringToSfmlKey(Config.GetControlConfig("UP"));
+		if (upButton == Keyboard.Key.Unknown) upButton = DEFAULT_UP_BUTTON;
 
-		downButton = Config.GetControlConfig("DOWN") == -1
-						 ? DEFAULT_DOWN_BUTTON
-						 : ConvertJsKeyCodeToSfml(Config.GetControlConfig("DOWN"));
+		downButton = ConvertStringToSfmlKey(Config.GetControlConfig("DOWN"));
+		if (downButton == Keyboard.Key.Unknown) downButton = DEFAULT_DOWN_BUTTON;
 
-		leftButton = Config.GetControlConfig("LEFT") == -1
-						 ? DEFAULT_LEFT_BUTTON
-						 : ConvertJsKeyCodeToSfml(Config.GetControlConfig("LEFT"));
+		leftButton = ConvertStringToSfmlKey(Config.GetControlConfig("LEFT"));
+		if (leftButton == Keyboard.Key.Unknown) leftButton = DEFAULT_LEFT_BUTTON;
 
-		rightButton = Config.GetControlConfig("RIGHT") == -1
-						  ? DEFAULT_RIGHT_BUTTON
-						  : ConvertJsKeyCodeToSfml(Config.GetControlConfig("RIGHT"));
+		rightButton = ConvertStringToSfmlKey(Config.GetControlConfig("RIGHT"));
+		if (rightButton == Keyboard.Key.Unknown) rightButton = DEFAULT_RIGHT_BUTTON;
 
-		startButton = Config.GetControlConfig("START") == -1
-						  ? DEFAULT_START_BUTTON
-						  : ConvertJsKeyCodeToSfml(Config.GetControlConfig("START"));
+		startButton = ConvertStringToSfmlKey(Config.GetControlConfig("START"));
+		if (startButton == Keyboard.Key.Unknown) startButton = DEFAULT_START_BUTTON;
 
-		selectButton = Config.GetControlConfig("SELECT") == -1
-						   ? DEFAULT_SELECT_BUTTON
-						   : ConvertJsKeyCodeToSfml(Config.GetControlConfig("SELECT"));
+		selectButton = ConvertStringToSfmlKey(Config.GetControlConfig("SELECT"));
+		if (selectButton == Keyboard.Key.Unknown) selectButton = DEFAULT_SELECT_BUTTON;
 
-		aButton = Config.GetControlConfig("A") == -1
-					  ? DEFAULT_A_BUTTON
-					  : ConvertJsKeyCodeToSfml(Config.GetControlConfig("A"));
+		aButton = ConvertStringToSfmlKey(Config.GetControlConfig("A"));
+		if (aButton == Keyboard.Key.Unknown) aButton = DEFAULT_A_BUTTON;
 
-		bButton = Config.GetControlConfig("B") == -1
-					  ? DEFAULT_B_BUTTON
-					  : ConvertJsKeyCodeToSfml(Config.GetControlConfig("B"));
+		bButton = ConvertStringToSfmlKey(Config.GetControlConfig("B"));
+		if (bButton == Keyboard.Key.Unknown) bButton = DEFAULT_B_BUTTON;
 
-		speedButton = Config.GetControlConfig("SPEED") == -1
-						  ? DEFAULT_SPEED_BUTTON
-						  : ConvertJsKeyCodeToSfml(Config.GetControlConfig("SPEED"));
+		speedButton = ConvertStringToSfmlKey(Config.GetControlConfig("SPEED"));
+		if (speedButton == Keyboard.Key.Unknown) speedButton = DEFAULT_SPEED_BUTTON;
 
-		pauseButton = Config.GetControlConfig("PAUSE") == -1
-						  ? DEFAULT_PAUSE_BUTTON
-						  : ConvertJsKeyCodeToSfml(Config.GetControlConfig("PAUSE"));
+		pauseButton = ConvertStringToSfmlKey(Config.GetControlConfig("PAUSE"));
+		if (pauseButton == Keyboard.Key.Unknown) pauseButton = DEFAULT_PAUSE_BUTTON;
 
-		resetButton = Config.GetControlConfig("RESET") == -1
-						  ? DEFAULT_RESET_BUTTON
-						  : ConvertJsKeyCodeToSfml(Config.GetControlConfig("RESET"));
+		resetButton = ConvertStringToSfmlKey(Config.GetControlConfig("RESET"));
+		if (resetButton == Keyboard.Key.Unknown) resetButton = DEFAULT_RESET_BUTTON;
 
-		audioChannel1Button = Config.GetControlConfig("AUDIO_CHANNEL_1") == -1
-								  ? DEFAULT_AUDIO_CHANNEL_1_BUTTON
-								  : ConvertJsKeyCodeToSfml(Config.GetControlConfig("AUDIO_CHANNEL_1"));
+		audioChannel1Button = ConvertStringToSfmlKey(Config.GetControlConfig("AUDIO_CHANNEL_1"));
+		if (audioChannel1Button == Keyboard.Key.Unknown) audioChannel1Button = DEFAULT_AUDIO_CHANNEL_1_BUTTON;
 
-		audioChannel2Button = Config.GetControlConfig("AUDIO_CHANNEL_2") == -1
-								  ? DEFAULT_AUDIO_CHANNEL_2_BUTTON
-								  : ConvertJsKeyCodeToSfml(Config.GetControlConfig("AUDIO_CHANNEL_2"));
+		audioChannel2Button = ConvertStringToSfmlKey(Config.GetControlConfig("AUDIO_CHANNEL_2"));
+		if (audioChannel2Button == Keyboard.Key.Unknown) audioChannel2Button = DEFAULT_AUDIO_CHANNEL_2_BUTTON;
 
-		audioChannel3Button = Config.GetControlConfig("AUDIO_CHANNEL_3") == -1
-								  ? DEFAULT_AUDIO_CHANNEL_3_BUTTON
-								  : ConvertJsKeyCodeToSfml(Config.GetControlConfig("AUDIO_CHANNEL_3"));
+		audioChannel3Button = ConvertStringToSfmlKey(Config.GetControlConfig("AUDIO_CHANNEL_3"));
+		if (audioChannel3Button == Keyboard.Key.Unknown) audioChannel3Button = DEFAULT_AUDIO_CHANNEL_3_BUTTON;
 
-		audioChannel4Button = Config.GetControlConfig("AUDIO_CHANNEL_4") == -1
-								  ? DEFAULT_AUDIO_CHANNEL_4_BUTTON
-								  : ConvertJsKeyCodeToSfml(Config.GetControlConfig("AUDIO_CHANNEL_4"));
+		audioChannel4Button = ConvertStringToSfmlKey(Config.GetControlConfig("AUDIO_CHANNEL_4"));
+		if (audioChannel4Button == Keyboard.Key.Unknown) audioChannel4Button = DEFAULT_AUDIO_CHANNEL_4_BUTTON;
 	}
 
 	private static void InitialiseColors()
@@ -198,59 +182,70 @@ public class InputOutput
 						 : new Color((uint)((Config.GetColorConfig("WHITE") << 8) | 0xFF));
 	}
 
-	private static Keyboard.Key ConvertJsKeyCodeToSfml(int keyCode)
+	private static Keyboard.Key ConvertStringToSfmlKey(string keyString)
 	{
-		if (Memory.IsInRange(keyCode, 65, 90))
+		if (keyString.Length == 1)
 		{
-			//A-Z
-			return (Keyboard.Key)(keyCode - 65);
+			if (Memory.IsInRange(keyString[0], 'A', 'Z'))
+				return keyString[0] - 'A' + Keyboard.Key.A;
+
+			if (Memory.IsInRange(keyString[0], '0', '9'))
+				return keyString[0] - '0' + Keyboard.Key.Num0;
+		}
+		else
+		{
+			return keyString switch
+			{
+				"ESC"            => Keyboard.Key.Escape,
+				"LCTRL"          => Keyboard.Key.LControl,
+				"LSHIFT"         => Keyboard.Key.LShift,
+				"LALT"           => Keyboard.Key.LAlt,
+				"SPACE"          => Keyboard.Key.Space,
+				"ENTER"          => Keyboard.Key.Enter,
+				"BACKSPACE"      => Keyboard.Key.Backspace,
+				"TAB"            => Keyboard.Key.Tab,
+				"PAGEUP"         => Keyboard.Key.PageUp,
+				"PAGEDOWN"       => Keyboard.Key.PageDown,
+				"END"            => Keyboard.Key.End,
+				"HOME"           => Keyboard.Key.Home,
+				"INSERT"         => Keyboard.Key.Insert,
+				"DELETE"         => Keyboard.Key.Delete,
+				"NUMPADADD"      => Keyboard.Key.Add,
+				"NUMPADSUBTRACT" => Keyboard.Key.Subtract,
+				"NUMPADMULTIPLY" => Keyboard.Key.Multiply,
+				"NUMPADDIVIDE"   => Keyboard.Key.Divide,
+				"PAUSE"          => Keyboard.Key.Pause,
+				"LEFTARROW"      => Keyboard.Key.Left,
+				"UPARROW"        => Keyboard.Key.Up,
+				"RIGHTARROW"     => Keyboard.Key.Right,
+				"DOWNARROW"      => Keyboard.Key.Down,
+				"NUMPAD0"        => Keyboard.Key.Numpad0,
+				"NUMPAD1"        => Keyboard.Key.Numpad1,
+				"NUMPAD2"        => Keyboard.Key.Numpad2,
+				"NUMPAD3"        => Keyboard.Key.Numpad3,
+				"NUMPAD4"        => Keyboard.Key.Numpad4,
+				"NUMPAD5"        => Keyboard.Key.Numpad5,
+				"NUMPAD6"        => Keyboard.Key.Numpad6,
+				"NUMPAD7"        => Keyboard.Key.Numpad7,
+				"NUMPAD8"        => Keyboard.Key.Numpad8,
+				"NUMPAD9"        => Keyboard.Key.Numpad9,
+				"F1"             => Keyboard.Key.F1,
+				"F2"             => Keyboard.Key.F2,
+				"F3"             => Keyboard.Key.F3,
+				"F4"             => Keyboard.Key.F4,
+				"F5"             => Keyboard.Key.F5,
+				"F6"             => Keyboard.Key.F6,
+				"F7"             => Keyboard.Key.F7,
+				"F8"             => Keyboard.Key.F8,
+				"F9"             => Keyboard.Key.F9,
+				"F10"            => Keyboard.Key.F10,
+				"F11"            => Keyboard.Key.F11,
+				"F12"            => Keyboard.Key.F12,
+				_                => Keyboard.Key.Unknown
+			};
 		}
 
-		if (Memory.IsInRange(keyCode, 48, 57))
-		{
-			//0-9
-			return (Keyboard.Key)(keyCode - 22);
-		}
-
-		if (Memory.IsInRange(keyCode, 96, 105))
-		{
-			//Numpad0-Numpad9
-			return (Keyboard.Key)(keyCode - 21);
-		}
-
-		if (Memory.IsInRange(keyCode, 112, 123))
-		{
-			//F1-F12
-			return (Keyboard.Key)(keyCode - 27);
-		}
-
-		return keyCode switch
-		{
-			27  => Keyboard.Key.Escape,
-			17  => Keyboard.Key.LControl,
-			16  => Keyboard.Key.LShift,
-			18  => Keyboard.Key.LAlt,
-			32  => Keyboard.Key.Space,
-			13  => Keyboard.Key.Enter,
-			8   => Keyboard.Key.Backspace,
-			9   => Keyboard.Key.Tab,
-			33  => Keyboard.Key.PageUp,
-			34  => Keyboard.Key.PageDown,
-			35  => Keyboard.Key.End,
-			36  => Keyboard.Key.Home,
-			45  => Keyboard.Key.Insert,
-			46  => Keyboard.Key.Delete,
-			107 => Keyboard.Key.Add,
-			109 => Keyboard.Key.Subtract,
-			106 => Keyboard.Key.Multiply,
-			111 => Keyboard.Key.Divide,
-			19  => Keyboard.Key.Pause,
-			37  => Keyboard.Key.Left,
-			38  => Keyboard.Key.Up,
-			39  => Keyboard.Key.Right,
-			40  => Keyboard.Key.Down,
-			_   => throw new ArgumentException($"Unsupported key code '{keyCode}'")
-		};
+		return Keyboard.Key.Unknown;
 	}
 
 	public void Update()

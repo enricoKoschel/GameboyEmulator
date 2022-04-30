@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using IniParser;
 
 namespace GameboyEmulator;
@@ -18,41 +19,9 @@ public static class Config
 		CONFIG_DATA = new IniDataParser().Parse(File.ReadAllText(CONFIG_FILE_PATH));
 	}
 
-	public static int GetControlConfig(string key)
+	public static string GetControlConfig(string key)
 	{
-		string value = CONFIG_DATA["Controls"][key];
-
-		bool validInt = Int32.TryParse(value, out int output);
-
-		//Ensure a valid key was provided by the ini file
-		if (validInt && (Memory.IsInRange(output, 65, 90)   //A-Z
-					  || Memory.IsInRange(output, 48, 57)   //0-9
-					  || Memory.IsInRange(output, 37, 40)   //Arrow keys
-					  || Memory.IsInRange(output, 96, 105)  //Numpad0-Numpad9
-					  || Memory.IsInRange(output, 112, 123) //F1-F12
-					  || output
-							 is 27  //Esc
-							 or 17  //Ctrl
-							 or 16  //Shift
-							 or 18  //Alt
-							 or 32  //Space
-							 or 13  //Enter
-							 or 8   //Backspace
-							 or 9   //Tab
-							 or 33  //PageUp
-							 or 34  //PageDown
-							 or 35  //End
-							 or 36  //Home
-							 or 45  //Insert
-							 or 46  //Delete
-							 or 107 //NumpadAdd
-							 or 109 //NumpadSubtract
-							 or 106 //NumpadMultiply
-							 or 111 //NumpadDivide
-							 or 19  //Pause
-						)) return output;
-
-		return -1;
+		return CONFIG_DATA["Controls"][key].ToUpper();
 	}
 
 	public static int GetColorConfig(string color)
@@ -102,44 +71,43 @@ public static class Config
 	private static void CreateDefaultConfigFile()
 	{
 		const string defaultConfig = @"[Controls]
-;Uses JavaScript Keycodes (https://keycode.info)
 ;Supported Keys are:
 ;A-Z, 0-9, Esc, LCtrl, LShift, LAlt, Space, Enter, Backspace,
 ;Tab, PageUp, PageDown, End, Home, Insert, Delete,  NumpadAdd, NumpadSubtract, NumpadMultiply,
-;NumDivide, Arrow keys, Numpad0-Numpad9, F1-F12, Pause
+;NumpadDivide, Arrow keys, Numpad0-Numpad9, F1-F12, Pause
 
 ;Default:
-;UP = 38 (Up arrow)
-;DOWN = 40 (Down arrow)
-;LEFT = 37 (Left arrow)
-;RIGHT = 39 (Right arrow)
-;START = 13 (Enter)
-;SELECT = 32 (Space)
-;A = 83 (S key)
-;B = 65 (A key)
-;SPEED = 16 (Shift)
-;PAUSE = 17 (LCtrl)
-;RESET = 27 (Esc)
-;AUDIO_CHANNEL_1 = 116 (F5)
-;AUDIO_CHANNEL_2 = 117 (F6)
-;AUDIO_CHANNEL_3 = 118 (F7)
-;AUDIO_CHANNEL_4 = 119 (F8)
+;UP = UpArrow
+;DOWN = DownArrow
+;LEFT = LeftArrow
+;RIGHT = RightArrow
+;START = Enter
+;SELECT = Space
+;A = S
+;B = A
+;SPEED = Shift
+;PAUSE = LCtrl
+;RESET = Esc
+;AUDIO_CHANNEL_1 = F5
+;AUDIO_CHANNEL_2 = F6
+;AUDIO_CHANNEL_3 = F7
+;AUDIO_CHANNEL_4 = F8
 
-UP = 38
-DOWN = 40
-LEFT = 37
-RIGHT = 39
-START = 13
-SELECT = 32
-A = 83
-B = 65
-SPEED = 16
-PAUSE = 17
-RESET = 27
-AUDIO_CHANNEL_1 = 116
-AUDIO_CHANNEL_2 = 117
-AUDIO_CHANNEL_3 = 118
-AUDIO_CHANNEL_4 = 119
+UP = UpArrow
+DOWN = DownArrow
+LEFT = LeftArrow
+RIGHT = RightArrow
+START = Enter
+SELECT = Space
+A = S
+B = A
+SPEED = Shift
+PAUSE = LCtrl
+RESET = Esc
+AUDIO_CHANNEL_1 = F5
+AUDIO_CHANNEL_2 = F6
+AUDIO_CHANNEL_3 = F7
+AUDIO_CHANNEL_4 = F8
 
 [Colors]
 ;Uses HEX color values WITHOUT the leading # (123456)
