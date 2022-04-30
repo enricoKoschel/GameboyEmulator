@@ -163,6 +163,7 @@ WHITE = e0f8d0
 ;Default:
 ;ENABLE=TRUE
 ;LOCATION=./saves/
+
 ENABLE=true
 LOCATION=./saves/
 
@@ -173,6 +174,7 @@ LOCATION=./saves/
 ;Default:
 ;ENABLE=true
 ;LOCATION=./logs/
+
 ENABLE=true
 LOCATION=./logs/
 
@@ -182,6 +184,7 @@ LOCATION=./logs/
 ;Default:
 ;GAME =
 ;BOOT =
+
 GAME =
 BOOT =";
 

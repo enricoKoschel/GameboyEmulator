@@ -20,6 +20,9 @@
 - MBC
   - Refactor to use inheritance/polymorphism
   - Implement other memory bank controllers
+- Config
+  - Add audio master and channel enable to config file
+  - Change keymap to use key strings instead of key codes
 - CPU
   - Implement STOP opcode
   - Refactor opcode switch statements to make them shorter
