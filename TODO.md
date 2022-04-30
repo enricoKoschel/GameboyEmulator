@@ -5,6 +5,7 @@
   - Fix bug where sample buffer is empty and audio lags a bit
   - Implement channel 4
   - Implement obscure behaviour/hardware bugs for all channels
+  - Implement VIn (Audio from cartridge)
 - PPU
   - Draw previous frame with 50% opacity on top of current frame
   - Implement video output with SFML textures

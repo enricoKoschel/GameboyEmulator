@@ -1,4 +1,9 @@
-﻿namespace GameboyEmulator;
+﻿// ReSharper disable UnusedMember.Local
+// ReSharper disable AutoPropertyCanBeMadeGetOnly.Local
+// ReSharper disable UnusedMember.Global
+// TODO enable unused warnings again when channel 4 is implemented
+
+namespace GameboyEmulator;
 
 public class ApuChannel4 : ApuChannel
 {

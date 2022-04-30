@@ -7,9 +7,6 @@ public class Apu
 	//NR50
 	public byte ChannelControlRegister { get; set; }
 
-	private bool VinLeftEnabled  => Cpu.GetBit(ChannelControlRegister, 7);
-	private bool VinRightEnabled => Cpu.GetBit(ChannelControlRegister, 3);
-
 	public byte LeftChannelVolume  => (byte)((ChannelControlRegister & 0b0111_0000) >> 4);
 	public byte RightChannelVolume => (byte)(ChannelControlRegister & 0b0000_0111);
 

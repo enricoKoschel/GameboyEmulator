@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading;
 using SFML.Audio;
 using SFML.System;
@@ -10,12 +9,10 @@ public abstract class ApuChannel : SoundStream
 {
 	private readonly List<short> sampleBuffer;
 	private readonly int         bufferSize;
-	private          int         sampleRate;
 	private readonly Mutex       mutex;
 
 	protected ApuChannel(int sampleRate, int bufferSize)
 	{
-		this.sampleRate = sampleRate;
 		this.bufferSize = bufferSize * 2;
 
 		sampleBuffer = new List<short>(bufferSize * 2);
