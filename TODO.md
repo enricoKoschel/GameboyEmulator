@@ -1,11 +1,11 @@
 # TODO
 
 - APU
-  - Combine all audio channels into one buffer to avoid them getting out of sync
-  - Fix bug where sample buffer is empty and audio lags a bit
+  - Fix sample buffer sometimes being empty and causing audio to lag
   - Implement channel 4
   - Implement obscure behaviour/hardware bugs for all channels
   - Implement VIn (Audio from cartridge)
+  - Play sound with adjusted speed when speed changes by changing what gets written into the sample list
 - PPU
   - Draw previous frame with 50% opacity on top of current frame
   - Implement video output with SFML textures

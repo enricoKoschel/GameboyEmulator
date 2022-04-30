@@ -1,6 +1,6 @@
 ﻿namespace GameboyEmulator;
 
-public class ApuChannel2 : ApuChannel
+public class ApuChannel2
 {
 	private byte internalSoundLengthWavePatternRegister;
 
@@ -67,7 +67,7 @@ public class ApuChannel2 : ApuChannel
 
 	private readonly Apu apu;
 
-	public ApuChannel2(Apu apu, int sampleRate, int bufferSize) : base(sampleRate, bufferSize)
+	public ApuChannel2(Apu apu)
 	{
 		this.apu = apu;
 	}
@@ -186,7 +186,7 @@ public class ApuChannel2 : ApuChannel
 		if (newVolume is >= 0 and < 16) currentEnvelopeVolume = newVolume;
 	}
 
-	protected override short GetCurrentAmplitudeLeft()
+	public short GetCurrentAmplitudeLeft()
 	{
 		if (!apu.Enabled || !LeftEnabled) return 0;
 
@@ -195,7 +195,7 @@ public class ApuChannel2 : ApuChannel
 		return (short)(Apu.WAVE_DUTY_TABLE[WavePatternDuty, waveDutyPosition] * volume);
 	}
 
-	protected override short GetCurrentAmplitudeRight()
+	public short GetCurrentAmplitudeRight()
 	{
 		if (!apu.Enabled || !RightEnabled) return 0;
 

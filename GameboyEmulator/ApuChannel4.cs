@@ -5,7 +5,7 @@
 
 namespace GameboyEmulator;
 
-public class ApuChannel4 : ApuChannel
+public class ApuChannel4
 {
 	private byte internalSoundLengthRegister;
 
@@ -52,7 +52,7 @@ public class ApuChannel4 : ApuChannel
 
 	private readonly Apu apu;
 
-	public ApuChannel4(Apu apu, int sampleRate, int bufferSize) : base(sampleRate, bufferSize)
+	public ApuChannel4(Apu apu)
 	{
 		this.apu = apu;
 	}
@@ -65,12 +65,12 @@ public class ApuChannel4 : ApuChannel
 	{
 	}
 
-	protected override short GetCurrentAmplitudeLeft()
+	public short GetCurrentAmplitudeLeft()
 	{
 		return 0;
 	}
 
-	protected override short GetCurrentAmplitudeRight()
+	public short GetCurrentAmplitudeRight()
 	{
 		return 0;
 	}

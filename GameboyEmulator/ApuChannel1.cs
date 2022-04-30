@@ -1,6 +1,6 @@
 ﻿namespace GameboyEmulator;
 
-public class ApuChannel1 : ApuChannel
+public class ApuChannel1
 {
 	private byte internalFrequencySweepRegister;
 
@@ -94,7 +94,7 @@ public class ApuChannel1 : ApuChannel
 
 	private readonly Apu apu;
 
-	public ApuChannel1(Apu apu, int sampleRate, int bufferSize) : base(sampleRate, bufferSize)
+	public ApuChannel1(Apu apu)
 	{
 		this.apu = apu;
 	}
@@ -262,7 +262,7 @@ public class ApuChannel1 : ApuChannel
 		return newFrequency;
 	}
 
-	protected override short GetCurrentAmplitudeLeft()
+	public short GetCurrentAmplitudeLeft()
 	{
 		if (!apu.Enabled || !LeftEnabled) return 0;
 
@@ -271,7 +271,7 @@ public class ApuChannel1 : ApuChannel
 		return (short)(Apu.WAVE_DUTY_TABLE[WavePatternDuty, waveDutyPosition] * volume);
 	}
 
-	protected override short GetCurrentAmplitudeRight()
+	public short GetCurrentAmplitudeRight()
 	{
 		if (!apu.Enabled || !RightEnabled) return 0;
 

@@ -1,9 +1,14 @@
-﻿namespace GameboyEmulator;
+﻿using System;
+using System.Collections.Generic;
+using System.Threading;
+using SFML.Audio;
+using SFML.System;
 
-public class Apu
+namespace GameboyEmulator;
+
+public class Apu : SoundStream
 {
 	//Controls registers
-
 	//NR50
 	public byte ChannelControlRegister { get; set; }
 
@@ -45,6 +50,7 @@ public class Apu
 
 	private const int SAMPLE_RATE        = 48000;
 	private const int SAMPLE_BUFFER_SIZE = SAMPLE_RATE / 10;
+	private const int CHANNEL_COUNT      = 2;
 
 	public const int VOLUME_MULTIPLIER = 50;
 
@@ -57,14 +63,23 @@ public class Apu
 	public readonly ApuChannel3 channel3;
 	public readonly ApuChannel4 channel4;
 
+	private readonly List<short> sampleBuffer;
+	private readonly Mutex       sampleBufferMutex;
+
 	public Apu(Emulator emulator)
 	{
 		this.emulator = emulator;
 
-		channel1 = new ApuChannel1(this, SAMPLE_RATE, SAMPLE_BUFFER_SIZE);
-		channel2 = new ApuChannel2(this, SAMPLE_RATE, SAMPLE_BUFFER_SIZE);
-		channel3 = new ApuChannel3(this, SAMPLE_RATE, SAMPLE_BUFFER_SIZE);
-		channel4 = new ApuChannel4(this, SAMPLE_RATE, SAMPLE_BUFFER_SIZE);
+		channel1 = new ApuChannel1(this);
+		channel2 = new ApuChannel2(this);
+		channel3 = new ApuChannel3(this);
+		channel4 = new ApuChannel4(this);
+
+		sampleBuffer      = new List<short>(SAMPLE_BUFFER_SIZE * CHANNEL_COUNT);
+		sampleBufferMutex = new Mutex();
+
+		Initialize(CHANNEL_COUNT, SAMPLE_RATE);
+		Play();
 	}
 
 	public void Update(int cycles)
@@ -97,13 +112,61 @@ public class Apu
 
 		internalMainApuCounter -= Emulator.GAMEBOY_CLOCK_SPEED;
 
-		//TODO Play sound with adjusted sample rate when speed changes by changing what gets written into the sample list
+		//If samples are collected when the emulator is running too fast, the sound will be delayed and practically unusable
 		if (emulator.CurrentSpeed >= 105) return;
 
-		if (Channel1Enabled) channel1.CollectSample();
-		if (Channel2Enabled) channel2.CollectSample();
-		if (Channel3Enabled) channel3.CollectSample();
-		if (Channel4Enabled) channel4.CollectSample();
+		short leftSample  = 0;
+		short rightSample = 0;
+
+		if (Channel1Enabled)
+		{
+			leftSample  += channel1.GetCurrentAmplitudeLeft();
+			rightSample += channel1.GetCurrentAmplitudeRight();
+		}
+
+		if (Channel2Enabled)
+		{
+			leftSample  += channel2.GetCurrentAmplitudeLeft();
+			rightSample += channel2.GetCurrentAmplitudeRight();
+		}
+
+		if (Channel3Enabled)
+		{
+			leftSample  += channel3.GetCurrentAmplitudeLeft();
+			rightSample += channel3.GetCurrentAmplitudeRight();
+		}
+
+		if (Channel4Enabled)
+		{
+			leftSample  += channel4.GetCurrentAmplitudeLeft();
+			rightSample += channel4.GetCurrentAmplitudeRight();
+		}
+
+		sampleBufferMutex.WaitOne();
+		sampleBuffer.Add(leftSample);
+		sampleBuffer.Add(rightSample);
+		sampleBufferMutex.ReleaseMutex();
+	}
+
+	protected override bool OnGetData(out short[] samples)
+	{
+		//Console.WriteLine(sampleBuffer.Count);
+
+		while (sampleBuffer.Count < SAMPLE_BUFFER_SIZE) Thread.Sleep(1);
+
+		sampleBufferMutex.WaitOne();
+
+		samples = sampleBuffer.ToArray();
+		sampleBuffer.Clear();
+
+		sampleBufferMutex.ReleaseMutex();
+
+		return true;
+	}
+
+	protected override void OnSeek(Time timeOffset)
+	{
+		//Function is unused
 	}
 
 	private void Reset()

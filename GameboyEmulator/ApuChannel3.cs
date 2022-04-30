@@ -2,7 +2,7 @@
 
 namespace GameboyEmulator;
 
-public class ApuChannel3 : ApuChannel
+public class ApuChannel3
 {
 	private bool internalSoundOnOffRegister;
 
@@ -89,7 +89,7 @@ public class ApuChannel3 : ApuChannel
 
 	private readonly byte[] waveRam;
 
-	public ApuChannel3(Apu apu, int sampleRate, int bufferSize) : base(sampleRate, bufferSize)
+	public ApuChannel3(Apu apu)
 	{
 		this.apu = apu;
 
@@ -203,7 +203,7 @@ public class ApuChannel3 : ApuChannel
 		waveRam[index] = data;
 	}
 
-	protected override short GetCurrentAmplitudeLeft()
+	public short GetCurrentAmplitudeLeft()
 	{
 		if (!apu.Enabled || !LeftEnabled) return 0;
 
@@ -212,7 +212,7 @@ public class ApuChannel3 : ApuChannel
 		return (short)((GetWaveRamSample(waveRamPosition) >> CurrentVolumeShiftAmount) * volume);
 	}
 
-	protected override short GetCurrentAmplitudeRight()
+	public short GetCurrentAmplitudeRight()
 	{
 		if (!apu.Enabled || !RightEnabled) return 0;
 
