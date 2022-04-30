@@ -15,11 +15,15 @@
   - Implement save states/rewind
   - Controller support
   - Scale window according to screen size
+- Logger
+  - Implement full logging of all opcodes, modules, etc. with configurable log levels
 - MBC
   - Refactor to use inheritance/polymorphism
   - Implement other memory bank controllers
 - CPU
   - Implement STOP opcode
+  - Refactor opcode switch statements to make them shorter
+  - Maybe implement different opcode structure from branch "opcodeStructureExperiment"
 - Fix game specific bugs
   - Buggy games
     - mario.gb (coin collect sound doesnt stop when the next one starts)
