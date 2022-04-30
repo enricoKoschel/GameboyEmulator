@@ -1,23 +1,29 @@
 # TODO
 
-- Combine all audio channels into one buffer to avoid them getting out of sync
-- Add inheritance/polymorphism to MBC
-- Draw previous frame with 50% opacity on top of current frame
-- Implement PPU output with SFML textures
-- Fix bug where sample buffer is empty and audio lags a bit
-- Implement APU channel 4
-- Implement obscure behaviour/hardware bugs for all APU channels
-- Implement all checks at startup (checksums, logo, etc.)
-- Implement better waiting at the end of a frame (Thread.Sleep() + correcting)
-- Add the ability to resize the window (change scale)
-- Implement other memory bank controllers
-- Implement STOP opcode
-- Implement GUI
-- Implement save states/rewind
-- Controller support
-- Buggy games
-  - mario.gb (coin collect sound doesnt stop when the next one starts)
-- Broken games
-  - donkeykong.gb (glitchy screen at the beginning and locks up after 2 levels)
-  - frogger.gb (pretty much unplayable, some sprites missing/corrupted)
-  - pokemonred.gb (no mbc3 support yet)
+- APU
+  - Combine all audio channels into one buffer to avoid them getting out of sync
+  - Fix bug where sample buffer is empty and audio lags a bit
+  - Implement channel 4
+  - Implement obscure behaviour/hardware bugs for all channels
+- PPU
+  - Draw previous frame with 50% opacity on top of current frame
+  - Implement video output with SFML textures
+- Core
+  - Implement all checks at startup (checksums, logo, etc.)
+  - Implement better waiting at the end of a frame (Thread.Sleep() + correcting)
+  - Add the ability to resize the window (change scale)
+  - Implement GUI
+  - Implement save states/rewind
+  - Controller support
+- MBC
+  - Refactor to use inheritance/polymorphism
+  - Implement other memory bank controllers
+- CPU
+  - Implement STOP opcode
+- Fix game specific bugs
+  - Buggy games
+    - mario.gb (coin collect sound doesnt stop when the next one starts)
+  - Broken games
+    - donkeykong.gb (glitchy screen at the beginning and locks up after 2 levels)
+    - frogger.gb (pretty much unplayable, some sprites missing/corrupted)
+    - pokemonred.gb (no mbc3 support yet)
