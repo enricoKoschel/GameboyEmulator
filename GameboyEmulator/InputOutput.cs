@@ -383,11 +383,6 @@ public class InputOutput
 		window.Display();
 	}
 
-	public void ClearFrame(Ppu.Color color)
-	{
-		for (int i = 0; i < NUMBER_OF_VERTICES; i++) vertexArray[i].Color = ConvertGameboyToSfmlColor(color);
-	}
-
 	private static Color ConvertGameboyToSfmlColor(Ppu.Color color)
 	{
 		return color switch
