@@ -92,11 +92,11 @@ public class MemoryBankController
 
 	private byte CurrentRomBank
 	{
-		get => (byte)(((currentRomBankUpper & 0b00000011) << 5) | (currentRomBankLower & 0b00011111));
+		get => (byte)(((currentRomBankUpper & 0b0000_0011) << 5) | (currentRomBankLower & 0b0001_1111));
 		set
 		{
-			currentRomBankLower = (byte)(value & 0b00011111);
-			currentRomBankUpper = (byte)((value & 0b01100000) >> 5);
+			currentRomBankLower = (byte)(value & 0b0001_1111);
+			currentRomBankUpper = (byte)((value & 0b0110_0000) >> 5);
 		}
 	}
 
@@ -204,16 +204,16 @@ public class MemoryBankController
 		else if (Memory.IsInRange(address, 0x2000, 0x3FFF))
 		{
 			//Set the lower 5 bits of current rom bank number
-			currentRomBankLower = (byte)(data & 0b00011111);
+			currentRomBankLower = (byte)(data & 0b0001_1111);
 		}
 		else if (Memory.IsInRange(address, 0x4000, 0x5FFF))
 		{
 			//Set bits 5 and 6 of current rom bank number if enough banks are available
-			if (numberOfRomBanks >= 64) currentRomBankUpper = (byte)(data & 0b00000011);
+			if (numberOfRomBanks >= 64) currentRomBankUpper = (byte)(data & 0b0000_0011);
 
 			//Set current ram bank number if enough banks are available
 			if (currentMemoryBankingMode == MemoryBankingMode.AdvancedRomOrRamBanking && NumberOfRamBanks >= 4)
-				currentRamBank = (byte)(data & 0b00000011);
+				currentRamBank = (byte)(data & 0b0000_0011);
 		}
 		else if (Memory.IsInRange(address, 0x6000, 0x7FFF))
 		{
@@ -251,7 +251,7 @@ public class MemoryBankController
 
 				if (currentMemoryBankingMode == MemoryBankingMode.AdvancedRomOrRamBanking)
 				{
-					if (address < 0x4000) return (uint)(address + (currentActualRomBank & 0b01100000) * 0x4000);
+					if (address < 0x4000) return (uint)(address + (currentActualRomBank & 0b0110_0000) * 0x4000);
 
 					return (uint)(address + (currentActualRomBank - 1) * 0x4000);
 				}

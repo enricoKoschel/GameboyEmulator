@@ -1,169 +1,180 @@
-﻿namespace GameboyEmulator;
+﻿using System;
+using System.Collections.Generic;
+using System.Threading;
+using SFML.Audio;
+using SFML.System;
 
-public class Apu
+namespace GameboyEmulator;
+
+public class Apu : SoundStream
 {
-	//Channel 1 registers
-	private byte internalChannel1SweepRegister;
-
-	public byte Channel1SweepRegister
-	{
-		get => (byte)(internalChannel1SweepRegister & 0b01111111);
-		set => internalChannel1SweepRegister = (byte)(value & 0b01111111);
-	}
-
-	public byte Channel1SoundLengthWavePatternRegister { get; set; }
-	public byte Channel1VolumeEnvelopeRegister         { get; set; }
-	public byte Channel1FrequencyRegisterLo            { get; set; }
-
-	private byte internalChannel1FrequencyRegisterHi;
-
-	public byte Channel1FrequencyRegisterHi
-	{
-		get => (byte)(internalChannel1FrequencyRegisterHi & 0b11000111);
-		set => internalChannel1FrequencyRegisterHi = (byte)(value & 0b11000111);
-	}
-
-	//Only the lower 3 bits of Channel1FrequencyRegisterHi are used
-	public ushort Channel1FrequencyRegister =>
-		(ushort)(Cpu.MakeWord(Channel1FrequencyRegisterHi, Channel1FrequencyRegisterLo) & 0x7FF);
-
-	//Channel 2 registers
-	public byte Channel2SoundLengthWavePatternRegister { get; set; }
-	public byte Channel2VolumeEnvelopeRegister         { get; set; }
-	public byte Channel2FrequencyRegisterLo            { get; set; }
-
-	private byte internalChannel2FrequencyRegisterHi;
-
-	public byte Channel2FrequencyRegisterHi
-	{
-		get => (byte)(internalChannel2FrequencyRegisterHi & 0b11000111);
-		set => internalChannel2FrequencyRegisterHi = (byte)(value & 0b11000111);
-	}
-
-	//Only the lower 3 bits of Channel2FrequencyRegisterHi are used
-	public ushort Channel2FrequencyRegister =>
-		(ushort)(Cpu.MakeWord(Channel2FrequencyRegisterHi, Channel2FrequencyRegisterLo) & 0x7FF);
-
-	//Channel 3 registers
-	private bool internalChannel3SoundOnOffRegister;
-
-	public byte Channel3SoundOnOffRegister
-	{
-		get => (byte)((internalChannel3SoundOnOffRegister ? 1 : 0) << 7);
-		set => internalChannel3SoundOnOffRegister = (value & 0b10000000) != 0;
-	}
-
-	public byte Channel3SoundLengthRegister { get; set; }
-
-	private byte internalChannel3SelectOutputLevelRegister;
-
-	public byte Channel3SelectOutputLevelRegister
-	{
-		get => (byte)(internalChannel3SelectOutputLevelRegister & 0b01100000);
-		set => internalChannel3SelectOutputLevelRegister = (byte)(value & 0b01100000);
-	}
-
-	public byte Channel3FrequencyRegisterLo { get; set; }
-
-	private byte internalChannel3FrequencyRegisterHi;
-
-	public byte Channel3FrequencyRegisterHi
-	{
-		get => (byte)(internalChannel3FrequencyRegisterHi & 0b11000111);
-		set => internalChannel3FrequencyRegisterHi = (byte)(value & 0b11000111);
-	}
-
-	//Only the lower 3 bits of Channel3FrequencyRegisterHi are used
-	public ushort Channel3FrequencyRegister =>
-		(ushort)(Cpu.MakeWord(Channel3FrequencyRegisterHi, Channel3FrequencyRegisterLo) & 0x7FF);
-
-	//Channel 4 registers
-	private byte internalChannel4SoundLengthRegister;
-
-	public byte Channel4SoundLengthRegister
-	{
-		get => (byte)(internalChannel4SoundLengthRegister & 0b00111111);
-		set => internalChannel4SoundLengthRegister = (byte)(value & 0b00111111);
-	}
-
-	public byte Channel4VolumeEnvelopeRegister    { get; set; }
-	public byte Channel4PolynomialCounterRegister { get; set; }
-
-	private byte internalChannel4CounterConsecutiveRegister;
-
-	public byte Channel4CounterConsecutiveRegister
-	{
-		get => (byte)(internalChannel4CounterConsecutiveRegister & 0b11000000);
-		set => internalChannel4CounterConsecutiveRegister = (byte)(value & 0b11000000);
-	}
-
 	//Controls registers
-	public byte ChannelControlRegister            { get; set; }
+	//NR50
+	public byte ChannelControlRegister { get; set; }
+
+	public byte LeftChannelVolume  => (byte)((ChannelControlRegister & 0b0111_0000) >> 4);
+	public byte RightChannelVolume => (byte)(ChannelControlRegister & 0b0000_0111);
+
+	//NR51
 	public byte SoundOutputTerminalSelectRegister { get; set; }
 
-	private byte internalSoundOnOffRegister;
+	public bool Channel1Enabled { get; set; } = true;
+	public bool Channel2Enabled { get; set; } = true;
+	public bool Channel3Enabled { get; set; } = true;
+	public bool Channel4Enabled { get; set; }
 
+	//NR52
 	public byte SoundOnOffRegister
 	{
-		get => (byte)(internalSoundOnOffRegister & 0b10001111);
-		set => internalSoundOnOffRegister = (byte)(value & 0b10000000);
+		get => Cpu.MakeByte(
+			Enabled, true, true, true, channel4.Playing, channel3.Playing, channel2.Playing, channel1.Playing
+		);
+		set => Enabled = (value & 0b1000_0000) != 0;
 	}
 
-	private readonly byte[] wavePatternRam;
+	public bool Enabled { get; private set; }
 
-	private const int SAMPLE_RATE = 44100;
-
-	private int internalApuCounter;
-
-	public Apu()
+	/*
+		00 - 12.5% (_-------_-------_-------)
+		01 - 25%   (__------__------__------)
+		10 - 50%   (____----____----____----)
+		11 - 75%   (______--______--______--)
+	*/
+	public static readonly byte[,] WAVE_DUTY_TABLE =
 	{
-		wavePatternRam = new byte[0x10];
+		{ 0, 1, 1, 1, 1, 1, 1, 1 },
+		{ 0, 0, 1, 1, 1, 1, 1, 1 },
+		{ 0, 0, 0, 0, 1, 1, 1, 1 },
+		{ 0, 0, 0, 0, 0, 0, 1, 1 }
+	};
+
+	private const int SAMPLE_RATE        = 48000;
+	private const int SAMPLE_BUFFER_SIZE = SAMPLE_RATE / 10;
+	private const int CHANNEL_COUNT      = 2;
+
+	public const int VOLUME_MULTIPLIER = 50;
+
+	private int internalMainApuCounter;
+
+	private readonly Emulator emulator;
+
+	public readonly ApuChannel1 channel1;
+	public readonly ApuChannel2 channel2;
+	public readonly ApuChannel3 channel3;
+	public readonly ApuChannel4 channel4;
+
+	private readonly List<short> sampleBuffer;
+	private readonly Mutex       sampleBufferMutex;
+
+	public Apu(Emulator emulator)
+	{
+		this.emulator = emulator;
+
+		channel1 = new ApuChannel1(this);
+		channel2 = new ApuChannel2(this);
+		channel3 = new ApuChannel3(this);
+		channel4 = new ApuChannel4(this);
+
+		sampleBuffer      = new List<short>(SAMPLE_BUFFER_SIZE * CHANNEL_COUNT);
+		sampleBufferMutex = new Mutex();
+
+		Initialize(CHANNEL_COUNT, SAMPLE_RATE);
+		Play();
 	}
 
 	public void Update(int cycles)
 	{
-		UpdateChannel1();
-		UpdateChannel2();
-		UpdateChannel3();
-		UpdateChannel4();
-
-		internalApuCounter += SAMPLE_RATE * cycles;
-
-		if (internalApuCounter >= Emulator.GAMEBOY_CLOCK_SPEED)
+		if (!Enabled)
 		{
-			internalApuCounter -= Emulator.GAMEBOY_CLOCK_SPEED;
+			Reset();
+			channel1.Reset();
+			channel2.Reset();
+			channel3.Reset();
+			channel4.Reset();
 
-			//TODO Save current state of APU as sample
+			//Update is still required, because the internal frame sequencer still ticks when the apu is disabled
+			channel1.Update(cycles);
+			channel2.Update(cycles);
+			channel3.Update(cycles);
+			channel4.Update(cycles);
+
+			return;
 		}
+
+		channel1.Update(cycles);
+		channel2.Update(cycles);
+		channel3.Update(cycles);
+		channel4.Update(cycles);
+
+		internalMainApuCounter += SAMPLE_RATE * cycles;
+
+		if (internalMainApuCounter < Emulator.GAMEBOY_CLOCK_SPEED) return;
+
+		internalMainApuCounter -= Emulator.GAMEBOY_CLOCK_SPEED;
+
+		//If samples are collected when the emulator is running too fast, the sound will be delayed and practically unusable
+		if (emulator.CurrentSpeed >= 105) return;
+
+		short leftSample  = 0;
+		short rightSample = 0;
+
+		if (Channel1Enabled)
+		{
+			leftSample  += channel1.GetCurrentAmplitudeLeft();
+			rightSample += channel1.GetCurrentAmplitudeRight();
+		}
+
+		if (Channel2Enabled)
+		{
+			leftSample  += channel2.GetCurrentAmplitudeLeft();
+			rightSample += channel2.GetCurrentAmplitudeRight();
+		}
+
+		if (Channel3Enabled)
+		{
+			leftSample  += channel3.GetCurrentAmplitudeLeft();
+			rightSample += channel3.GetCurrentAmplitudeRight();
+		}
+
+		if (Channel4Enabled)
+		{
+			leftSample  += channel4.GetCurrentAmplitudeLeft();
+			rightSample += channel4.GetCurrentAmplitudeRight();
+		}
+
+		sampleBufferMutex.WaitOne();
+		sampleBuffer.Add(leftSample);
+		sampleBuffer.Add(rightSample);
+		sampleBufferMutex.ReleaseMutex();
 	}
 
-	private void UpdateChannel1()
+	protected override bool OnGetData(out short[] samples)
 	{
+		//Console.WriteLine(sampleBuffer.Count);
+
+		while (sampleBuffer.Count < SAMPLE_BUFFER_SIZE) Thread.Sleep(1);
+
+		sampleBufferMutex.WaitOne();
+
+		samples = sampleBuffer.ToArray();
+		sampleBuffer.Clear();
+
+		sampleBufferMutex.ReleaseMutex();
+
+		return true;
 	}
 
-	private void UpdateChannel2()
+	protected override void OnSeek(Time timeOffset)
 	{
+		//Function is unused
 	}
 
-	private void UpdateChannel3()
+	private void Reset()
 	{
-	}
+		ChannelControlRegister = 0;
 
-	private void UpdateChannel4()
-	{
-	}
+		SoundOutputTerminalSelectRegister = 0;
 
-	public byte GetWavePatternRamAtIndex(int index)
-	{
-		//TODO implement actual behaviour for CH3 enabled
-		return internalChannel3SoundOnOffRegister ? (byte)0xFF : wavePatternRam[index];
-	}
-
-	public void SetWavePatternRamAtIndex(int index, byte data)
-	{
-		//TODO implement actual behaviour for CH3 enabled
-		if (internalChannel3SoundOnOffRegister) return;
-
-		wavePatternRam[index] = data;
+		internalMainApuCounter = 0;
 	}
 }

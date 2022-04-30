@@ -87,8 +87,8 @@ public class Cpu
 	private byte FlagRegister
 	{
 		//Lower nibble of Flag Register should always be zero
-		get => (byte)(internalFlagRegister & 0b11110000);
-		set => internalFlagRegister = (byte)(value & 0b11110000);
+		get => (byte)(internalFlagRegister & 0b1111_0000);
+		set => internalFlagRegister = (byte)(value & 0b1111_0000);
 	}
 
 	private bool ZeroFlag
@@ -2163,12 +2163,26 @@ public class Cpu
 		return (ushort)((hi << 8) | lo);
 	}
 
-	private static byte GetLoByte(ushort word)
+	public static byte MakeByte(bool bit7, bool bit6, bool bit5, bool bit4, bool bit3, bool bit2, bool bit1, bool bit0)
+	{
+		int bit7B = (bit7 ? 1 : 0) << 7;
+		int bit6B = (bit6 ? 1 : 0) << 6;
+		int bit5B = (bit5 ? 1 : 0) << 5;
+		int bit4B = (bit4 ? 1 : 0) << 4;
+		int bit3B = (bit3 ? 1 : 0) << 3;
+		int bit2B = (bit2 ? 1 : 0) << 2;
+		int bit1B = (bit1 ? 1 : 0) << 1;
+		int bit0B = bit0 ? 1 : 0;
+
+		return (byte)(bit7B | bit6B | bit5B | bit4B | bit3B | bit2B | bit1B | bit0B);
+	}
+
+	public static byte GetLoByte(ushort word)
 	{
 		return (byte)(word & 0xFF);
 	}
 
-	private static byte GetHiByte(ushort word)
+	public static byte GetHiByte(ushort word)
 	{
 		return (byte)(word >> 8);
 	}
@@ -2582,9 +2596,9 @@ public class Cpu
 	{
 		int correction = 0;
 
-		if (HalfCarryFlag || !SubtractFlag && (aRegister & 0xF) > 9) correction |= 6;
+		if (HalfCarryFlag || (!SubtractFlag && (aRegister & 0xF) > 9)) correction |= 6;
 
-		if (CarryFlag || !SubtractFlag && aRegister > 0x99)
+		if (CarryFlag || (!SubtractFlag && aRegister > 0x99))
 		{
 			correction |= 0x60;
 			CarryFlag  =  true;

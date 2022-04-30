@@ -45,7 +45,7 @@ public class Ppu
 				throw new ArgumentOutOfRangeException(nameof(value), "LCD Mode cannot be larger than 3!");
 			}
 
-			LcdStatusRegister &= 0b11111100;
+			LcdStatusRegister &= 0b1111_1100;
 			LcdStatusRegister |= value;
 		}
 	}

@@ -16,14 +16,14 @@
 # Settings file
 settings.ini
 
-# Rom folder
-roms/
+# Roms folder
+[Rr]oms/
 
-#Log folder
-logs/
+# Logs folder
+[Ll]ogs/
 
-#Saves folder
-saves/
+# Saves folder
+[Ss]aves/
 
 # Build results
 [Dd]ebug/

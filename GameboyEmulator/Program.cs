@@ -13,9 +13,9 @@ static class Program
 	{
 		Logger.LogMessage("Program started", Logger.LogLevel.Info);
 
-		string gameRomFilePath = null;
-		string bootRomFilePath = null;
-		bool   shouldShowHelp  = false;
+		string? gameRomFilePath = null;
+		string? bootRomFilePath = null;
+		bool    shouldShowHelp  = false;
 
 		OptionSet options = new()
 		{

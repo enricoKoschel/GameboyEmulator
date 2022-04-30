@@ -36,8 +36,8 @@ public class Interrupts
 
 	public byte InterruptFlagRegister
 	{
-		get => (byte)(internalInterruptFlagRegister & 0b00011111);
-		set => internalInterruptFlagRegister = (byte)(value & 0b00011111);
+		get => (byte)(internalInterruptFlagRegister & 0b0001_1111);
+		set => internalInterruptFlagRegister = (byte)(value & 0b0001_1111);
 	}
 
 	private bool VBlankEnabled => Cpu.GetBit(InterruptEnableRegister, 0);

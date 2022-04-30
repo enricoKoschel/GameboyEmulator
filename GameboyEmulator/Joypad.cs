@@ -26,8 +26,8 @@ public class Joypad
 
 	public byte JoypadRegister
 	{
-		get => (byte)(internalJoypadRegister & 0b00111111);
-		set => internalJoypadRegister = (byte)(value & 0b00111111);
+		get => (byte)(internalJoypadRegister & 0b0011_1111);
+		set => internalJoypadRegister = (byte)(value & 0b0011_1111);
 	}
 
 	//Flags

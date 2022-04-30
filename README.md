@@ -1,6 +1,7 @@
 # GameboyEmulator
 
-This is a Work-In-Progress Gameboy(https://en.wikipedia.org/wiki/Game_Boy) Emulator written in C# with SFML.net.  
+This is a Work-In-Progress [Gameboy](https://en.wikipedia.org/wiki/Game_Boy) Emulator written in C#
+with [SFML.Net](https://www.sfml-dev.org/download/sfml.net/).  
 For test progress see [TESTING.md](TESTING.md).
 
 # Dependencies
@@ -27,15 +28,14 @@ You can build this repository yourself by
 
 # Run
 
-After building the repository you can run the program in 2 ways. Either you
+After building the repository you can run the program in 2 ways.  
+First you navigate to `<repository_root>/GameboyEmulator/bin/release/netcoreapp6.0`,  
+then you either execute `GameboyEmulator.exe` or you run `dotnet GameboyEmulator.dll` in the console
 
-1. Navigate to `<repository_root>/GameboyEmulator/bin/release/netcoreapp6.0`
-2. Execute `GameboyEmulator.exe` on Windows or just `GameboyEmulator` on Linux
+# Linux
 
-or you
-
-1. Navigate to `<repository_root>/GameboyEmulator/bin/release/netcoreapp6.0`
-2. Run `dotnet GameboyEmulator.dll` on Windows or ` dotnet GameboyEmulator` on Linux
+There is a compatibility issue with SFML.Net and .NET 6.0 that prevents the repository from being built on Linux. I am
+sorry for the inconvenience.
 
 # Controls
 

@@ -7,15 +7,15 @@ namespace GameboyEmulator;
 
 public class Emulator
 {
-	public readonly Cpu                  cpu;
-	public readonly Interrupts           interrupts;
-	public readonly Joypad               joypad;
-	public readonly Memory               memory;
-	public readonly MemoryBankController memoryBankController;
-	public readonly Ppu                  ppu;
-	public readonly Timer                timer;
-	public readonly InputOutput          inputOutput;
-	public readonly Apu                  apu;
+	public Cpu                  cpu;
+	public Interrupts           interrupts;
+	public Joypad               joypad;
+	public Memory               memory;
+	public MemoryBankController memoryBankController;
+	public Ppu                  ppu;
+	public Timer                timer;
+	public InputOutput          inputOutput;
+	public Apu                  apu;
 
 	public const int GAMEBOY_CLOCK_SPEED = 4194304;
 
@@ -25,6 +25,8 @@ public class Emulator
 	public  double MaxFps          { get; set; }
 	private double MinTimePerFrame => MaxFps != 0 ? 1000 / MaxFps : 0;
 
+	public int CurrentSpeed => lastSpeeds[NUMBER_OF_SPEEDS_TO_AVERAGE - 1];
+
 	private const    int   NUMBER_OF_SPEEDS_TO_AVERAGE = 60;
 	private readonly int[] lastSpeeds;
 
@@ -33,7 +35,7 @@ public class Emulator
 	public readonly string saveFilePath;
 
 	public bool IsRunning => inputOutput.WindowIsOpen;
-	public bool isPaused = false;
+	public bool isPaused;
 
 	public Emulator(string gameRomFilePath, string bootRomFilePath)
 	{
@@ -45,12 +47,12 @@ public class Emulator
 		ppu                  = new Ppu(this);
 		timer                = new Timer(this);
 		inputOutput          = new InputOutput(this);
-		apu                  = new Apu();
+		apu                  = new Apu(this);
 
 		this.gameRomFilePath = gameRomFilePath;
 		this.bootRomFilePath = bootRomFilePath;
 
-		string saveFileDirectory = Path.GetDirectoryName(Config.GetSaveLocationConfig() + "/");
+		string? saveFileDirectory = Path.GetDirectoryName(Config.GetSaveLocationConfig() + "/");
 		if (String.IsNullOrWhiteSpace(saveFileDirectory)) saveFileDirectory = "./saves/";
 
 		string saveFileName = Path.ChangeExtension(Path.GetFileName(gameRomFilePath), ".sav");
@@ -65,6 +67,26 @@ public class Emulator
 		//Only create save directory if saving is enabled and cartridge ram exists
 		if (Config.GetSaveEnabledConfig() && memoryBankController.CartridgeRamExists)
 			Directory.CreateDirectory(saveFileDirectory);
+	}
+
+	public void Reset()
+	{
+		inputOutput.CloseWindow();
+
+		cpu                  = new Cpu(this);
+		interrupts           = new Interrupts(this);
+		joypad               = new Joypad(this);
+		memory               = new Memory(this);
+		memoryBankController = new MemoryBankController(this);
+		ppu                  = new Ppu(this);
+		timer                = new Timer(this);
+		inputOutput          = new InputOutput(this);
+		apu                  = new Apu(this);
+
+		MaxFps   = GAMEBOY_FPS;
+		isPaused = false;
+
+		memory.LoadGame();
 	}
 
 	public void Update()
@@ -95,6 +117,7 @@ public class Emulator
 			ppu.Update(cycles);
 			timer.Update(cycles);
 			joypad.Update(false);
+			apu.Update(cycles);
 			interrupts.Update();
 		}
 
@@ -136,6 +159,10 @@ public class Emulator
 
 		speedAverage /= NUMBER_OF_SPEEDS_TO_AVERAGE;
 
-		inputOutput.SetWindowTitle($"{Path.GetFileName(gameRomFilePath)} | Speed: {speedAverage}%");
+		inputOutput.SetWindowTitle(
+			isPaused
+				? $"{Path.GetFileName(gameRomFilePath)} | paused"
+				: $"{Path.GetFileName(gameRomFilePath)} | Speed: {speedAverage}%"
+		);
 	}
 }

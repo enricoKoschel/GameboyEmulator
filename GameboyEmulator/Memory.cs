@@ -19,10 +19,11 @@ public class Memory
 	//0xFFFF			Interrupt Enable Register
 	//ReSharper restore CommentTypo
 
-	private          byte[] bootRom;
-	private          byte[] cartridgeRom;
+	//bootRom, cartridgeRom and cartridgeRam are correctly set by LoadGame() before they are accessed
+	private          byte[] bootRom      = null!;
+	private          byte[] cartridgeRom = null!;
 	private readonly byte[] videoRam;
-	private          byte[] cartridgeRam;
+	private          byte[] cartridgeRam = null!;
 	private readonly byte[] workRam;
 	private readonly byte[] spriteAttributes;
 	private          byte   dmaRegister;
@@ -226,29 +227,13 @@ public class Memory
 	public byte Read(ushort address, bool noRomBanking = false)
 	{
 		if (IsInRange(address, CARTRIDGE_ROM_BASE_ADDRESS, CARTRIDGE_ROM_LAST_ADDRESS))
-		{
-			if (bootRomEnabled && address < 0x100) return bootRom[address];
-
-			return noRomBanking
-					   ? cartridgeRom[address]
-					   : cartridgeRom[emulator.memoryBankController.ConvertAddressInRomBank(address)];
-		}
+			return ReadFromCartridgeRom(address, noRomBanking);
 
 		if (IsInRange(address, VIDEO_RAM_BASE_ADDRESS, VIDEO_RAM_LAST_ADDRESS))
 			return videoRam[address - VIDEO_RAM_BASE_ADDRESS];
 
 		if (IsInRange(address, CARTRIDGE_RAM_BASE_ADDRESS, CARTRIDGE_RAM_LAST_ADDRESS))
-		{
-			if (emulator.memoryBankController.CartridgeRamExists && emulator.memoryBankController.IsRamEnabled)
-			{
-				return cartridgeRam[
-					emulator.memoryBankController.ConvertAddressInRamBank(
-						(ushort)(address - CARTRIDGE_RAM_BASE_ADDRESS)
-					)];
-			}
-
-			return 0xFF;
-		}
+			return ReadFromCartridgeRam(address);
 
 		if (IsInRange(address, WORK_RAM_BASE_ADDRESS, WORK_RAM_LAST_ADDRESS))
 			return workRam[address - WORK_RAM_BASE_ADDRESS];
@@ -265,110 +250,7 @@ public class Memory
 			return 0xFF;
 
 		if (IsInRange(address, IO_PORTS_BASE_ADDRESS, IO_PORTS_LAST_ADDRESS))
-		{
-			if (IsInRange(address, 0xFF30, 0xFF3F))
-				return emulator.apu.GetWavePatternRamAtIndex(address & 0xF);
-
-			switch (address & 0xFF)
-			{
-				case 0x00:
-					return emulator.joypad.JoypadRegister;
-				case 0x01:
-				case 0x02:
-					//TODO Serial transfer
-					return 0xFF;
-				case 0x04:
-					return emulator.timer.DividerRegister;
-				case 0x05:
-					return emulator.timer.TimerRegister;
-				case 0x06:
-					return emulator.timer.TimerModulo;
-				case 0x07:
-					return emulator.timer.TimerControl;
-				case 0x0F:
-					return emulator.interrupts.InterruptFlagRegister;
-				case 0x10:
-					return emulator.apu.Channel1SweepRegister;
-				case 0x11:
-					return emulator.apu.Channel1SoundLengthWavePatternRegister;
-				case 0x12:
-					return emulator.apu.Channel1VolumeEnvelopeRegister;
-				case 0x13:
-					//Write only
-					return 0xFF;
-				case 0x14:
-					return emulator.apu.Channel1FrequencyRegisterHi;
-				case 0x16:
-					return emulator.apu.Channel2SoundLengthWavePatternRegister;
-				case 0x17:
-					return emulator.apu.Channel2VolumeEnvelopeRegister;
-				case 0x18:
-					//Write only
-					return 0xFF;
-				case 0x19:
-					return emulator.apu.Channel2FrequencyRegisterHi;
-				case 0x1A:
-					return emulator.apu.Channel3SoundOnOffRegister;
-				case 0x1B:
-					//Write only
-					return 0xFF;
-				case 0x1C:
-					return emulator.apu.Channel3SelectOutputLevelRegister;
-				case 0x1D:
-					//Write only
-					return 0xFF;
-				case 0x1E:
-					return emulator.apu.Channel3FrequencyRegisterHi;
-				case 0x20:
-					//Write only
-					return 0xFF;
-				case 0x21:
-					return emulator.apu.Channel4VolumeEnvelopeRegister;
-				case 0x22:
-					return emulator.apu.Channel4PolynomialCounterRegister;
-				case 0x23:
-					return emulator.apu.Channel4CounterConsecutiveRegister;
-				case 0x24:
-					return emulator.apu.ChannelControlRegister;
-				case 0x25:
-					return emulator.apu.SoundOutputTerminalSelectRegister;
-				case 0x26:
-					return emulator.apu.SoundOnOffRegister;
-				case 0x40:
-					return emulator.ppu.LcdControlRegister;
-				case 0x41:
-					return emulator.ppu.LcdStatusRegister;
-				case 0x42:
-					return emulator.ppu.ScrollY;
-				case 0x43:
-					return emulator.ppu.ScrollX;
-				case 0x44:
-					return emulator.ppu.CurrentScanline;
-				case 0x45:
-					return emulator.ppu.CurrentScanlineCompare;
-				case 0x46:
-					return dmaRegister;
-				case 0x47:
-					return emulator.ppu.TilePalette;
-				case 0x48:
-					return emulator.ppu.SpritePalette0;
-				case 0x49:
-					return emulator.ppu.SpritePalette1;
-				case 0x4A:
-					return emulator.ppu.WindowY;
-				case 0x4B:
-					return emulator.ppu.WindowX;
-				case 0x4D:
-					//0xFF4D is used to detect a GameBoy Color, a regular GameBoy always returns 0xFF
-					return 0xFF;
-				case 0x50:
-					//Reading from 0xFF50 returns 1 for bits 7-1 and the boot rom state for bit 0
-					return (byte)(0b11111110 | (bootRomEnabled ? 0 : 1));
-				default:
-					//Unused IO ports return 0xFF
-					return 0xFF;
-			}
-		}
+			return ReadFromIoPorts(address);
 
 		if (IsInRange(address, HIGH_RAM_BASE_ADDRESS, HIGH_RAM_LAST_ADDRESS))
 			return highRam[address - HIGH_RAM_BASE_ADDRESS];
@@ -377,6 +259,134 @@ public class Memory
 			return emulator.interrupts.InterruptEnableRegister;
 
 		throw new ArgumentOutOfRangeException(nameof(address), address, "Address out of range!");
+	}
+
+	private byte ReadFromCartridgeRom(ushort address, bool noRomBanking)
+	{
+		if (bootRomEnabled && address < 0x100) return bootRom[address];
+
+		return noRomBanking
+				   ? cartridgeRom[address]
+				   : cartridgeRom[emulator.memoryBankController.ConvertAddressInRomBank(address)];
+	}
+
+	private byte ReadFromCartridgeRam(ushort address)
+	{
+		if (emulator.memoryBankController.CartridgeRamExists && emulator.memoryBankController.IsRamEnabled)
+		{
+			return cartridgeRam[
+				emulator.memoryBankController.ConvertAddressInRamBank(
+					(ushort)(address - CARTRIDGE_RAM_BASE_ADDRESS)
+				)];
+		}
+
+		return 0xFF;
+	}
+
+	private byte ReadFromIoPorts(ushort address)
+	{
+		if (IsInRange(address, 0xFF30, 0xFF3F))
+			return emulator.apu.channel3.GetWaveRamSamplePair(address & 0xF);
+
+		switch (address & 0xFF)
+		{
+			case 0x00:
+				return emulator.joypad.JoypadRegister;
+			case 0x01:
+			case 0x02:
+				//TODO Serial transfer
+				return 0xFF;
+			case 0x04:
+				return emulator.timer.DividerRegister;
+			case 0x05:
+				return emulator.timer.TimerRegister;
+			case 0x06:
+				return emulator.timer.TimerModulo;
+			case 0x07:
+				return emulator.timer.TimerControl;
+			case 0x0F:
+				return emulator.interrupts.InterruptFlagRegister;
+			case 0x10:
+				return (byte)(emulator.apu.channel1.FrequencySweepRegister | 0b1000_0000);
+			case 0x11:
+				return (byte)(emulator.apu.channel1.SoundLengthWavePatternRegister | 0b0011_1111);
+			case 0x12:
+				return emulator.apu.channel1.VolumeEnvelopeRegister;
+			case 0x13:
+				//Write only
+				return 0xFF;
+			case 0x14:
+				return (byte)(emulator.apu.channel1.FrequencyRegisterHi | 0b1011_1111);
+			case 0x16:
+				return (byte)(emulator.apu.channel2.SoundLengthWavePatternRegister | 0b0011_1111);
+			case 0x17:
+				return emulator.apu.channel2.VolumeEnvelopeRegister;
+			case 0x18:
+				//Write only
+				return 0xFF;
+			case 0x19:
+				return (byte)(emulator.apu.channel2.FrequencyRegisterHi | 0b1011_1111);
+			case 0x1A:
+				return (byte)(emulator.apu.channel3.SoundOnOffRegister | 0b0111_1111);
+			case 0x1B:
+				//Write only
+				return 0xFF;
+			case 0x1C:
+				return (byte)(emulator.apu.channel3.SelectOutputLevelRegister | 0b1001_1111);
+			case 0x1D:
+				//Write only
+				return 0xFF;
+			case 0x1E:
+				return (byte)(emulator.apu.channel3.FrequencyRegisterHi | 0b1011_1111);
+			case 0x20:
+				//Write only
+				return 0xFF;
+			case 0x21:
+				return emulator.apu.channel4.VolumeEnvelopeRegister;
+			case 0x22:
+				return emulator.apu.channel4.PolynomialCounterRegister;
+			case 0x23:
+				return (byte)(emulator.apu.channel4.CounterConsecutiveRegister | 0b1011_1111);
+			case 0x24:
+				return emulator.apu.ChannelControlRegister;
+			case 0x25:
+				return emulator.apu.SoundOutputTerminalSelectRegister;
+			case 0x26:
+				return (byte)(emulator.apu.SoundOnOffRegister | 0b0111_0000);
+			case 0x40:
+				return emulator.ppu.LcdControlRegister;
+			case 0x41:
+				return emulator.ppu.LcdStatusRegister;
+			case 0x42:
+				return emulator.ppu.ScrollY;
+			case 0x43:
+				return emulator.ppu.ScrollX;
+			case 0x44:
+				return emulator.ppu.CurrentScanline;
+			case 0x45:
+				return emulator.ppu.CurrentScanlineCompare;
+			case 0x46:
+				return dmaRegister;
+			case 0x47:
+				return emulator.ppu.TilePalette;
+			case 0x48:
+				return emulator.ppu.SpritePalette0;
+			case 0x49:
+				return emulator.ppu.SpritePalette1;
+			case 0x4A:
+				return emulator.ppu.WindowY;
+			case 0x4B:
+				return emulator.ppu.WindowX;
+			case 0x4D:
+				//0xFF4D is used to detect a GameBoy Color, a regular GameBoy always returns 0xFF
+				return 0xFF;
+			case 0x50:
+				//Reading from 0xFF50 returns 1 for bits 7-1 and the boot rom state for bit 0
+				return (byte)(0b1111_1110 | (bootRomEnabled ? 0 : 1));
+			default:
+				//Unused IO ports return 0xFF
+				return 0xFF;
+		}
 	}
 
 	public void Write(ushort address, byte data)
@@ -389,17 +399,7 @@ public class Memory
 			videoRam[address - VIDEO_RAM_BASE_ADDRESS] = data;
 
 		else if (IsInRange(address, CARTRIDGE_RAM_BASE_ADDRESS, CARTRIDGE_RAM_LAST_ADDRESS))
-		{
-			if (!emulator.memoryBankController.CartridgeRamExists ||
-				!emulator.memoryBankController.IsRamEnabled) return;
-
-			cartridgeRam[
-				emulator.memoryBankController.ConvertAddressInRamBank(
-					(ushort)(address - CARTRIDGE_RAM_BASE_ADDRESS)
-				)] = data;
-
-			ramChangedSinceLastSave = true;
-		}
+			WriteToCartridgeRam(address, data);
 
 		else if (IsInRange(address, WORK_RAM_BASE_ADDRESS, WORK_RAM_LAST_ADDRESS))
 			workRam[address - WORK_RAM_BASE_ADDRESS] = data;
@@ -418,141 +418,7 @@ public class Memory
 		}
 
 		else if (IsInRange(address, IO_PORTS_BASE_ADDRESS, IO_PORTS_LAST_ADDRESS))
-		{
-			if (IsInRange(address, 0xFF30, 0xFF3F))
-				emulator.apu.SetWavePatternRamAtIndex(address & 0xF, data);
-
-			switch (address & 0xFF)
-			{
-				case 0x00:
-					//Only bits 4 and 5 of the joypad register are writeable
-					emulator.joypad.JoypadRegister =
-						(byte)((emulator.joypad.JoypadRegister & 0b11001111) | (data & 0b00110000));
-
-					break;
-				case 0x01:
-				case 0x02:
-					//TODO Serial transfer
-					break;
-				case 0x04:
-					//Writing to the divider register resets it
-					emulator.timer.ResetDividerRegister();
-					break;
-				case 0x05:
-					emulator.timer.TimerRegister = data;
-					break;
-				case 0x06:
-					emulator.timer.TimerModulo = data;
-					break;
-				case 0x07:
-					emulator.timer.TimerControl = data;
-					break;
-				case 0x0F:
-					emulator.interrupts.InterruptFlagRegister = data;
-					break;
-				case 0x10:
-					emulator.apu.Channel1SweepRegister = data;
-					break;
-				case 0x11:
-					emulator.apu.Channel1SoundLengthWavePatternRegister = data;
-					break;
-				case 0x12:
-					emulator.apu.Channel1VolumeEnvelopeRegister = data;
-					break;
-				case 0x13:
-					emulator.apu.Channel1FrequencyRegisterLo = data;
-					break;
-				case 0x14:
-					emulator.apu.Channel1FrequencyRegisterHi = data;
-					break;
-				case 0x16:
-					emulator.apu.Channel2SoundLengthWavePatternRegister = data;
-					break;
-				case 0x17:
-					emulator.apu.Channel2VolumeEnvelopeRegister = data;
-					break;
-				case 0x18:
-					emulator.apu.Channel2FrequencyRegisterLo = data;
-					break;
-				case 0x19:
-					emulator.apu.Channel2FrequencyRegisterHi = data;
-					break;
-				case 0x1A:
-					emulator.apu.Channel3SoundOnOffRegister = data;
-					break;
-				case 0x1B:
-					emulator.apu.Channel3SoundLengthRegister = data;
-					break;
-				case 0x1C:
-					emulator.apu.Channel3SelectOutputLevelRegister = data;
-					break;
-				case 0x1D:
-					emulator.apu.Channel3FrequencyRegisterLo = data;
-					break;
-				case 0x1E:
-					emulator.apu.Channel3FrequencyRegisterHi = data;
-					break;
-				case 0x20:
-					emulator.apu.Channel4SoundLengthRegister = data;
-					break;
-				case 0x21:
-					emulator.apu.Channel4VolumeEnvelopeRegister = data;
-					break;
-				case 0x22:
-					emulator.apu.Channel4PolynomialCounterRegister = data;
-					break;
-				case 0x23:
-					emulator.apu.Channel4CounterConsecutiveRegister = data;
-					break;
-				case 0x24:
-					emulator.apu.ChannelControlRegister = data;
-					break;
-				case 0x25:
-					emulator.apu.SoundOutputTerminalSelectRegister = data;
-					break;
-				case 0x26:
-					emulator.apu.SoundOnOffRegister = data;
-					break;
-				case 0x40:
-					emulator.ppu.LcdControlRegister = data;
-					break;
-				case 0x41:
-					emulator.ppu.LcdStatusRegister = data;
-					break;
-				case 0x42:
-					emulator.ppu.ScrollY = data;
-					break;
-				case 0x43:
-					emulator.ppu.ScrollX = data;
-					break;
-				case 0x45:
-					emulator.ppu.CurrentScanlineCompare = data;
-					break;
-				case 0x46:
-					dmaRegister = data;
-					DirectMemoryAccess(data);
-					break;
-				case 0x47:
-					emulator.ppu.TilePalette = data;
-					break;
-				case 0x48:
-					emulator.ppu.SpritePalette0 = data;
-					break;
-				case 0x49:
-					emulator.ppu.SpritePalette1 = data;
-					break;
-				case 0x4A:
-					emulator.ppu.WindowY = data;
-					break;
-				case 0x4B:
-					emulator.ppu.WindowX = data;
-					break;
-				case 0x50:
-					//Writing to this address disables the boot rom
-					if (bootRomEnabled && (data & 0b00000001) == 1) DisableBootRom();
-					break;
-			}
-		}
+			WriteToIoPorts(address, data);
 
 		else if (IsInRange(address, HIGH_RAM_BASE_ADDRESS, HIGH_RAM_LAST_ADDRESS))
 			highRam[address - HIGH_RAM_BASE_ADDRESS] = data;
@@ -562,6 +428,156 @@ public class Memory
 
 		else
 			throw new ArgumentOutOfRangeException(nameof(address), address, "Address out of range!");
+	}
+
+	private void WriteToCartridgeRam(ushort address, byte data)
+	{
+		if (!emulator.memoryBankController.CartridgeRamExists ||
+			!emulator.memoryBankController.IsRamEnabled) return;
+
+		cartridgeRam[
+			emulator.memoryBankController.ConvertAddressInRamBank(
+				(ushort)(address - CARTRIDGE_RAM_BASE_ADDRESS)
+			)] = data;
+
+		ramChangedSinceLastSave = true;
+	}
+
+	private void WriteToIoPorts(ushort address, byte data)
+	{
+		if (IsInRange(address, 0xFF30, 0xFF3F))
+			emulator.apu.channel3.SetWaveRamSamplePair(address & 0xF, data);
+
+		switch (address & 0xFF)
+		{
+			case 0x00:
+				//Only bits 4 and 5 of the joypad register are writeable
+				emulator.joypad.JoypadRegister =
+					(byte)((emulator.joypad.JoypadRegister & 0b1100_1111) | (data & 0b0011_0000));
+
+				break;
+			case 0x01:
+			case 0x02:
+				//TODO Serial transfer
+				break;
+			case 0x04:
+				//Writing to the divider register resets it
+				emulator.timer.ResetDividerRegister();
+				break;
+			case 0x05:
+				emulator.timer.TimerRegister = data;
+				break;
+			case 0x06:
+				emulator.timer.TimerModulo = data;
+				break;
+			case 0x07:
+				emulator.timer.TimerControl = data;
+				break;
+			case 0x0F:
+				emulator.interrupts.InterruptFlagRegister = data;
+				break;
+			case 0x10:
+				emulator.apu.channel1.FrequencySweepRegister = data;
+				break;
+			case 0x11:
+				emulator.apu.channel1.SoundLengthWavePatternRegister = data;
+				break;
+			case 0x12:
+				emulator.apu.channel1.VolumeEnvelopeRegister = data;
+				break;
+			case 0x13:
+				emulator.apu.channel1.FrequencyRegisterLo = data;
+				break;
+			case 0x14:
+				emulator.apu.channel1.FrequencyRegisterHi = data;
+				break;
+			case 0x16:
+				emulator.apu.channel2.SoundLengthWavePatternRegister = data;
+				break;
+			case 0x17:
+				emulator.apu.channel2.VolumeEnvelopeRegister = data;
+				break;
+			case 0x18:
+				emulator.apu.channel2.FrequencyRegisterLo = data;
+				break;
+			case 0x19:
+				emulator.apu.channel2.FrequencyRegisterHi = data;
+				break;
+			case 0x1A:
+				emulator.apu.channel3.SoundOnOffRegister = data;
+				break;
+			case 0x1B:
+				emulator.apu.channel3.SoundLengthRegister = data;
+				break;
+			case 0x1C:
+				emulator.apu.channel3.SelectOutputLevelRegister = data;
+				break;
+			case 0x1D:
+				emulator.apu.channel3.FrequencyRegisterLo = data;
+				break;
+			case 0x1E:
+				emulator.apu.channel3.FrequencyRegisterHi = data;
+				break;
+			case 0x20:
+				emulator.apu.channel4.SoundLengthRegister = data;
+				break;
+			case 0x21:
+				emulator.apu.channel4.VolumeEnvelopeRegister = data;
+				break;
+			case 0x22:
+				emulator.apu.channel4.PolynomialCounterRegister = data;
+				break;
+			case 0x23:
+				emulator.apu.channel4.CounterConsecutiveRegister = data;
+				break;
+			case 0x24:
+				emulator.apu.ChannelControlRegister = data;
+				break;
+			case 0x25:
+				emulator.apu.SoundOutputTerminalSelectRegister = data;
+				break;
+			case 0x26:
+				emulator.apu.SoundOnOffRegister = data;
+				break;
+			case 0x40:
+				emulator.ppu.LcdControlRegister = data;
+				break;
+			case 0x41:
+				emulator.ppu.LcdStatusRegister = data;
+				break;
+			case 0x42:
+				emulator.ppu.ScrollY = data;
+				break;
+			case 0x43:
+				emulator.ppu.ScrollX = data;
+				break;
+			case 0x45:
+				emulator.ppu.CurrentScanlineCompare = data;
+				break;
+			case 0x46:
+				dmaRegister = data;
+				DirectMemoryAccess(data);
+				break;
+			case 0x47:
+				emulator.ppu.TilePalette = data;
+				break;
+			case 0x48:
+				emulator.ppu.SpritePalette0 = data;
+				break;
+			case 0x49:
+				emulator.ppu.SpritePalette1 = data;
+				break;
+			case 0x4A:
+				emulator.ppu.WindowY = data;
+				break;
+			case 0x4B:
+				emulator.ppu.WindowX = data;
+				break;
+			case 0x50:
+				//Writing to this address disables the boot rom
+				if (bootRomEnabled && (data & 0b0000_0001) == 1) DisableBootRom();
+				break;
+		}
 	}
 
 	private void DirectMemoryAccess(byte sourceAddressLo)
