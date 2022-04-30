@@ -205,7 +205,6 @@ public class ApuChannel1
 
 	private void UpdateLength()
 	{
-		//TODO probably works
 		if (!EnableLength) return;
 
 		if (lengthTimer <= 0 || --lengthTimer != 0) return;
@@ -215,7 +214,6 @@ public class ApuChannel1
 
 	private void UpdateVolume()
 	{
-		//TODO maybe works
 		if (volumePeriodTimer > 0) volumePeriodTimer--;
 		if (volumePeriodTimer != 0) return;
 
@@ -230,7 +228,6 @@ public class ApuChannel1
 
 	private void UpdateSweep()
 	{
-		//TODO does not work
 		if (sweepTimer > 0) sweepTimer--;
 		if (sweepTimer != 0) return;
 

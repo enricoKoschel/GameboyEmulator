@@ -170,7 +170,6 @@ public class ApuChannel3
 
 	private void UpdateLength()
 	{
-		//TODO probably works
 		if (!EnableLength) return;
 
 		if (lengthTimer <= 0 || --lengthTimer != 0) return;

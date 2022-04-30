@@ -4,6 +4,7 @@
   - Fix sample buffer sometimes being empty and causing audio to lag
   - Implement channel 4
   - Implement obscure behaviour/hardware bugs for all channels
+  - Pass all audio test roms
   - Implement VIn (Audio from cartridge)
   - Play sound with adjusted speed when speed changes by changing what gets written into the sample list
 - PPU
