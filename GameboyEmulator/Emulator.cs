@@ -93,11 +93,8 @@ public class Emulator
 	{
 		while (isPaused)
 		{
-			Thread.Sleep(16);
-
-			//Drawing the frame allows events to be dispatched (moving the window for example)
-			inputOutput.DrawFrame(true);
 			inputOutput.Update();
+			Thread.Sleep(16);
 		}
 
 		Stopwatch frameTime = new();

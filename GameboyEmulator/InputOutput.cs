@@ -293,6 +293,7 @@ public class InputOutput
 	public void Update()
 	{
 		CheckButtons();
+		window.DispatchEvents();
 	}
 
 	private void CheckButtons()
@@ -366,7 +367,7 @@ public class InputOutput
 		return zBuffer[x, y];
 	}
 
-	public void DrawFrame(bool paused = false)
+	public void DrawFrame()
 	{
 		if (!WindowIsOpen)
 		{
@@ -374,10 +375,7 @@ public class InputOutput
 			throw new InvalidOperationException("Cannot draw Screen when Window is closed!");
 		}
 
-		window.DispatchEvents();
-
-		//Dont update vertexBuffer if paused, so no unfinished frame gets drawn
-		if (!paused) vertexBuffer.Update(vertexArray);
+		vertexBuffer.Update(vertexArray);
 		vertexBuffer.Draw(window, RenderStates.Default);
 
 		window.Display();
