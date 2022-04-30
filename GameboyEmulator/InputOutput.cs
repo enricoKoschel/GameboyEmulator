@@ -20,17 +20,21 @@ public class InputOutput
 	private const int DRAW_HEIGHT        = GAME_HEIGHT * SCALE;
 
 	//Key mapping
-	private const Keyboard.Key DEFAULT_UP_BUTTON     = Keyboard.Key.Up;
-	private const Keyboard.Key DEFAULT_DOWN_BUTTON   = Keyboard.Key.Down;
-	private const Keyboard.Key DEFAULT_LEFT_BUTTON   = Keyboard.Key.Left;
-	private const Keyboard.Key DEFAULT_RIGHT_BUTTON  = Keyboard.Key.Right;
-	private const Keyboard.Key DEFAULT_START_BUTTON  = Keyboard.Key.Enter;
-	private const Keyboard.Key DEFAULT_SELECT_BUTTON = Keyboard.Key.Space;
-	private const Keyboard.Key DEFAULT_A_BUTTON      = Keyboard.Key.S;
-	private const Keyboard.Key DEFAULT_B_BUTTON      = Keyboard.Key.A;
-	private const Keyboard.Key DEFAULT_SPEED_BUTTON  = Keyboard.Key.LShift;
-	private const Keyboard.Key DEFAULT_PAUSE_BUTTON  = Keyboard.Key.LControl;
-	private const Keyboard.Key DEFAULT_RESET_BUTTON  = Keyboard.Key.Escape;
+	private const Keyboard.Key DEFAULT_UP_BUTTON              = Keyboard.Key.Up;
+	private const Keyboard.Key DEFAULT_DOWN_BUTTON            = Keyboard.Key.Down;
+	private const Keyboard.Key DEFAULT_LEFT_BUTTON            = Keyboard.Key.Left;
+	private const Keyboard.Key DEFAULT_RIGHT_BUTTON           = Keyboard.Key.Right;
+	private const Keyboard.Key DEFAULT_START_BUTTON           = Keyboard.Key.Enter;
+	private const Keyboard.Key DEFAULT_SELECT_BUTTON          = Keyboard.Key.Space;
+	private const Keyboard.Key DEFAULT_A_BUTTON               = Keyboard.Key.S;
+	private const Keyboard.Key DEFAULT_B_BUTTON               = Keyboard.Key.A;
+	private const Keyboard.Key DEFAULT_SPEED_BUTTON           = Keyboard.Key.LShift;
+	private const Keyboard.Key DEFAULT_PAUSE_BUTTON           = Keyboard.Key.LControl;
+	private const Keyboard.Key DEFAULT_RESET_BUTTON           = Keyboard.Key.Escape;
+	private const Keyboard.Key DEFAULT_AUDIO_CHANNEL_1_BUTTON = Keyboard.Key.F5;
+	private const Keyboard.Key DEFAULT_AUDIO_CHANNEL_2_BUTTON = Keyboard.Key.F6;
+	private const Keyboard.Key DEFAULT_AUDIO_CHANNEL_3_BUTTON = Keyboard.Key.F7;
+	private const Keyboard.Key DEFAULT_AUDIO_CHANNEL_4_BUTTON = Keyboard.Key.F8;
 
 	private static Keyboard.Key upButton;
 	private static Keyboard.Key downButton;
@@ -43,6 +47,10 @@ public class InputOutput
 	private static Keyboard.Key speedButton;
 	private static Keyboard.Key pauseButton;
 	private static Keyboard.Key resetButton;
+	private static Keyboard.Key audioChannel1Button;
+	private static Keyboard.Key audioChannel2Button;
+	private static Keyboard.Key audioChannel3Button;
+	private static Keyboard.Key audioChannel4Button;
 
 	//Color mapping
 	private static readonly Color DEFAULT_BLACK_COLOR      = new(8, 24, 32);
@@ -60,7 +68,11 @@ public class InputOutput
 
 	private readonly bool[,] zBuffer;
 
-	private bool pauseWasPressed;
+	private bool pauseButtonWasPressed;
+	private bool audioChannel1ButtonWasPressed;
+	private bool audioChannel2ButtonWasPressed;
+	private bool audioChannel3ButtonWasPressed;
+	private bool audioChannel4ButtonWasPressed;
 
 	private readonly Emulator emulator;
 
@@ -145,6 +157,22 @@ public class InputOutput
 		resetButton = Config.GetControlConfig("RESET") == -1
 						  ? DEFAULT_RESET_BUTTON
 						  : ConvertJsKeyCodeToSfml(Config.GetControlConfig("RESET"));
+
+		audioChannel1Button = Config.GetControlConfig("AUDIO_CHANNEL_1") == -1
+								  ? DEFAULT_AUDIO_CHANNEL_1_BUTTON
+								  : ConvertJsKeyCodeToSfml(Config.GetControlConfig("AUDIO_CHANNEL_1"));
+
+		audioChannel2Button = Config.GetControlConfig("AUDIO_CHANNEL_2") == -1
+								  ? DEFAULT_AUDIO_CHANNEL_2_BUTTON
+								  : ConvertJsKeyCodeToSfml(Config.GetControlConfig("AUDIO_CHANNEL_2"));
+
+		audioChannel3Button = Config.GetControlConfig("AUDIO_CHANNEL_3") == -1
+								  ? DEFAULT_AUDIO_CHANNEL_3_BUTTON
+								  : ConvertJsKeyCodeToSfml(Config.GetControlConfig("AUDIO_CHANNEL_3"));
+
+		audioChannel4Button = Config.GetControlConfig("AUDIO_CHANNEL_4") == -1
+								  ? DEFAULT_AUDIO_CHANNEL_4_BUTTON
+								  : ConvertJsKeyCodeToSfml(Config.GetControlConfig("AUDIO_CHANNEL_4"));
 	}
 
 	private static void InitialiseColors()
@@ -264,20 +292,56 @@ public class InputOutput
 
 	public void Update()
 	{
+		CheckButtons();
+	}
+
+	private void CheckButtons()
+	{
+		if (!WindowHasFocus) return;
+
 		//Check for speed button
-		if (WindowHasFocus && Keyboard.IsKeyPressed(speedButton)) emulator.MaxFps = 0;
-		else emulator.MaxFps                                                      = Emulator.GAMEBOY_FPS;
+		if (Keyboard.IsKeyPressed(speedButton)) emulator.MaxFps = 0;
+		else emulator.MaxFps                                    = Emulator.GAMEBOY_FPS;
 
 		//Check for pause button
-		if (WindowHasFocus && Keyboard.IsKeyPressed(pauseButton) && !pauseWasPressed)
+		if (Keyboard.IsKeyPressed(pauseButton) && !pauseButtonWasPressed)
 		{
-			emulator.isPaused = !emulator.isPaused;
-			pauseWasPressed   = true;
+			emulator.isPaused     = !emulator.isPaused;
+			pauseButtonWasPressed = true;
 		}
-		else if (!Keyboard.IsKeyPressed(pauseButton)) pauseWasPressed = false;
+		else if (!Keyboard.IsKeyPressed(pauseButton)) pauseButtonWasPressed = false;
 
 		//Check for reset button
-		if (WindowHasFocus && Keyboard.IsKeyPressed(resetButton)) emulator.Reset();
+		if (Keyboard.IsKeyPressed(resetButton)) emulator.Reset();
+
+		//Check for audio channel buttons
+		if (Keyboard.IsKeyPressed(audioChannel1Button) && !audioChannel1ButtonWasPressed)
+		{
+			emulator.apu.Channel1Enabled  = !emulator.apu.Channel1Enabled;
+			audioChannel1ButtonWasPressed = true;
+		}
+		else if (!Keyboard.IsKeyPressed(audioChannel1Button)) audioChannel1ButtonWasPressed = false;
+
+		if (Keyboard.IsKeyPressed(audioChannel2Button) && !audioChannel2ButtonWasPressed)
+		{
+			emulator.apu.Channel2Enabled  = !emulator.apu.Channel2Enabled;
+			audioChannel2ButtonWasPressed = true;
+		}
+		else if (!Keyboard.IsKeyPressed(audioChannel2Button)) audioChannel2ButtonWasPressed = false;
+
+		if (Keyboard.IsKeyPressed(audioChannel3Button) && !audioChannel3ButtonWasPressed)
+		{
+			emulator.apu.Channel3Enabled  = !emulator.apu.Channel3Enabled;
+			audioChannel3ButtonWasPressed = true;
+		}
+		else if (!Keyboard.IsKeyPressed(audioChannel3Button)) audioChannel3ButtonWasPressed = false;
+
+		if (Keyboard.IsKeyPressed(audioChannel4Button) && !audioChannel4ButtonWasPressed)
+		{
+			emulator.apu.Channel4Enabled  = !emulator.apu.Channel4Enabled;
+			audioChannel4ButtonWasPressed = true;
+		}
+		else if (!Keyboard.IsKeyPressed(audioChannel4Button)) audioChannel4ButtonWasPressed = false;
 	}
 
 	public void UpdatePixelBuffer(int x, int y, Ppu.Color color)

@@ -1,10 +1,10 @@
 # TODO
 
+- Combine all audio channels into one buffer to avoid them getting out of sync
 - Add inheritance/polymorphism to MBC
 - Draw previous frame with 50% opacity on top of current frame
 - Implement PPU output with SFML textures
 - Fix bug where sample buffer is empty and audio lags a bit
-- Implement toggling APU channels on and off (F5-F8) and add the keys to the settings.ini
 - Implement APU channel 4
 - Implement obscure behaviour/hardware bugs for all APU channels
 - Implement all checks at startup (checksums, logo, etc.)

@@ -120,6 +120,10 @@ public static class Config
 ;SPEED = 16 (Shift)
 ;PAUSE = 17 (LCtrl)
 ;RESET = 27 (Esc)
+;AUDIO_CHANNEL_1 = 116 (F5)
+;AUDIO_CHANNEL_2 = 117 (F6)
+;AUDIO_CHANNEL_3 = 118 (F7)
+;AUDIO_CHANNEL_4 = 119 (F8)
 
 UP = 38
 DOWN = 40
@@ -132,6 +136,10 @@ B = 65
 SPEED = 16
 PAUSE = 17
 RESET = 27
+AUDIO_CHANNEL_1 = 116
+AUDIO_CHANNEL_2 = 117
+AUDIO_CHANNEL_3 = 118
+AUDIO_CHANNEL_4 = 119
 
 [Colors]
 ;Uses HEX color values WITHOUT the leading # (123456)

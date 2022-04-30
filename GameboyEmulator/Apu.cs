@@ -1,4 +1,6 @@
-﻿namespace GameboyEmulator;
+﻿using System;
+
+namespace GameboyEmulator;
 
 public class Apu
 {
@@ -16,10 +18,10 @@ public class Apu
 	//NR51
 	public byte SoundOutputTerminalSelectRegister { get; set; }
 
-	private bool channel1Enabled = true;
-	private bool channel2Enabled = true;
-	private bool channel3Enabled = true;
-	private bool channel4Enabled;
+	public bool Channel1Enabled { get; set; } = true;
+	public bool Channel2Enabled { get; set; } = true;
+	public bool Channel3Enabled { get; set; } = true;
+	public bool Channel4Enabled { get; set; }
 
 	//NR52
 	public byte SoundOnOffRegister
@@ -85,6 +87,8 @@ public class Apu
 			channel2.Update(cycles);
 			channel3.Update(cycles);
 			channel4.Update(cycles);
+
+			return;
 		}
 
 		channel1.Update(cycles);
@@ -101,10 +105,10 @@ public class Apu
 		//TODO Play sound with adjusted sample rate when speed changes by changing what gets written into the sample list
 		if (emulator.CurrentSpeed >= 105) return;
 
-		if (channel1Enabled) channel1.CollectSample();
-		if (channel2Enabled) channel2.CollectSample();
-		if (channel3Enabled) channel3.CollectSample();
-		if (channel4Enabled) channel4.CollectSample();
+		if (Channel1Enabled) channel1.CollectSample();
+		if (Channel2Enabled) channel2.CollectSample();
+		if (Channel3Enabled) channel3.CollectSample();
+		if (Channel4Enabled) channel4.CollectSample();
 	}
 
 	private void Reset()
