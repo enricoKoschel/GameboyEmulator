@@ -12,12 +12,11 @@ public class InputOutput
 	public bool WindowIsOpen   => window.IsOpen;
 	public bool WindowHasFocus => window.HasFocus();
 
-	private const int GAME_WIDTH         = 160;
-	private const int GAME_HEIGHT        = 144;
-	private const int NUMBER_OF_VERTICES = GAME_WIDTH * GAME_HEIGHT * 4;
-	private const int SCALE              = 8;
-	private const int DRAW_WIDTH         = GAME_WIDTH * SCALE;
-	private const int DRAW_HEIGHT        = GAME_HEIGHT * SCALE;
+	private const int GAME_WIDTH  = 160;
+	private const int GAME_HEIGHT = 144;
+	private const int SCALE       = 8;
+	private const int DRAW_WIDTH  = GAME_WIDTH * SCALE;
+	private const int DRAW_HEIGHT = GAME_HEIGHT * SCALE;
 
 	//Key mapping
 	private const Keyboard.Key DEFAULT_UP_BUTTON              = Keyboard.Key.Up;
@@ -63,8 +62,10 @@ public class InputOutput
 	private static Color lightGrayColor;
 	private static Color whiteColor;
 
-	private readonly VertexBuffer vertexBuffer;
-	private readonly Vertex[]     vertexArray;
+	private byte[]  pixelBuffer;
+	private Texture texture;
+	private Sprite  sprite;
+
 
 	private readonly bool[,] zBuffer;
 
@@ -82,14 +83,16 @@ public class InputOutput
 
 		window = new RenderWindow(new VideoMode(DRAW_WIDTH, DRAW_HEIGHT), "GameBoy Emulator", Styles.Close);
 
-		vertexArray  = new Vertex[NUMBER_OF_VERTICES];
-		vertexBuffer = new VertexBuffer(NUMBER_OF_VERTICES, PrimitiveType.Quads, VertexBuffer.UsageSpecifier.Stream);
+		pixelBuffer = new byte[GAME_WIDTH * GAME_HEIGHT * 4];
+		texture     = new Texture(GAME_WIDTH, GAME_HEIGHT);
+		sprite      = new Sprite(texture);
+
+		sprite.Scale = new Vector2f(SCALE, SCALE);
 
 		zBuffer = new bool[GAME_WIDTH, GAME_HEIGHT];
 
 		InitialiseControls();
 		InitialiseColors();
-		InitialiseVertexArray();
 
 		window.SetActive();
 
@@ -193,46 +196,6 @@ public class InputOutput
 		whiteColor = Config.GetColorConfig("WHITE") == -1
 						 ? DEFAULT_WHITE_COLOR
 						 : new Color((uint)((Config.GetColorConfig("WHITE") << 8) | 0xFF));
-	}
-
-	private void InitialiseVertexArray()
-	{
-		for (int i = 0; i < vertexArray.Length; i += 4)
-		{
-			int x = i % (GAME_WIDTH * 4);
-			int y = i / (GAME_WIDTH * 4);
-
-			int leftSide = x / 4 * SCALE;
-			int topSide  = y * SCALE;
-
-			//Vertex Direction
-			//1******2
-			//*		 *
-			//*		 *
-			//*		 *
-			//*		 *
-			//*		 *
-			//*		 *
-			//4******3
-
-			Color white = ConvertGameboyToSfmlColor(Ppu.Color.White);
-
-			vertexArray[i + 0] = new Vertex(
-				new Vector2f(leftSide, topSide), white
-			);
-
-			vertexArray[i + 1] = new Vertex(
-				new Vector2f(leftSide + SCALE, topSide), white
-			);
-
-			vertexArray[i + 2] = new Vertex(
-				new Vector2f(leftSide + SCALE, topSide + SCALE), white
-			);
-
-			vertexArray[i + 3] = new Vertex(
-				new Vector2f(leftSide, topSide + SCALE), white
-			);
-		}
 	}
 
 	private static Keyboard.Key ConvertJsKeyCodeToSfml(int keyCode)
@@ -351,10 +314,10 @@ public class InputOutput
 
 		Color convertedColor = ConvertGameboyToSfmlColor(color);
 
-		vertexArray[index + 0].Color = convertedColor;
-		vertexArray[index + 1].Color = convertedColor;
-		vertexArray[index + 2].Color = convertedColor;
-		vertexArray[index + 3].Color = convertedColor;
+		pixelBuffer[index + 0] = convertedColor.R;
+		pixelBuffer[index + 1] = convertedColor.G;
+		pixelBuffer[index + 2] = convertedColor.B;
+		pixelBuffer[index + 3] = convertedColor.A;
 	}
 
 	public void UpdateZBuffer(int x, int y, bool behindSprite)
@@ -375,8 +338,8 @@ public class InputOutput
 			throw new InvalidOperationException("Cannot draw Screen when Window is closed!");
 		}
 
-		vertexBuffer.Update(vertexArray);
-		vertexBuffer.Draw(window, RenderStates.Default);
+		texture.Update(pixelBuffer);
+		window.Draw(sprite);
 
 		window.Display();
 	}

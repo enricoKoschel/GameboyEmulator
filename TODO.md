@@ -9,7 +9,6 @@
   - Play sound with adjusted speed when speed changes by changing what gets written into the sample list
 - PPU
   - Draw previous frame with 50% opacity on top of current frame
-  - Implement video output with SFML textures
 - Core
   - Implement all checks at startup (checksums, logo, etc.)
   - Implement better waiting at the end of a frame (Thread.Sleep() + correcting)
@@ -17,6 +16,7 @@
   - Implement GUI
   - Implement save states/rewind
   - Controller support
+  - Scale window according to screen size
 - MBC
   - Refactor to use inheritance/polymorphism
   - Implement other memory bank controllers
