@@ -22,43 +22,47 @@ public class Joypad
 	}
 
 	//Registers
-	private byte internalJoypadRegister;
-
 	public byte JoypadRegister
 	{
-		get => (byte)(internalJoypadRegister & 0b0011_1111);
-		set => internalJoypadRegister = (byte)(value & 0b0011_1111);
+		get
+		{
+			bool downOrStartPressed    = false;
+			bool upOrSelectPressed     = false;
+			bool leftOrButtonBPressed  = false;
+			bool rightOrButtonAPressed = false;
+
+			if (actionButtonsSelected)
+			{
+				downOrStartPressed    |= startPressedThisFrame;
+				upOrSelectPressed     |= selectPressedThisFrame;
+				leftOrButtonBPressed  |= buttonBPressedThisFrame;
+				rightOrButtonAPressed |= buttonAPressedThisFrame;
+			}
+
+			if (directionButtonsSelected)
+			{
+				downOrStartPressed    |= downPressedThisFrame;
+				upOrSelectPressed     |= upPressedThisFrame;
+				leftOrButtonBPressed  |= leftPressedThisFrame;
+				rightOrButtonAPressed |= rightPressedThisFrame;
+			}
+
+			//Unused IO bits are 1
+			return Cpu.MakeByte(
+				true, true, !actionButtonsSelected, !directionButtonsSelected,
+				!downOrStartPressed, !upOrSelectPressed, !leftOrButtonBPressed, !rightOrButtonAPressed
+			);
+		}
+		set
+		{
+			actionButtonsSelected    = !Cpu.GetBit(value, 5);
+			directionButtonsSelected = !Cpu.GetBit(value, 4);
+		}
 	}
 
 	//Flags
-	private bool ButtonKeysSelected    => !Cpu.GetBit(JoypadRegister, 5);
-	private bool DirectionKeysSelected => !Cpu.GetBit(JoypadRegister, 4);
-
-	private bool DownOrStartPressed
-	{
-		get => !Cpu.GetBit(JoypadRegister, 3);
-		set => JoypadRegister = Cpu.SetBit(JoypadRegister, 3, !value);
-	}
-
-	private bool UpOrSelectPressed
-	{
-		get => !Cpu.GetBit(JoypadRegister, 2);
-		set => JoypadRegister = Cpu.SetBit(JoypadRegister, 2, !value);
-	}
-
-	private bool LeftOrButtonBPressed
-	{
-		get => !Cpu.GetBit(JoypadRegister, 1);
-		set => JoypadRegister = Cpu.SetBit(JoypadRegister, 1, !value);
-	}
-
-	private bool RightOrButtonAPressed
-	{
-		get => !Cpu.GetBit(JoypadRegister, 0);
-		set => JoypadRegister = Cpu.SetBit(JoypadRegister, 0, !value);
-	}
-
-	private bool hadFocusLastFrame;
+	private bool actionButtonsSelected;
+	private bool directionButtonsSelected;
 
 	private bool downPressedThisFrame;
 	private bool upPressedThisFrame;
@@ -76,55 +80,42 @@ public class Joypad
 										   selectPressedThisFrame || buttonBPressedThisFrame ||
 										   buttonAPressedThisFrame;
 
-	public void Update(bool frameDone)
+	public void CaptureInput()
 	{
-		if (frameDone)
+		//Do not allow any keys to be pressed when Emulator is out of focus
+		if (!emulator.inputOutput.WindowHasFocus)
 		{
-			hadFocusLastFrame = emulator.inputOutput.WindowHasFocus;
+			upPressedThisFrame    = false;
+			downPressedThisFrame  = false;
+			leftPressedThisFrame  = false;
+			rightPressedThisFrame = false;
 
-			upPressedThisFrame    = InputOutput.IsButtonPressed(Button.Up);
-			downPressedThisFrame  = InputOutput.IsButtonPressed(Button.Down);
-			leftPressedThisFrame  = InputOutput.IsButtonPressed(Button.Left);
-			rightPressedThisFrame = InputOutput.IsButtonPressed(Button.Right);
+			startPressedThisFrame   = false;
+			selectPressedThisFrame  = false;
+			buttonBPressedThisFrame = false;
+			buttonAPressedThisFrame = false;
 
-			//Don't allow "impossible" inputs (🠕+🠗/🠔+🠖)
-			if (upPressedThisFrame && downPressedThisFrame) upPressedThisFrame      = downPressedThisFrame  = false;
-			if (leftPressedThisFrame && rightPressedThisFrame) leftPressedThisFrame = rightPressedThisFrame = false;
-
-			startPressedThisFrame   = InputOutput.IsButtonPressed(Button.Start);
-			selectPressedThisFrame  = InputOutput.IsButtonPressed(Button.Select);
-			buttonBPressedThisFrame = InputOutput.IsButtonPressed(Button.B);
-			buttonAPressedThisFrame = InputOutput.IsButtonPressed(Button.A);
-
-			//Only request Interrupt if Button was pressed this Frame
-			if (ButtonPressedThisFrame && ButtonPressedThisFrame != buttonPressedLastFrame)
-				emulator.interrupts.Request(Interrupts.InterruptType.Joypad);
-
-			buttonPressedLastFrame = ButtonPressedThisFrame;
+			return;
 		}
 
-		DownOrStartPressed    = false;
-		UpOrSelectPressed     = false;
-		LeftOrButtonBPressed  = false;
-		RightOrButtonAPressed = false;
+		upPressedThisFrame    = InputOutput.IsButtonPressed(Button.Up);
+		downPressedThisFrame  = InputOutput.IsButtonPressed(Button.Down);
+		leftPressedThisFrame  = InputOutput.IsButtonPressed(Button.Left);
+		rightPressedThisFrame = InputOutput.IsButtonPressed(Button.Right);
 
-		//Do not accept Key Presses when Emulator is not in Focus
-		if (!hadFocusLastFrame) return;
+		//Don't allow "impossible" inputs (🠕+🠗/🠔+🠖)
+		if (upPressedThisFrame && downPressedThisFrame) upPressedThisFrame      = downPressedThisFrame  = false;
+		if (leftPressedThisFrame && rightPressedThisFrame) leftPressedThisFrame = rightPressedThisFrame = false;
 
-		if (ButtonKeysSelected)
-		{
-			DownOrStartPressed    |= startPressedThisFrame;
-			UpOrSelectPressed     |= selectPressedThisFrame;
-			LeftOrButtonBPressed  |= buttonBPressedThisFrame;
-			RightOrButtonAPressed |= buttonAPressedThisFrame;
-		}
+		startPressedThisFrame   = InputOutput.IsButtonPressed(Button.Start);
+		selectPressedThisFrame  = InputOutput.IsButtonPressed(Button.Select);
+		buttonBPressedThisFrame = InputOutput.IsButtonPressed(Button.B);
+		buttonAPressedThisFrame = InputOutput.IsButtonPressed(Button.A);
 
-		if (DirectionKeysSelected)
-		{
-			DownOrStartPressed    |= downPressedThisFrame;
-			UpOrSelectPressed     |= upPressedThisFrame;
-			LeftOrButtonBPressed  |= leftPressedThisFrame;
-			RightOrButtonAPressed |= rightPressedThisFrame;
-		}
+		//Request interrupt if a button was pressed this frame
+		if (ButtonPressedThisFrame && !buttonPressedLastFrame)
+			emulator.interrupts.Request(Interrupts.InterruptType.Joypad);
+
+		buttonPressedLastFrame = ButtonPressedThisFrame;
 	}
 }
