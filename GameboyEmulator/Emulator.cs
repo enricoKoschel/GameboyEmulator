@@ -34,8 +34,8 @@ public class Emulator
 	public readonly string gameRomFilePath;
 	public readonly string saveFilePath;
 
-	public bool IsRunning => inputOutput.WindowIsOpen;
-	public bool isPaused;
+	private bool IsRunning => inputOutput.WindowIsOpen;
+	public  bool isPaused;
 
 	public Emulator(string gameRomFilePath, string bootRomFilePath)
 	{
@@ -89,7 +89,12 @@ public class Emulator
 		memory.LoadGame();
 	}
 
-	public void Update()
+	public void Run()
+	{
+		while (IsRunning) Update();
+	}
+
+	private void Update()
 	{
 		while (isPaused)
 		{

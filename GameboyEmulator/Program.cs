@@ -52,7 +52,7 @@ static class Program
 
 		Emulator emulator = new(gameRomFilePath, bootRomFilePath);
 
-		while (emulator.IsRunning) emulator.Update();
+		emulator.Run();
 
 		Logger.LogMessage("Program terminated without errors", Logger.LogLevel.Info);
 	}

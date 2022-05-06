@@ -15,6 +15,8 @@
   - Implement save states/rewind
   - Controller support
   - Scale window according to screen size (or have screen scale in config)
+- Memory
+  - Maybe change cartridge ram to be a memory mapped file
 - Logger
   - Implement full logging of all opcodes, modules, etc. with configurable log levels
 - MBC
