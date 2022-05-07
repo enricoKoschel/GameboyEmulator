@@ -11,10 +11,11 @@
   - Implement all checks at startup (checksums, logo, etc.)
   - Implement better waiting at the end of a frame (Thread.Sleep() + correcting)
   - Add the ability to resize the window (change scale)
+  - Scale window according to screen size (or have screen scale in config)
   - Implement GUI
   - Implement save states/rewind
   - Controller support
-  - Scale window according to screen size (or have screen scale in config)
+  - Somehow dont block while events get handled
 - Memory
   - Maybe change cartridge ram to be a memory mapped file
 - Logger
