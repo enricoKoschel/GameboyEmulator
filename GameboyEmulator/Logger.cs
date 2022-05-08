@@ -25,7 +25,8 @@ public static class Logger
 		if (!Config.GetLogEnabledConfig()) return;
 
 		LOG_DIRECTORY_PATH = Path.GetDirectoryName(Config.GetLogLocationConfig() + "/");
-		if (String.IsNullOrWhiteSpace(LOG_DIRECTORY_PATH)) LOG_DIRECTORY_PATH = "./logs/";
+		if (String.IsNullOrWhiteSpace(LOG_DIRECTORY_PATH)) LOG_DIRECTORY_PATH = "./logs";
+		LOG_DIRECTORY_PATH += "/";
 
 		LOG_FILE = CreateLogFile();
 
