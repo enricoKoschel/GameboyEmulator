@@ -19,6 +19,7 @@
 - Memory
   - Maybe change cartridge ram to be a memory mapped file
 - Logger
+  - Change log file to be a memory mapped file
   - Implement full logging of all opcodes, modules, etc. with configurable log levels
 - MBC
   - Refactor to use inheritance/polymorphism

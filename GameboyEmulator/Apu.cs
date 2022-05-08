@@ -81,6 +81,15 @@ public class Apu : SoundStream
 		Play();
 	}
 
+	private bool shouldUpdateFrameSequencer;
+
+	public void UpdateFrameSequencer()
+	{
+		if (!Enabled) return;
+
+		shouldUpdateFrameSequencer = true;
+	}
+
 	public void Update(int cycles)
 	{
 		if (!Enabled)
@@ -91,13 +100,17 @@ public class Apu : SoundStream
 			channel3.Reset();
 			channel4.Reset();
 
-			//Update is still required, because the internal frame sequencer still ticks when the apu is disabled
-			channel1.Update(cycles);
-			channel2.Update(cycles);
-			channel3.Update(cycles);
-			channel4.Update(cycles);
-
 			return;
+		}
+
+		if (shouldUpdateFrameSequencer)
+		{
+			channel1.UpdateFrameSequencer();
+			channel2.UpdateFrameSequencer();
+			channel3.UpdateFrameSequencer();
+			channel4.UpdateFrameSequencer();
+
+			shouldUpdateFrameSequencer = false;
 		}
 
 		channel1.Update(cycles);

@@ -363,9 +363,14 @@ public class InputOutput
 
 	private static void OnClosed(object? sender, EventArgs e)
 	{
-		if (sender is null) return;
+		if (sender is null)
+		{
+			Console.WriteLine("OnClosed sender is null");
+			return;
+		}
 
 		RenderWindow window = (RenderWindow)sender;
 		window.Close();
+		Environment.Exit(0);
 	}
 }

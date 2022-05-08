@@ -96,7 +96,7 @@ public class Emulator
 
 	private void Update()
 	{
-		while (isPaused)
+		while (IsRunning && isPaused)
 		{
 			inputOutput.Update();
 			Thread.Sleep(16);

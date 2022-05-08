@@ -55,7 +55,6 @@ public class ApuChannel2
 
 	private int waveDutyPosition;
 
-	private int frameSequencerCounter;
 	private int currentFrameSequencerTick;
 
 	private int lengthTimer;
@@ -74,19 +73,9 @@ public class ApuChannel2
 
 	public void Update(int cycles)
 	{
-		//The frame sequencer still gets ticked but no components get updated when the apu is disabled
-		if (!apu.Enabled) UpdateFrameSequencer(cycles, false, true);
-
 		CheckDacEnabled();
 
-		if (!Playing)
-		{
-			//The length still gets updated when the channel is disabled
-			UpdateFrameSequencer(cycles, true);
-			return;
-		}
-
-		UpdateFrameSequencer(cycles);
+		if (!Playing) return;
 
 		frequencyTimer -= cycles;
 		if (frequencyTimer > 0) return;
@@ -146,16 +135,11 @@ public class ApuChannel2
 		volumePeriodTimer     = 0;
 	}
 
-	private void UpdateFrameSequencer(int cycles, bool onlyLength = false, bool onlyTick = false)
+	public void UpdateFrameSequencer()
 	{
-		if ((frameSequencerCounter += cycles) < 8192) return;
-
-		frameSequencerCounter -= 8192;
-
-		if (onlyTick) return;
-
+		//Only the length gets updated when the channel is disabled
 		if (currentFrameSequencerTick % 2 == 0) UpdateLength();
-		if (!onlyLength && currentFrameSequencerTick == 7) UpdateVolume();
+		if (Playing && currentFrameSequencerTick == 7) UpdateVolume();
 
 		currentFrameSequencerTick++;
 		currentFrameSequencerTick %= 8;

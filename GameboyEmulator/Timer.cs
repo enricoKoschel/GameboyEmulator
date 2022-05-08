@@ -65,7 +65,15 @@ public class Timer
 
 		//Increment Divider Register every 256 Clock Cycles
 		internalDividerRegisterCounter = counterWithCycles - 256; //Maybe reset to 0
+
+		byte previousDividerRegister = DividerRegister;
 		DividerRegister++;
+
+		if (Cpu.ToBool(previousDividerRegister & 0b0010_0000) && !Cpu.ToBool(DividerRegister & 0b0010_0000))
+		{
+			//Falling edge of bit 5 of Divider Register clocks the APU's Frame Sequencer
+			emulator.apu.UpdateFrameSequencer();
+		}
 	}
 
 	private void UpdateMainTimer(int cycles)
