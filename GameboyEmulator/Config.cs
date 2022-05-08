@@ -2,6 +2,7 @@
 using System.Globalization;
 using System.IO;
 using IniParser;
+using IniParser.Model;
 
 namespace GameboyEmulator;
 
@@ -20,12 +21,16 @@ public static class Config
 
 	public static string GetControlConfig(string key)
 	{
-		return CONFIG_DATA["Controls"][key].ToUpper();
+		PropertyCollection? controls      = CONFIG_DATA["Controls"];
+		string?             configuredKey = controls?[key];
+
+		return configuredKey is null ? "" : configuredKey.ToUpper();
 	}
 
 	public static int GetColorConfig(string color)
 	{
-		string value = CONFIG_DATA["Colors"][color];
+		PropertyCollection? colors = CONFIG_DATA["Colors"];
+		string?             value  = colors?[color];
 
 		bool validInt = Int32.TryParse(value, NumberStyles.HexNumber, null, out int output);
 
@@ -34,28 +39,32 @@ public static class Config
 		return -1;
 	}
 
-	public static string GetSaveLocationConfig()
+	public static string? GetSaveLocationConfig()
 	{
-		return CONFIG_DATA["Saving"]["LOCATION"];
+		PropertyCollection? saving = CONFIG_DATA["Saving"];
+		return saving?["LOCATION"];
 	}
 
 	public static bool GetSaveEnabledConfig()
 	{
-		string value = CONFIG_DATA["Saving"]["ENABLE"];
+		PropertyCollection? saving = CONFIG_DATA["Saving"];
+		string?             value  = saving?["ENABLE"];
 
 		bool validBool = Boolean.TryParse(value, out bool output);
 
 		return !validBool || output;
 	}
 
-	public static string GetLogLocationConfig()
+	public static string? GetLogLocationConfig()
 	{
-		return CONFIG_DATA["Logging"]["LOCATION"];
+		PropertyCollection? logging = CONFIG_DATA["Logging"];
+		return logging?["LOCATION"];
 	}
 
 	public static bool GetLogEnabledConfig()
 	{
-		string value = CONFIG_DATA["Logging"]["ENABLE"];
+		PropertyCollection? logging = CONFIG_DATA["Logging"];
+		string?             value   = logging?["ENABLE"];
 
 		bool validBool = Boolean.TryParse(value, out bool output);
 
@@ -64,7 +73,8 @@ public static class Config
 
 	public static string GetRomConfig(string rom)
 	{
-		return CONFIG_DATA["Roms"][rom];
+		PropertyCollection? roms = CONFIG_DATA["Roms"];
+		return roms is null ? "" : roms[rom];
 	}
 
 	private static void CreateDefaultConfigFile()
