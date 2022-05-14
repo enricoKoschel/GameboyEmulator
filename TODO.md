@@ -7,6 +7,7 @@
   - Pass all audio test roms
   - Implement VIn (Audio from cartridge)
   - Play sound with adjusted speed when speed changes by changing what gets written into the sample list
+  - Maybe use Blip-Buf to emulate audio
 - Core
   - Implement all checks at startup (checksums, logo, etc.)
   - Implement better waiting at the end of a frame (Thread.Sleep() + correcting)
@@ -26,6 +27,7 @@
   - Implement other memory bank controllers
 - Config
   - Add audio master and channel enable to config file
+  - Use enum parsing for control config instead of checking all values manually
 - CPU
   - Implement STOP opcode
   - Refactor opcode switch statements to make them shorter
