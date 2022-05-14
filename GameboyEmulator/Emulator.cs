@@ -30,6 +30,8 @@ public class Emulator
 	private const    int   NUMBER_OF_SPEEDS_TO_AVERAGE = 60;
 	private readonly int[] lastSpeeds;
 
+	public readonly bool savingEnabled;
+
 	public readonly string bootRomFilePath;
 	public readonly string gameRomFilePath;
 	public readonly string saveFilePath;
@@ -53,7 +55,15 @@ public class Emulator
 		this.bootRomFilePath = bootRomFilePath;
 
 		string? saveFileDirectory = Path.GetDirectoryName(Config.GetSaveLocationConfig() + "/");
-		if (String.IsNullOrWhiteSpace(saveFileDirectory)) saveFileDirectory = "./saves/";
+		if (String.IsNullOrWhiteSpace(saveFileDirectory))
+		{
+			saveFileDirectory = "./saves/";
+
+			Logger.LogMessage(
+				$"Invalid value for [Saving].LOCATION in config file. Defaulting to {saveFileDirectory}.",
+				Logger.LogLevel.Warn, true
+			);
+		}
 
 		string saveFileName = Path.ChangeExtension(Path.GetFileName(gameRomFilePath), ".sav");
 		saveFilePath = $"{saveFileDirectory}/{saveFileName}";
@@ -64,8 +74,10 @@ public class Emulator
 
 		memory.LoadGame();
 
+		savingEnabled = Config.GetSaveEnabledConfig();
+
 		//Only create save directory if saving is enabled and cartridge ram exists
-		if (Config.GetSaveEnabledConfig() && memoryBankController.CartridgeRamExists)
+		if (savingEnabled && memoryBankController.CartridgeRamExists)
 			Directory.CreateDirectory(saveFileDirectory);
 	}
 

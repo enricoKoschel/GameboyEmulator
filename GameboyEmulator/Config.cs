@@ -24,7 +24,7 @@ public static class Config
 		PropertyCollection? controls      = CONFIG_DATA["Controls"];
 		string?             configuredKey = controls?[key];
 
-		return configuredKey is null ? "" : configuredKey.ToUpper();
+		return configuredKey ?? "";
 	}
 
 	public static int GetColorConfig(string color)
@@ -52,6 +52,13 @@ public static class Config
 
 		bool validBool = Boolean.TryParse(value, out bool output);
 
+		if (!validBool)
+		{
+			Logger.LogMessage(
+				"Invalid value for [Saving].ENABLE in config file. Defaulting to true.", Logger.LogLevel.Warn, true
+			);
+		}
+
 		return !validBool || output;
 	}
 
@@ -61,58 +68,60 @@ public static class Config
 		return logging?["LOCATION"];
 	}
 
-	public static bool GetLogEnabledConfig()
+	public static bool? GetLogEnabledConfig()
 	{
 		PropertyCollection? logging = CONFIG_DATA["Logging"];
 		string?             value   = logging?["ENABLE"];
 
 		bool validBool = Boolean.TryParse(value, out bool output);
 
-		return !validBool || output;
+		//Not pretty but required so the incorrect config value can be logged
+		if (!validBool) return null;
+
+		return output;
 	}
 
 	public static string GetRomConfig(string rom)
 	{
-		PropertyCollection? roms = CONFIG_DATA["Roms"];
-		return roms is null ? "" : roms[rom];
+		PropertyCollection? roms  = CONFIG_DATA["Roms"];
+		string?             value = roms?[rom];
+
+		return value ?? "";
 	}
 
 	private static void CreateDefaultConfigFile()
 	{
 		const string defaultConfig = @"[Controls]
-;Supported Keys are:
-;A-Z, 0-9, Esc, LCtrl, LShift, LAlt, Space, Enter, Backspace,
-;Tab, PageUp, PageDown, End, Home, Insert, Delete,  NumpadAdd, NumpadSubtract, NumpadMultiply,
-;NumpadDivide, Arrow keys, Numpad0-Numpad9, F1-F12, Pause
+;Supported Keys can be found at: https://www.sfml-dev.org/documentation/2.5.1/classsf_1_1Keyboard.php#acb4cacd7cc5802dec45724cf3314a142
 
 ;Default:
-;UP = UpArrow
-;DOWN = DownArrow
-;LEFT = LeftArrow
-;RIGHT = RightArrow
+;UP = Up
+;DOWN = Down
+;LEFT = Left
+;RIGHT = Right
 ;START = Enter
 ;SELECT = Space
 ;A = S
 ;B = A
-;SPEED = Shift
-;PAUSE = LCtrl
-;RESET = Esc
+;SPEED = LShift
+;PAUSE = LControl
+;RESET = Escape
 ;AUDIO_CHANNEL_1 = F5
 ;AUDIO_CHANNEL_2 = F6
 ;AUDIO_CHANNEL_3 = F7
 ;AUDIO_CHANNEL_4 = F8
 
-UP = UpArrow
-DOWN = DownArrow
-LEFT = LeftArrow
-RIGHT = RightArrow
+UP = Up
+DOWN = Down
+LEFT = Left
+RIGHT = Right
 START = Enter
 SELECT = Space
 A = S
 B = A
-SPEED = Shift
-PAUSE = LCtrl
-RESET = Esc
+SPEED = LShift
+PAUSE = LControl
+RESET = Escape
 AUDIO_CHANNEL_1 = F5
 AUDIO_CHANNEL_2 = F6
 AUDIO_CHANNEL_3 = F7
@@ -124,13 +133,13 @@ AUDIO_CHANNEL_4 = F8
 ;Default:
 ;BLACK = 081820
 ;DARK_GRAY = 346856
-;LIGHT_GRAY = 88c070
-;WHITE = e0f8d0
+;LIGHT_GRAY = 88C070
+;WHITE = E0F8D0
 
 BLACK = 081820
 DARK_GRAY = 346856
-LIGHT_GRAY = 88c070
-WHITE = e0f8d0
+LIGHT_GRAY = 88C070
+WHITE = E0F8D0
 
 [Saving]
 ;LOCATION can be an absolute or a relative path
@@ -138,22 +147,22 @@ WHITE = e0f8d0
 ;Disabling saving also disables loading
 
 ;Default:
-;ENABLE=TRUE
-;LOCATION=./saves/
+;ENABLE = TRUE
+;LOCATION = ./saves/
 
-ENABLE=true
-LOCATION=./saves/
+ENABLE = true
+LOCATION = ./saves/
 
 [Logging]
 ;LOCATION can be an absolute or a relative path
 ;The path is relative to the emulator executable
 
 ;Default:
-;ENABLE=true
-;LOCATION=./logs/
+;ENABLE = true
+;LOCATION = ./logs/
 
-ENABLE=true
-LOCATION=./logs/
+ENABLE = true
+LOCATION = ./logs/
 
 [Roms]
 ;The roms provided by the console parameters have priority over these settings

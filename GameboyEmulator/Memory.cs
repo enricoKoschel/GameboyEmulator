@@ -160,7 +160,7 @@ public class Memory
 	public void SaveCartridgeRam()
 	{
 		if (!ramChangedSinceLastSave || !emulator.memoryBankController.CartridgeRamExists ||
-			!Config.GetSaveEnabledConfig()) return;
+			!emulator.savingEnabled) return;
 
 		if (DateTime.Now < lastTimeRamWasSaved.AddSeconds(1)) return;
 
@@ -172,7 +172,7 @@ public class Memory
 
 	private void LoadCartridgeRam()
 	{
-		if (Config.GetSaveEnabledConfig() && File.Exists(emulator.saveFilePath))
+		if (emulator.savingEnabled && File.Exists(emulator.saveFilePath))
 			cartridgeRam = File.ReadAllBytes(emulator.saveFilePath);
 	}
 

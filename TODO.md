@@ -27,7 +27,6 @@
   - Implement other memory bank controllers
 - Config
   - Add audio master and channel enable to config file
-  - Use enum parsing for control config instead of checking all values manually
 - CPU
   - Implement STOP opcode
   - Refactor opcode switch statements to make them shorter
