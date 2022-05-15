@@ -106,9 +106,6 @@ public class Emulator
 		while (IsRunning) Update();
 	}
 
-	public int currentCycleInFrame;
-	public int currentFrame;
-
 	private void Update()
 	{
 		while (IsRunning && isPaused)
@@ -128,13 +125,6 @@ public class Emulator
 			int cycles = cpu.ExecuteOpcode();
 			cyclesThisFrame += cycles;
 
-			currentCycleInFrame += cycles;
-
-			if (currentFrame == 0 && currentCycleInFrame == 8192)
-			{
-				int a = 1;
-			}
-
 			//Interrupts only get enabled when requested beforehand by the corresponding instruction
 			interrupts.EnableInterrupts();
 
@@ -146,9 +136,6 @@ public class Emulator
 
 		joypad.CaptureInput();
 		inputOutput.Update();
-
-		currentCycleInFrame = 0;
-		currentFrame++;
 
 		//Save cartridge ram at the end of every frame so that no data is lost
 		memory.SaveCartridgeRam();
