@@ -30,6 +30,8 @@ public class Emulator
 	private const    int   NUMBER_OF_SPEEDS_TO_AVERAGE = 60;
 	private readonly int[] lastSpeeds;
 
+	public readonly bool savingEnabled;
+
 	public readonly string bootRomFilePath;
 	public readonly string gameRomFilePath;
 	public readonly string saveFilePath;
@@ -53,7 +55,15 @@ public class Emulator
 		this.bootRomFilePath = bootRomFilePath;
 
 		string? saveFileDirectory = Path.GetDirectoryName(Config.GetSaveLocationConfig() + "/");
-		if (String.IsNullOrWhiteSpace(saveFileDirectory)) saveFileDirectory = "./saves/";
+		if (String.IsNullOrWhiteSpace(saveFileDirectory))
+		{
+			saveFileDirectory = "./saves/";
+
+			Logger.LogMessage(
+				$"Invalid value for [Saving].LOCATION in config file. Defaulting to {saveFileDirectory}.",
+				Logger.LogLevel.Warn, true
+			);
+		}
 
 		string saveFileName = Path.ChangeExtension(Path.GetFileName(gameRomFilePath), ".sav");
 		saveFilePath = $"{saveFileDirectory}/{saveFileName}";
@@ -64,8 +74,10 @@ public class Emulator
 
 		memory.LoadGame();
 
+		savingEnabled = Config.GetSaveEnabledConfig();
+
 		//Only create save directory if saving is enabled and cartridge ram exists
-		if (Config.GetSaveEnabledConfig() && memoryBankController.CartridgeRamExists)
+		if (savingEnabled && memoryBankController.CartridgeRamExists)
 			Directory.CreateDirectory(saveFileDirectory);
 	}
 
@@ -94,9 +106,12 @@ public class Emulator
 		while (IsRunning) Update();
 	}
 
+	public int currentCycleInFrame;
+	public int currentFrame;
+
 	private void Update()
 	{
-		while (isPaused)
+		while (IsRunning && isPaused)
 		{
 			inputOutput.Update();
 			Thread.Sleep(16);
@@ -113,6 +128,13 @@ public class Emulator
 			int cycles = cpu.ExecuteOpcode();
 			cyclesThisFrame += cycles;
 
+			currentCycleInFrame += cycles;
+
+			if (currentFrame == 0 && currentCycleInFrame == 8192)
+			{
+				int a = 1;
+			}
+
 			//Interrupts only get enabled when requested beforehand by the corresponding instruction
 			interrupts.EnableInterrupts();
 
@@ -124,6 +146,9 @@ public class Emulator
 
 		joypad.CaptureInput();
 		inputOutput.Update();
+
+		currentCycleInFrame = 0;
+		currentFrame++;
 
 		//Save cartridge ram at the end of every frame so that no data is lost
 		memory.SaveCartridgeRam();

@@ -7,6 +7,8 @@
   - Pass all audio test roms
   - Implement VIn (Audio from cartridge)
   - Play sound with adjusted speed when speed changes by changing what gets written into the sample list
+  - Maybe use Blip-Buf to emulate audio
+  - Apply smoothing to audio
 - Core
   - Implement all checks at startup (checksums, logo, etc.)
   - Implement better waiting at the end of a frame (Thread.Sleep() + correcting)
@@ -19,6 +21,7 @@
 - Memory
   - Maybe change cartridge ram to be a memory mapped file
 - Logger
+  - Change log file to be a memory mapped file
   - Implement full logging of all opcodes, modules, etc. with configurable log levels
 - MBC
   - Refactor to use inheritance/polymorphism

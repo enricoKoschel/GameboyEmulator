@@ -61,6 +61,10 @@ public class ApuChannel4
 	{
 	}
 
+	public void TickFrameSequencer()
+	{
+	}
+
 	public void Reset()
 	{
 	}

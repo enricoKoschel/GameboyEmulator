@@ -18,25 +18,72 @@ public static class Logger
 	private static string CurrentTimeFileFormatted => DateTime.Now.ToString("yyyy-MM-dd__HH_mm_ss");
 
 	private static readonly string? LOG_DIRECTORY_PATH;
+	private static readonly bool    LOGGING_ENABLED;
 	private const           bool    ENABLE_CONSOLE_LOGGING = true;
 
 	static Logger()
 	{
-		if (!Config.GetLogEnabledConfig()) return;
+		bool? loggingEnabledConfig = Config.GetLogEnabledConfig();
+
+		bool enableConfigWasInvalid = false;
+		if (!loggingEnabledConfig.HasValue)
+		{
+			LOGGING_ENABLED        = true;
+			enableConfigWasInvalid = true;
+		}
+		else if (!loggingEnabledConfig.Value)
+		{
+			LOGGING_ENABLED = false;
+			return;
+		}
+		else LOGGING_ENABLED = true;
 
 		LOG_DIRECTORY_PATH = Path.GetDirectoryName(Config.GetLogLocationConfig() + "/");
-		if (String.IsNullOrWhiteSpace(LOG_DIRECTORY_PATH)) LOG_DIRECTORY_PATH = "./logs";
+
+		bool defaultDirectoryUsed = false;
+		if (String.IsNullOrWhiteSpace(LOG_DIRECTORY_PATH))
+		{
+			LOG_DIRECTORY_PATH   = "./logs";
+			defaultDirectoryUsed = true;
+		}
+
 		LOG_DIRECTORY_PATH += "/";
 
 		LOG_FILE = CreateLogFile();
 
 		//LOG_FILE cannot be null when logging is enabled
 		LOG_FILE!.AutoFlush = true;
+
+		//Not pretty but we can't call LogMessage() here because the logger isn't initialized yet
+		void LocalLogMessage(string message, LogLevel loglevel, bool logToConsole = false)
+		{
+			string logMessage = $"[{CurrentTime}][{LogLevelToString(loglevel)}] {message}";
+
+			if (logToConsole && ENABLE_CONSOLE_LOGGING) Console.WriteLine(logMessage);
+
+			//LOG_FILE cannot be null when logging is enabled
+			LOG_FILE!.WriteLine(logMessage);
+		}
+
+		if (enableConfigWasInvalid)
+		{
+			LocalLogMessage(
+				"Invalid value for [Logging].ENABLED in config file. Defaulting to true.", LogLevel.Warn, true
+			);
+		}
+
+		if (defaultDirectoryUsed)
+		{
+			LocalLogMessage(
+				$"Invalid value for [Logging].LOCATION in config file. Defaulting to {LOG_DIRECTORY_PATH}.",
+				LogLevel.Warn, true
+			);
+		}
 	}
 
 	public static void LogMessage(string message, LogLevel loglevel, bool logToConsole = false)
 	{
-		if (!Config.GetLogEnabledConfig()) return;
+		if (!LOGGING_ENABLED) return;
 
 		string logMessage = $"[{CurrentTime}][{LogLevelToString(loglevel)}] {message}";
 
@@ -48,7 +95,7 @@ public static class Logger
 
 	private static StreamWriter? CreateLogFile()
 	{
-		if (!Config.GetLogEnabledConfig()) return null;
+		if (!LOGGING_ENABLED) return null;
 
 		//LOG_DIRECTORY_PATH cannot be null when logging is enabled
 		Directory.CreateDirectory(LOG_DIRECTORY_PATH!);

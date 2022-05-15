@@ -78,7 +78,6 @@ public class ApuChannel3
 
 	private int waveRamPosition;
 
-	private int frameSequencerCounter;
 	private int currentFrameSequencerTick;
 
 	private int lengthTimer;
@@ -98,14 +97,11 @@ public class ApuChannel3
 
 	public void Update(int cycles)
 	{
-		//The frame sequencer still gets ticked but no components get updated when the apu is disabled
-		if (!apu.Enabled) UpdateFrameSequencer(cycles, true);
-
 		CheckDacEnabled();
 
 		if (!Playing) return;
 
-		UpdateFrameSequencer(cycles);
+		if (apu.ShouldTickFrameSequencer) TickFrameSequencer();
 
 		frequencyTimer -= cycles;
 		if (frequencyTimer > 0) return;
@@ -154,14 +150,8 @@ public class ApuChannel3
 		FrequencyRegisterHi         = 0;
 	}
 
-	private void UpdateFrameSequencer(int cycles, bool onlyTick = false)
+	private void TickFrameSequencer()
 	{
-		if ((frameSequencerCounter += cycles) < 8192) return;
-
-		frameSequencerCounter -= 8192;
-
-		if (onlyTick) return;
-
 		if (currentFrameSequencerTick % 2 == 0) UpdateLength();
 
 		currentFrameSequencerTick++;

@@ -55,7 +55,7 @@ public class Apu : SoundStream
 
 	private int internalMainApuCounter;
 
-	private readonly Emulator emulator;
+	public readonly Emulator emulator;
 
 	public readonly ApuChannel1 channel1;
 	public readonly ApuChannel2 channel2;
@@ -81,6 +81,15 @@ public class Apu : SoundStream
 		Play();
 	}
 
+	public bool ShouldTickFrameSequencer { get; private set; }
+
+	public void TickFrameSequencer()
+	{
+		if (!Enabled) return;
+
+		ShouldTickFrameSequencer = true;
+	}
+
 	public void Update(int cycles)
 	{
 		if (!Enabled)
@@ -91,12 +100,6 @@ public class Apu : SoundStream
 			channel3.Reset();
 			channel4.Reset();
 
-			//Update is still required, because the internal frame sequencer still ticks when the apu is disabled
-			channel1.Update(cycles);
-			channel2.Update(cycles);
-			channel3.Update(cycles);
-			channel4.Update(cycles);
-
 			return;
 		}
 
@@ -104,6 +107,8 @@ public class Apu : SoundStream
 		channel2.Update(cycles);
 		channel3.Update(cycles);
 		channel4.Update(cycles);
+
+		if (ShouldTickFrameSequencer) ShouldTickFrameSequencer = false;
 
 		internalMainApuCounter += SAMPLE_RATE * cycles;
 
