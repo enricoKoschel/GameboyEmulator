@@ -55,7 +55,7 @@ public class Apu : SoundStream
 
 	private int internalMainApuCounter;
 
-	private readonly Emulator emulator;
+	public readonly Emulator emulator;
 
 	public readonly ApuChannel1 channel1;
 	public readonly ApuChannel2 channel2;
@@ -81,13 +81,13 @@ public class Apu : SoundStream
 		Play();
 	}
 
-	private bool shouldUpdateFrameSequencer;
+	public bool ShouldTickFrameSequencer { get; private set; }
 
-	public void UpdateFrameSequencer()
+	public void TickFrameSequencer()
 	{
 		if (!Enabled) return;
 
-		shouldUpdateFrameSequencer = true;
+		ShouldTickFrameSequencer = true;
 	}
 
 	public void Update(int cycles)
@@ -103,20 +103,12 @@ public class Apu : SoundStream
 			return;
 		}
 
-		if (shouldUpdateFrameSequencer)
-		{
-			channel1.UpdateFrameSequencer();
-			channel2.UpdateFrameSequencer();
-			channel3.UpdateFrameSequencer();
-			channel4.UpdateFrameSequencer();
-
-			shouldUpdateFrameSequencer = false;
-		}
-
 		channel1.Update(cycles);
 		channel2.Update(cycles);
 		channel3.Update(cycles);
 		channel4.Update(cycles);
+
+		if (ShouldTickFrameSequencer) ShouldTickFrameSequencer = false;
 
 		internalMainApuCounter += SAMPLE_RATE * cycles;
 

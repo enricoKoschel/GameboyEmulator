@@ -8,6 +8,7 @@
   - Implement VIn (Audio from cartridge)
   - Play sound with adjusted speed when speed changes by changing what gets written into the sample list
   - Maybe use Blip-Buf to emulate audio
+  - Apply smoothing to audio
 - Core
   - Implement all checks at startup (checksums, logo, etc.)
   - Implement better waiting at the end of a frame (Thread.Sleep() + correcting)

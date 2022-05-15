@@ -101,6 +101,8 @@ public class ApuChannel3
 
 		if (!Playing) return;
 
+		if (apu.ShouldTickFrameSequencer) TickFrameSequencer();
+
 		frequencyTimer -= cycles;
 		if (frequencyTimer > 0) return;
 
@@ -148,7 +150,7 @@ public class ApuChannel3
 		FrequencyRegisterHi         = 0;
 	}
 
-	public void UpdateFrameSequencer()
+	private void TickFrameSequencer()
 	{
 		if (currentFrameSequencerTick % 2 == 0) UpdateLength();
 

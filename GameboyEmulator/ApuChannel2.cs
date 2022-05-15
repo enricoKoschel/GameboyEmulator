@@ -77,6 +77,8 @@ public class ApuChannel2
 
 		if (!Playing) return;
 
+		if (apu.ShouldTickFrameSequencer) TickFrameSequencer();
+
 		frequencyTimer -= cycles;
 		if (frequencyTimer > 0) return;
 
@@ -135,7 +137,7 @@ public class ApuChannel2
 		volumePeriodTimer     = 0;
 	}
 
-	public void UpdateFrameSequencer()
+	private void TickFrameSequencer()
 	{
 		//Only the length gets updated when the channel is disabled
 		if (currentFrameSequencerTick % 2 == 0) UpdateLength();
