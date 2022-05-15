@@ -48,14 +48,14 @@ public class Apu : SoundStream
 	};
 
 	private const int SAMPLE_RATE        = 48000;
-	private const int SAMPLE_BUFFER_SIZE = SAMPLE_RATE / 10;
+	private const int SAMPLE_BUFFER_SIZE = SAMPLE_RATE / 20;
 	private const int CHANNEL_COUNT      = 2;
 
 	public const int VOLUME_MULTIPLIER = 50;
 
 	private int internalMainApuCounter;
 
-	public readonly Emulator emulator;
+	private readonly Emulator emulator;
 
 	public readonly ApuChannel1 channel1;
 	public readonly ApuChannel2 channel2;
@@ -154,14 +154,14 @@ public class Apu : SoundStream
 
 	protected override bool OnGetData(out short[] samples)
 	{
-		//Console.WriteLine(sampleBuffer.Count);
-
-		while (sampleBuffer.Count < SAMPLE_BUFFER_SIZE) Thread.Sleep(1);
-
 		sampleBufferMutex.WaitOne();
 
-		samples = sampleBuffer.ToArray();
-		sampleBuffer.Clear();
+		if (sampleBuffer.Count > SAMPLE_BUFFER_SIZE)
+		{
+			samples = sampleBuffer.GetRange(0, SAMPLE_BUFFER_SIZE).ToArray();
+			sampleBuffer.RemoveRange(0, SAMPLE_BUFFER_SIZE);
+		}
+		else samples = new short[SAMPLE_BUFFER_SIZE];
 
 		sampleBufferMutex.ReleaseMutex();
 
