@@ -48,7 +48,7 @@ public class Apu : SoundStream
 	};
 
 	private const int SAMPLE_RATE        = 48000;
-	private const int SAMPLE_BUFFER_SIZE = SAMPLE_RATE / 20;
+	private const int SAMPLE_BUFFER_SIZE = SAMPLE_RATE / 40;
 	private const int CHANNEL_COUNT      = 2;
 
 	public const int VOLUME_MULTIPLIER = 50;
@@ -63,6 +63,7 @@ public class Apu : SoundStream
 	public readonly ApuChannel4 channel4;
 
 	private readonly List<short> sampleBuffer;
+	private          short[]     previousFullSampleBuffer;
 	private readonly Mutex       sampleBufferMutex;
 
 	public Apu(Emulator emulator)
@@ -74,8 +75,9 @@ public class Apu : SoundStream
 		channel3 = new ApuChannel3(this);
 		channel4 = new ApuChannel4(this);
 
-		sampleBuffer      = new List<short>(SAMPLE_BUFFER_SIZE * CHANNEL_COUNT);
-		sampleBufferMutex = new Mutex();
+		sampleBuffer             = new List<short>(SAMPLE_BUFFER_SIZE * CHANNEL_COUNT);
+		previousFullSampleBuffer = new short[SAMPLE_BUFFER_SIZE];
+		sampleBufferMutex        = new Mutex();
 
 		Initialize(CHANNEL_COUNT, SAMPLE_RATE);
 		Play();
@@ -158,10 +160,12 @@ public class Apu : SoundStream
 
 		if (sampleBuffer.Count > SAMPLE_BUFFER_SIZE)
 		{
-			samples = sampleBuffer.GetRange(0, SAMPLE_BUFFER_SIZE).ToArray();
+			samples                  = sampleBuffer.GetRange(0, SAMPLE_BUFFER_SIZE).ToArray();
+			previousFullSampleBuffer = samples;
+
 			sampleBuffer.RemoveRange(0, SAMPLE_BUFFER_SIZE);
 		}
-		else samples = new short[SAMPLE_BUFFER_SIZE];
+		else samples = previousFullSampleBuffer;
 
 		sampleBufferMutex.ReleaseMutex();
 
