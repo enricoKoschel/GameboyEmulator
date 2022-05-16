@@ -18,6 +18,7 @@
   - Implement save states/rewind
   - Controller support
   - Somehow dont block while events get handled
+  - Improve resetting the emulator (dont create all modules every time)
 - Memory
   - Maybe change cartridge ram to be a memory mapped file
 - Logger

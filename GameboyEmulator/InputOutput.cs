@@ -360,7 +360,7 @@ public class InputOutput
 		if (Keyboard.IsKeyPressed(speedButton))
 		{
 			emulator.MaxFps = 0;
-			emulator.apu.ClearPreviousFullSampleBuffer();
+			emulator.apu.ClearSampleBuffer();
 		}
 		else emulator.MaxFps = Emulator.GAMEBOY_FPS;
 

@@ -27,8 +27,6 @@ public class Emulator
 
 	private double sleepErrorInMilliseconds;
 
-	public int CurrentSpeed => lastSpeeds[NUMBER_OF_SPEEDS_TO_AVERAGE - 1];
-
 	private const    int   NUMBER_OF_SPEEDS_TO_AVERAGE = 60;
 	private readonly int[] lastSpeeds;
 
@@ -51,7 +49,7 @@ public class Emulator
 		ppu                  = new Ppu(this);
 		timer                = new Timer(this);
 		inputOutput          = new InputOutput(this);
-		apu                  = new Apu(this);
+		apu                  = new Apu();
 
 		this.gameRomFilePath = gameRomFilePath;
 		this.bootRomFilePath = bootRomFilePath;
@@ -96,7 +94,7 @@ public class Emulator
 		ppu                  = new Ppu(this);
 		timer                = new Timer(this);
 		inputOutput          = new InputOutput(this);
-		apu                  = new Apu(this);
+		apu                  = new Apu();
 
 		MaxFps   = GAMEBOY_FPS;
 		isPaused = false;
@@ -114,7 +112,7 @@ public class Emulator
 		while (IsRunning && isPaused)
 		{
 			inputOutput.Update();
-			apu.ClearPreviousFullSampleBuffer();
+			apu.ClearSampleBuffer();
 			Thread.Sleep(16);
 		}
 
@@ -144,10 +142,14 @@ public class Emulator
 		//Save cartridge ram at the end of every frame so that no data is lost
 		memory.SaveCartridgeRam();
 
+		//while (frameTime.Elapsed.TotalMilliseconds < MinMillisecondsPerFrame)
+		//{
+		//}
+
 		double elapsedMilliseconds = frameTime.Elapsed.TotalMilliseconds;
 		double sleepNeeded         = MinMillisecondsPerFrame - elapsedMilliseconds - sleepErrorInMilliseconds;
 
-		if (sleepNeeded > 0)
+		if (sleepNeeded > 0 && apu.AmountOfSamples > Apu.SAMPLE_BUFFER_SIZE)
 		{
 			Stopwatch sleepTime = new();
 			sleepTime.Restart();

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading;
 using SFML.Audio;
 using SFML.System;
@@ -48,14 +49,12 @@ public class Apu : SoundStream
 	};
 
 	private const int SAMPLE_RATE        = 48000;
-	private const int SAMPLE_BUFFER_SIZE = SAMPLE_RATE / 40;
+	public const  int SAMPLE_BUFFER_SIZE = SAMPLE_RATE / 40;
 	private const int CHANNEL_COUNT      = 2;
 
 	public const int VOLUME_MULTIPLIER = 50;
 
 	private int internalMainApuCounter;
-
-	private readonly Emulator emulator;
 
 	public readonly ApuChannel1 channel1;
 	public readonly ApuChannel2 channel2;
@@ -66,10 +65,8 @@ public class Apu : SoundStream
 	private          short[]     previousFullSampleBuffer;
 	private readonly Mutex       sampleBufferMutex;
 
-	public Apu(Emulator emulator)
+	public Apu()
 	{
-		this.emulator = emulator;
-
 		channel1 = new ApuChannel1(this);
 		channel2 = new ApuChannel2(this);
 		channel3 = new ApuChannel3(this);
@@ -82,6 +79,8 @@ public class Apu : SoundStream
 		Initialize(CHANNEL_COUNT, SAMPLE_RATE);
 		Play();
 	}
+
+	public int AmountOfSamples => sampleBuffer.Count;
 
 	public bool ShouldTickFrameSequencer { get; private set; }
 
@@ -117,9 +116,6 @@ public class Apu : SoundStream
 		if (internalMainApuCounter < Emulator.GAMEBOY_CLOCK_SPEED) return;
 
 		internalMainApuCounter -= Emulator.GAMEBOY_CLOCK_SPEED;
-
-		//If samples are collected when the emulator is running too fast, the sound will be delayed and practically unusable
-		if (emulator.CurrentSpeed >= 105) return;
 
 		short leftSample  = 0;
 		short rightSample = 0;
@@ -164,8 +160,13 @@ public class Apu : SoundStream
 			previousFullSampleBuffer = samples;
 
 			sampleBuffer.RemoveRange(0, SAMPLE_BUFFER_SIZE);
+			Console.WriteLine(".");
 		}
-		else samples = previousFullSampleBuffer;
+		else
+		{
+			samples = previousFullSampleBuffer;
+			Console.WriteLine("No samples");
+		}
 
 		sampleBufferMutex.ReleaseMutex();
 
@@ -177,8 +178,12 @@ public class Apu : SoundStream
 		//Function is unused
 	}
 
-	public void ClearPreviousFullSampleBuffer()
+	public void ClearSampleBuffer()
 	{
+		sampleBufferMutex.WaitOne();
+		sampleBuffer.Clear();
+		sampleBufferMutex.ReleaseMutex();
+
 		previousFullSampleBuffer = new short[SAMPLE_BUFFER_SIZE];
 	}
 
