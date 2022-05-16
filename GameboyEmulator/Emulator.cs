@@ -22,8 +22,10 @@ public class Emulator
 	//Clock speed/70224 is the exact fps of the Gameboy
 	public const double GAMEBOY_FPS = GAMEBOY_CLOCK_SPEED / 70224.0;
 
-	public  double MaxFps          { get; set; }
-	private double MinTimePerFrame => MaxFps != 0 ? 1000 / MaxFps : 0;
+	public  double MaxFps                  { get; set; }
+	private double MinMillisecondsPerFrame => MaxFps != 0 ? 1000 / MaxFps : 0;
+
+	private double sleepErrorInMilliseconds;
 
 	public int CurrentSpeed => lastSpeeds[NUMBER_OF_SPEEDS_TO_AVERAGE - 1];
 
@@ -142,10 +144,21 @@ public class Emulator
 		//Save cartridge ram at the end of every frame so that no data is lost
 		memory.SaveCartridgeRam();
 
-		//Thread.Sleep is too imprecise for this use case, thus a busy loop has to be used
-		while (frameTime.Elapsed.TotalMilliseconds < MinTimePerFrame)
+		double elapsedMilliseconds = frameTime.Elapsed.TotalMilliseconds;
+		double sleepNeeded         = MinMillisecondsPerFrame - elapsedMilliseconds - sleepErrorInMilliseconds;
+
+		if (sleepNeeded > 0)
 		{
+			Stopwatch sleepTime = new();
+			sleepTime.Restart();
+
+			Thread.Sleep((int)sleepNeeded);
+
+			//Calculate the error from sleeping too much/not enough
+			double timeSlept = sleepTime.Elapsed.TotalMilliseconds;
+			sleepErrorInMilliseconds = sleepNeeded - timeSlept;
 		}
+		else sleepErrorInMilliseconds = 0;
 
 		UpdateWindowTitle(frameTime.Elapsed.TotalMilliseconds);
 	}

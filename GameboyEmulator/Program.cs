@@ -13,6 +13,13 @@ static class Program
 	{
 		Logger.LogMessage("Program started", Logger.LogLevel.Info);
 
+		//Set timer granularity to 1ms on Windows, other platforms have finer granularity by default
+		if (Environment.OSVersion.Platform == PlatformID.Win32NT && WinApi.TimeBeginPeriod(1) != 0)
+		{
+			Logger.LogMessage("TimeBeginPeriod failed", Logger.LogLevel.Error);
+			return;
+		}
+
 		string? gameRomFilePath = null;
 		string? bootRomFilePath = null;
 		bool    shouldShowHelp  = false;
@@ -53,6 +60,13 @@ static class Program
 		Emulator emulator = new(gameRomFilePath, bootRomFilePath);
 
 		emulator.Run();
+
+		//Reset timer granularity to default on Windows
+		if (Environment.OSVersion.Platform == PlatformID.Win32NT && WinApi.TimeEndPeriod(1) != 0)
+		{
+			Logger.LogMessage("TimeEndPeriod failed", Logger.LogLevel.Error);
+			return;
+		}
 
 		Logger.LogMessage("Program terminated without errors", Logger.LogLevel.Info);
 	}
