@@ -67,8 +67,12 @@ public class Apu : SoundStream
 	private          short[]     previousFullSampleBuffer;
 	private readonly Mutex       sampleBufferMutex;
 
-	public Apu()
+	private readonly Emulator emulator;
+
+	public Apu(Emulator emulator)
 	{
+		this.emulator = emulator;
+
 		channel1 = new ApuChannel1(this);
 		channel2 = new ApuChannel2(this);
 		channel3 = new ApuChannel3(this);
@@ -163,7 +167,8 @@ public class Apu : SoundStream
 
 			sampleBuffer.RemoveRange(0, SAMPLE_BUFFER_SIZE);
 		}
-		else samples = previousFullSampleBuffer;
+		else
+			samples = emulator.inputOutput.DispatchingEvents ? new short[SAMPLE_BUFFER_SIZE] : previousFullSampleBuffer;
 
 		sampleBufferMutex.ReleaseMutex();
 

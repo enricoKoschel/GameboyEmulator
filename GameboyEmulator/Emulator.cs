@@ -50,7 +50,7 @@ public class Emulator
 		ppu                  = new Ppu(this);
 		timer                = new Timer(this);
 		inputOutput          = new InputOutput(this);
-		apu                  = new Apu();
+		apu                  = new Apu(this);
 
 		this.gameRomFilePath = gameRomFilePath;
 		this.bootRomFilePath = bootRomFilePath;
@@ -95,7 +95,7 @@ public class Emulator
 		ppu                  = new Ppu(this);
 		timer                = new Timer(this);
 		inputOutput          = new InputOutput(this);
-		apu                  = new Apu();
+		apu                  = new Apu(this);
 
 		MaxFps   = GAMEBOY_FPS;
 		isPaused = false;

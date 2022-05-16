@@ -12,6 +12,8 @@ public class InputOutput
 	public bool WindowIsOpen   => window.IsOpen;
 	public bool WindowHasFocus => window.HasFocus();
 
+	public bool DispatchingEvents { get; private set; }
+
 	private const int GAME_WIDTH  = 160;
 	private const int GAME_HEIGHT = 144;
 	private const int SCALE       = 8;
@@ -349,7 +351,10 @@ public class InputOutput
 	public void Update()
 	{
 		CheckButtons();
+
+		DispatchingEvents = true;
 		window.DispatchEvents();
+		DispatchingEvents = false;
 	}
 
 	private void CheckButtons()
