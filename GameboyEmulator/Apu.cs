@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading;
 using SFML.Audio;
 using SFML.System;
@@ -48,9 +47,12 @@ public class Apu : SoundStream
 		{ 0, 0, 0, 0, 0, 0, 1, 1 }
 	};
 
-	private const int SAMPLE_RATE        = 48000;
-	public const  int SAMPLE_BUFFER_SIZE = SAMPLE_RATE / 40;
-	private const int CHANNEL_COUNT      = 2;
+	private const int SAMPLE_RATE                        = 48000;
+	private const int SAMPLE_BUFFER_SIZE_IN_MILLISECONDS = 50;
+	private const int CHANNEL_COUNT                      = 2;
+
+	public const int SAMPLE_BUFFER_SIZE =
+		(int)(SAMPLE_RATE * CHANNEL_COUNT * (SAMPLE_BUFFER_SIZE_IN_MILLISECONDS / 1000f));
 
 	public const int VOLUME_MULTIPLIER = 50;
 
@@ -160,13 +162,8 @@ public class Apu : SoundStream
 			previousFullSampleBuffer = samples;
 
 			sampleBuffer.RemoveRange(0, SAMPLE_BUFFER_SIZE);
-			Console.WriteLine(".");
 		}
-		else
-		{
-			samples = previousFullSampleBuffer;
-			Console.WriteLine("No samples");
-		}
+		else samples = previousFullSampleBuffer;
 
 		sampleBufferMutex.ReleaseMutex();
 

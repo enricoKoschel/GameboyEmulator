@@ -28,7 +28,8 @@ public class Emulator
 	private double sleepErrorInMilliseconds;
 
 	private const    int   NUMBER_OF_SPEEDS_TO_AVERAGE = 60;
-	private readonly int[] lastSpeeds;
+	private readonly int[] speedHistory;
+	private          int   speedAverage = 100;
 
 	public readonly bool savingEnabled;
 
@@ -68,7 +69,7 @@ public class Emulator
 		string saveFileName = Path.ChangeExtension(Path.GetFileName(gameRomFilePath), ".sav");
 		saveFilePath = $"{saveFileDirectory}/{saveFileName}";
 
-		lastSpeeds = new int[NUMBER_OF_SPEEDS_TO_AVERAGE];
+		speedHistory = new int[NUMBER_OF_SPEEDS_TO_AVERAGE];
 
 		MaxFps = GAMEBOY_FPS;
 
@@ -142,27 +143,25 @@ public class Emulator
 		//Save cartridge ram at the end of every frame so that no data is lost
 		memory.SaveCartridgeRam();
 
-		//while (frameTime.Elapsed.TotalMilliseconds < MinMillisecondsPerFrame)
-		//{
-		//}
-
 		double elapsedMilliseconds = frameTime.Elapsed.TotalMilliseconds;
 		double sleepNeeded         = MinMillisecondsPerFrame - elapsedMilliseconds - sleepErrorInMilliseconds;
 
+		double timeSlept = 0;
+
 		if (sleepNeeded > 0 && apu.AmountOfSamples > Apu.SAMPLE_BUFFER_SIZE)
 		{
-			Stopwatch sleepTime = new();
-			sleepTime.Restart();
-
+			TimeOnly timeBeforeSleep = TimeOnly.FromDateTime(DateTime.Now);
 			Thread.Sleep((int)sleepNeeded);
+			TimeOnly timeAfterSleep = TimeOnly.FromDateTime(DateTime.Now);
+
+			timeSlept = (timeAfterSleep - timeBeforeSleep).TotalMilliseconds;
 
 			//Calculate the error from sleeping too much/not enough
-			double timeSlept = sleepTime.Elapsed.TotalMilliseconds;
 			sleepErrorInMilliseconds = sleepNeeded - timeSlept;
 		}
 		else sleepErrorInMilliseconds = 0;
 
-		UpdateWindowTitle(frameTime.Elapsed.TotalMilliseconds);
+		UpdateWindowTitle(elapsedMilliseconds + timeSlept);
 	}
 
 	private void UpdateWindowTitle(double elapsedTime)
@@ -171,20 +170,25 @@ public class Emulator
 		//Dividing 1674 by the frame time gives us the emulation speed out of 100%
 		int speed = Convert.ToInt32(1674 / Math.Max(elapsedTime, 1));
 
-		int speedAverage = 0;
+		if (Math.Abs(speed - speedHistory[NUMBER_OF_SPEEDS_TO_AVERAGE - 1]) > 100)
+		{
+			//If the speed is significantly different from the previous one, dont consider it
+			speedHistory[NUMBER_OF_SPEEDS_TO_AVERAGE - 1] = speed;
+			return;
+		}
 
 		//Very inefficient way to average the emulator speed
 		for (int i = 0; i < NUMBER_OF_SPEEDS_TO_AVERAGE; i++)
 		{
-			speedAverage += lastSpeeds[i];
+			speedAverage += speedHistory[i];
 
 			if (i + 1 < NUMBER_OF_SPEEDS_TO_AVERAGE)
 			{
-				lastSpeeds[i] = lastSpeeds[i + 1];
+				speedHistory[i] = speedHistory[i + 1];
 				continue;
 			}
 
-			lastSpeeds[i] = speed;
+			speedHistory[i] = speed;
 		}
 
 		speedAverage /= NUMBER_OF_SPEEDS_TO_AVERAGE;

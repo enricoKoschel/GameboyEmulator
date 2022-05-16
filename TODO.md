@@ -1,7 +1,6 @@
 # TODO
 
 - APU
-  - Fix sample buffer sometimes being empty and causing audio to lag
   - Implement channel 4
   - Implement obscure behaviour/hardware bugs for all channels
   - Pass all audio test roms
@@ -11,7 +10,6 @@
   - Apply smoothing to audio
 - Core
   - Implement all checks at startup (checksums, logo, etc.)
-  - Implement better waiting at the end of a frame (Thread.Sleep() + correcting)
   - Add the ability to resize the window (change scale)
   - Scale window according to screen size (or have screen scale in config)
   - Implement GUI
