@@ -143,8 +143,12 @@ public class Emulator
 		//Save cartridge ram at the end of every frame so that no data is lost
 		memory.SaveCartridgeRam();
 
-		double elapsedMilliseconds = frameTime.Elapsed.TotalMilliseconds;
-		double sleepNeeded         = MinMillisecondsPerFrame - elapsedMilliseconds - sleepErrorInMilliseconds;
+		LimitSpeed(frameTime.Elapsed.TotalMilliseconds);
+	}
+
+	private void LimitSpeed(double elapsedMilliseconds)
+	{
+		double sleepNeeded = MinMillisecondsPerFrame - elapsedMilliseconds - sleepErrorInMilliseconds;
 
 		double timeSlept = 0;
 
