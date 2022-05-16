@@ -84,6 +84,7 @@ public class Emulator
 	public void Reset()
 	{
 		inputOutput.CloseWindow();
+		apu.Stop();
 
 		cpu                  = new Cpu(this);
 		interrupts           = new Interrupts(this);
