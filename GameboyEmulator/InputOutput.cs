@@ -357,8 +357,12 @@ public class InputOutput
 		if (!WindowHasFocus) return;
 
 		//Check for speed button
-		if (Keyboard.IsKeyPressed(speedButton)) emulator.MaxFps = 0;
-		else emulator.MaxFps                                    = Emulator.GAMEBOY_FPS;
+		if (Keyboard.IsKeyPressed(speedButton))
+		{
+			emulator.MaxFps = 0;
+			emulator.apu.ClearPreviousFullSampleBuffer();
+		}
+		else emulator.MaxFps = Emulator.GAMEBOY_FPS;
 
 		//Check for pause button
 		if (Keyboard.IsKeyPressed(pauseButton) && !pauseButtonWasPressed)

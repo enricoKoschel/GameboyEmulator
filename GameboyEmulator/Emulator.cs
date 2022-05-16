@@ -111,6 +111,7 @@ public class Emulator
 		while (IsRunning && isPaused)
 		{
 			inputOutput.Update();
+			apu.ClearPreviousFullSampleBuffer();
 			Thread.Sleep(16);
 		}
 

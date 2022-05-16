@@ -177,6 +177,11 @@ public class Apu : SoundStream
 		//Function is unused
 	}
 
+	public void ClearPreviousFullSampleBuffer()
+	{
+		previousFullSampleBuffer = new short[SAMPLE_BUFFER_SIZE];
+	}
+
 	private void Reset()
 	{
 		ChannelControlRegister = 0;
