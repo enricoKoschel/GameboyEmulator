@@ -13,7 +13,6 @@
   - **_Scale window according to screen size (or have screen scale in config)_**
   - **_Implement GUI_**
   - **_Implement save states/rewind_**
-  - **_Controller support_**
   - Implement all checks at startup (checksums, logo, etc.)
   - Somehow dont block while events get handled
   - Improve resetting the emulator (dont create all modules every time)
@@ -27,6 +26,9 @@
   - Refactor to use inheritance/polymorphism
 - Config
   - Add audio master enable to config file
+- Controls
+  - **_Implement controller support_**
+  - Ask for confirmation on reset
 - CPU
   - Implement STOP opcode
   - Refactor opcode decoding to use blocks of similar opcodes instead of a big switch statement
