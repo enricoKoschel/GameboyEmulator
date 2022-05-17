@@ -1,20 +1,20 @@
 # TODO
 
 - APU
-  - Implement channel 4
+  - **_Implement channel 4_**
+  - **_Play sound with adjusted speed when speed changes by changing what gets written into the sample list_**
   - Implement obscure behaviour/hardware bugs for all channels
   - Pass all audio test roms
   - Implement VIn (Audio from cartridge)
-  - Play sound with adjusted speed when speed changes by changing what gets written into the sample list
   - Maybe use Blip-Buf to emulate audio
-  - Apply smoothing to audio
+  - Apply smoothing to square waves
 - Core
+  - **_Add the ability to resize the window (change scale)_**
+  - **_Scale window according to screen size (or have screen scale in config)_**
+  - **_Implement GUI_**
+  - **_Implement save states/rewind_**
+  - **_Controller support_**
   - Implement all checks at startup (checksums, logo, etc.)
-  - Add the ability to resize the window (change scale)
-  - Scale window according to screen size (or have screen scale in config)
-  - Implement GUI
-  - Implement save states/rewind
-  - Controller support
   - Somehow dont block while events get handled
   - Improve resetting the emulator (dont create all modules every time)
 - Memory
@@ -23,8 +23,8 @@
   - Change log file to be a memory mapped file
   - Implement full logging of all opcodes, modules, etc. with configurable log levels
 - MBC
+  - **_Implement other memory bank controllers (especially mbc3)_**
   - Refactor to use inheritance/polymorphism
-  - Implement other memory bank controllers
 - Config
   - Add audio master enable to config file
 - CPU
@@ -34,6 +34,6 @@
 - Fix game specific bugs
   - Buggy games
     - mario.gb (coin collect sound doesnt stop when the next one starts)
+    - donkeykong.gb (weird lines in select screen and at the bottom of the screen)
   - Broken games
-    - donkeykong.gb (glitchy screen at the beginning and locks up after 2 levels)
-    - frogger.gb (pretty much unplayable, some sprites missing/corrupted)
+    - frogger.gb (pretty much unplayable, some sprites missing/corrupted, annoying sound)
