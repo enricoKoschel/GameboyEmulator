@@ -26,10 +26,10 @@
   - Refactor to use inheritance/polymorphism
   - Implement other memory bank controllers
 - Config
-  - Add audio master and channel enable to config file
+  - Add audio master enable to config file
 - CPU
   - Implement STOP opcode
-  - Refactor opcode switch statements to make them shorter
+  - Refactor opcode decoding to use blocks of similar opcodes instead of a big switch statement
   - Maybe implement different opcode structure from branch "opcodeStructureExperiment"
 - Fix game specific bugs
   - Buggy games
