@@ -129,7 +129,7 @@ public class Emulator
 			cyclesThisFrame += cycles;
 
 			//Interrupts only get enabled when requested beforehand by the corresponding instruction
-			interrupts.EnableInterrupts();
+			interrupts.CheckEnable();
 
 			ppu.Update(cycles);
 			timer.Update(cycles);

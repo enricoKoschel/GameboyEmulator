@@ -86,9 +86,9 @@ public class Interrupts
 
 	public EnableInterruptsStatus enableInterruptsStatus = EnableInterruptsStatus.None;
 
-	public void EnableInterrupts()
+	public void CheckEnable()
 	{
-		//After interrupts are enabled, there is a delay of one cycle until they are actually enabled
+		//When interrupts are enabled, there is a delay of one cycle until they are actually enabled
 		switch (enableInterruptsStatus)
 		{
 			case EnableInterruptsStatus.NextCycle:
