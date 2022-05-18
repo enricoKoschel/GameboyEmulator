@@ -47,7 +47,7 @@ public class Apu : SoundStream
 		{ 0, 0, 0, 0, 0, 0, 1, 1 }
 	};
 
-	private const int SAMPLE_RATE                        = 48000;
+	public const  int SAMPLE_RATE                        = 48000;
 	private const int SAMPLE_BUFFER_SIZE_IN_MILLISECONDS = 50;
 	private const int CHANNEL_COUNT                      = 2;
 
@@ -95,6 +95,13 @@ public class Apu : SoundStream
 		if (!Enabled) return;
 
 		ShouldTickFrameSequencer = true;
+	}
+
+	public void SetSampleRate(uint sampleRate)
+	{
+		Stop();
+		Initialize(CHANNEL_COUNT, sampleRate);
+		Play();
 	}
 
 	public void Update(int cycles)

@@ -19,8 +19,7 @@ public class Emulator
 
 	public const int GAMEBOY_CLOCK_SPEED = 4194304;
 
-	//Clock speed/70224 is the exact fps of the Gameboy
-	public const double GAMEBOY_FPS = GAMEBOY_CLOCK_SPEED / 70224.0;
+	public const double GAMEBOY_FPS = (float)GAMEBOY_CLOCK_SPEED / Cpu.MAX_CYCLES_PER_FRAME;
 
 	public  double MaxFps                  { get; set; }
 	private double MinMillisecondsPerFrame => MaxFps != 0 ? 1000 / MaxFps : 0;
@@ -70,6 +69,7 @@ public class Emulator
 		saveFilePath = $"{saveFileDirectory}/{saveFileName}";
 
 		speedHistory = new int[NUMBER_OF_SPEEDS_TO_AVERAGE];
+		Array.Fill(speedHistory, 100);
 
 		MaxFps = GAMEBOY_FPS;
 
@@ -165,37 +165,65 @@ public class Emulator
 		}
 		else sleepErrorInMilliseconds = 0;
 
-		UpdateWindowTitle(elapsedMilliseconds + timeSlept);
-	}
+		double totalElapsedTime = elapsedMilliseconds + timeSlept;
 
-	private void UpdateWindowTitle(double elapsedTime)
-	{
 		//One frame on the Gameboy takes about 16.74 milliseconds to render
-		//Dividing 1674 by the frame time gives us the emulation speed out of 100%
-		int speed = Convert.ToInt32(1674 / Math.Max(elapsedTime, 1));
+		//Dividing 1674 by the frame time calculates the emulation speed out of 100%
+		int speed = Convert.ToInt32(1674 / Math.Max(totalElapsedTime, Double.MinValue));
 
-		if (Math.Abs(speed - speedHistory[NUMBER_OF_SPEEDS_TO_AVERAGE - 1]) > 100)
+		//Catch single frames where the speed is very low or very high
+		if (Math.Abs(speed - speedHistory[NUMBER_OF_SPEEDS_TO_AVERAGE - 1]) > 50)
 		{
-			//If the speed is significantly different from the previous one, dont consider it
 			speedHistory[NUMBER_OF_SPEEDS_TO_AVERAGE - 1] = speed;
 			return;
 		}
 
-		//Very inefficient way to average the emulator speed
-		for (int i = 0; i < NUMBER_OF_SPEEDS_TO_AVERAGE; i++)
-		{
-			speedAverage += speedHistory[i];
+		UpdateWindowTitle(speed);
 
-			if (i + 1 < NUMBER_OF_SPEEDS_TO_AVERAGE)
+		uint oldSampleRate = apu.SampleRate;
+		uint newSampleRate = (uint)Math.Clamp(
+			Apu.SAMPLE_RATE * (speed / 100f), Apu.SAMPLE_RATE / 10f, Apu.SAMPLE_RATE * 5
+		);
+
+		//Console.WriteLine($"Speed average: {speedAverage}%");
+		//Console.WriteLine($"Sample rate: {oldSampleRate} Hz -> {newSampleRate} Hz");
+		//Console.WriteLine();
+
+		if (Math.Abs(speed - speedAverage) > 50)
+		{
+			apu.SetSampleRate(newSampleRate);
+			Console.WriteLine($"Speed: {speed}%");
+			Console.WriteLine($"Speed average: {speedAverage}%");
+			Console.WriteLine($"Sample rate: {oldSampleRate} Hz -> {newSampleRate} Hz");
+			Console.WriteLine();
+		}
+	}
+
+	private void UpdateWindowTitle(int speed)
+	{
+		if (Math.Abs(speed - speedAverage) > 100)
+		{
+			speedAverage = speed;
+			Console.WriteLine($"Set speed average to {speedAverage}%");
+		}
+		else
+		{
+			//Very inefficient way to average the emulator speed
+			for (int i = 0; i < NUMBER_OF_SPEEDS_TO_AVERAGE; i++)
 			{
-				speedHistory[i] = speedHistory[i + 1];
-				continue;
+				speedAverage += speedHistory[i];
+
+				if (i + 1 < NUMBER_OF_SPEEDS_TO_AVERAGE)
+				{
+					speedHistory[i] = speedHistory[i + 1];
+					continue;
+				}
+
+				speedHistory[i] = speed;
 			}
 
-			speedHistory[i] = speed;
+			speedAverage /= NUMBER_OF_SPEEDS_TO_AVERAGE;
 		}
-
-		speedAverage /= NUMBER_OF_SPEEDS_TO_AVERAGE;
 
 		inputOutput.SetWindowTitle(
 			isPaused
