@@ -70,6 +70,7 @@ public class InputOutput
 
 	private readonly bool[,] zBuffer;
 
+	private bool speedButtonWasPressed;
 	private bool pauseButtonWasPressed;
 	private bool audioChannel1ButtonWasPressed;
 	private bool audioChannel2ButtonWasPressed;
@@ -96,6 +97,8 @@ public class InputOutput
 		InitialiseColors();
 
 		window.SetActive();
+
+		window.SetFramerateLimit(40);
 
 		window.Closed += OnClosed;
 	}
@@ -362,12 +365,17 @@ public class InputOutput
 		if (!WindowHasFocus) return;
 
 		//Check for speed button
-		if (Keyboard.IsKeyPressed(speedButton))
+		if (!speedButtonWasPressed && Keyboard.IsKeyPressed(speedButton))
 		{
-			emulator.MaxFps = 0;
-			//emulator.apu.ClearSampleBuffer();
+			speedButtonWasPressed = true;
+			emulator.MaxFps       = 0;
 		}
-		else emulator.MaxFps = Emulator.GAMEBOY_FPS;
+		else if (speedButtonWasPressed && !Keyboard.IsKeyPressed(speedButton))
+		{
+			speedButtonWasPressed = false;
+			emulator.MaxFps       = Emulator.GAMEBOY_FPS;
+			emulator.apu.ClearSampleBuffer();
+		}
 
 		//Check for pause button
 		if (Keyboard.IsKeyPressed(pauseButton) && !pauseButtonWasPressed)

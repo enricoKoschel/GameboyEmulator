@@ -28,7 +28,7 @@ public class Emulator
 
 	private const    int   NUMBER_OF_SPEEDS_TO_AVERAGE = 60;
 	private readonly int[] speedHistory;
-	private          int   speedAverage = 100;
+	public           int   SpeedAverage { get; private set; } = 100;
 
 	public readonly bool savingEnabled;
 
@@ -172,46 +172,28 @@ public class Emulator
 		int speed = Convert.ToInt32(1674 / Math.Max(totalElapsedTime, Double.MinValue));
 
 		//Catch single frames where the speed is very low or very high
-		if (Math.Abs(speed - speedHistory[NUMBER_OF_SPEEDS_TO_AVERAGE - 1]) > 50)
+		if (Math.Abs(speed - speedHistory[^1]) > 50)
 		{
-			speedHistory[NUMBER_OF_SPEEDS_TO_AVERAGE - 1] = speed;
+			speedHistory[^1] = speed;
 			return;
 		}
 
 		UpdateWindowTitle(speed);
-
-		uint oldSampleRate = apu.SampleRate;
-		uint newSampleRate = (uint)Math.Clamp(
-			Apu.SAMPLE_RATE * (speed / 100f), Apu.SAMPLE_RATE / 10f, Apu.SAMPLE_RATE * 5
-		);
-
-		//Console.WriteLine($"Speed average: {speedAverage}%");
-		//Console.WriteLine($"Sample rate: {oldSampleRate} Hz -> {newSampleRate} Hz");
-		//Console.WriteLine();
-
-		if (Math.Abs(speed - speedAverage) > 50)
-		{
-			apu.SetSampleRate(newSampleRate);
-			Console.WriteLine($"Speed: {speed}%");
-			Console.WriteLine($"Speed average: {speedAverage}%");
-			Console.WriteLine($"Sample rate: {oldSampleRate} Hz -> {newSampleRate} Hz");
-			Console.WriteLine();
-		}
 	}
 
 	private void UpdateWindowTitle(int speed)
 	{
-		if (Math.Abs(speed - speedAverage) > 100)
+		if (Math.Abs(speed - SpeedAverage) > 150)
 		{
-			speedAverage = speed;
-			Console.WriteLine($"Set speed average to {speedAverage}%");
+			SpeedAverage = speed;
+			Array.Fill(speedHistory, speed);
 		}
 		else
 		{
 			//Very inefficient way to average the emulator speed
 			for (int i = 0; i < NUMBER_OF_SPEEDS_TO_AVERAGE; i++)
 			{
-				speedAverage += speedHistory[i];
+				SpeedAverage += speedHistory[i];
 
 				if (i + 1 < NUMBER_OF_SPEEDS_TO_AVERAGE)
 				{
@@ -222,13 +204,13 @@ public class Emulator
 				speedHistory[i] = speed;
 			}
 
-			speedAverage /= NUMBER_OF_SPEEDS_TO_AVERAGE;
+			SpeedAverage /= NUMBER_OF_SPEEDS_TO_AVERAGE;
 		}
 
 		inputOutput.SetWindowTitle(
 			isPaused
 				? $"{Path.GetFileName(gameRomFilePath)} | paused"
-				: $"{Path.GetFileName(gameRomFilePath)} | Speed: {speedAverage}%"
+				: $"{Path.GetFileName(gameRomFilePath)} | Speed: {SpeedAverage}%"
 		);
 	}
 }

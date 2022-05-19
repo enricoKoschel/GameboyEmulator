@@ -47,7 +47,7 @@ public class Apu : SoundStream
 		{ 0, 0, 0, 0, 0, 0, 1, 1 }
 	};
 
-	public const  int SAMPLE_RATE                        = 48000;
+	private const int SAMPLE_RATE                        = 48000;
 	private const int SAMPLE_BUFFER_SIZE_IN_MILLISECONDS = 50;
 	private const int CHANNEL_COUNT                      = 2;
 
@@ -78,7 +78,7 @@ public class Apu : SoundStream
 		channel3 = new ApuChannel3(this);
 		channel4 = new ApuChannel4(this);
 
-		sampleBuffer             = new List<short>(SAMPLE_BUFFER_SIZE * CHANNEL_COUNT);
+		sampleBuffer             = new List<short>(SAMPLE_BUFFER_SIZE);
 		previousFullSampleBuffer = new short[SAMPLE_BUFFER_SIZE];
 		sampleBufferMutex        = new Mutex();
 
@@ -95,13 +95,6 @@ public class Apu : SoundStream
 		if (!Enabled) return;
 
 		ShouldTickFrameSequencer = true;
-	}
-
-	public void SetSampleRate(uint sampleRate)
-	{
-		Stop();
-		Initialize(CHANNEL_COUNT, sampleRate);
-		Play();
 	}
 
 	public void Update(int cycles)
@@ -125,6 +118,20 @@ public class Apu : SoundStream
 		if (ShouldTickFrameSequencer) ShouldTickFrameSequencer = false;
 
 		internalMainApuCounter += SAMPLE_RATE * cycles;
+
+		//TODO drop samples when the speed is higher than 100%
+		//if (emulator.SpeedAverage > 200)
+		//{
+		//	internalMainApuCounter *= 2;
+		//}
+		//else if (emulator.SpeedAverage > 400)
+		//{
+		//	internalMainApuCounter *= 4;
+		//}
+		//else if (emulator.SpeedAverage > 800)
+		//{
+		//	internalMainApuCounter *= 8;
+		//}
 
 		if (internalMainApuCounter < Emulator.GAMEBOY_CLOCK_SPEED) return;
 
@@ -167,7 +174,7 @@ public class Apu : SoundStream
 	{
 		sampleBufferMutex.WaitOne();
 
-		if (sampleBuffer.Count > SAMPLE_BUFFER_SIZE)
+		if (sampleBuffer.Count >= SAMPLE_BUFFER_SIZE)
 		{
 			samples                  = sampleBuffer.GetRange(0, SAMPLE_BUFFER_SIZE).ToArray();
 			previousFullSampleBuffer = samples;
@@ -175,7 +182,10 @@ public class Apu : SoundStream
 			sampleBuffer.RemoveRange(0, SAMPLE_BUFFER_SIZE);
 		}
 		else
+		{
+			//TODO Stretch samples when the buffer does not have enough
 			samples = emulator.inputOutput.DispatchingEvents ? new short[SAMPLE_BUFFER_SIZE] : previousFullSampleBuffer;
+		}
 
 		sampleBufferMutex.ReleaseMutex();
 
