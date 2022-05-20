@@ -184,6 +184,26 @@ public class Apu : SoundStream
 		else
 		{
 			//TODO Stretch samples when the buffer does not have enough
+			// //Dispatching events (i.e. moving the window) causes emulator to freeze so play silence
+			// if (emulator.inputOutput.DispatchingEvents)
+			// {
+			// 	samples = new short[SAMPLE_BUFFER_SIZE];
+			// 	sampleBufferMutex.ReleaseMutex();
+			// 
+			// 	return true;
+			// }
+			// 
+			// //If the buffer is not full stretch the last sample to fill the buffer
+			// samples = new short[SAMPLE_BUFFER_SIZE];
+			// Array.Copy(samples, sampleBuffer.ToArray(), sampleBuffer.Count);
+			// 
+			// sampleBuffer.Clear();
+			// 
+			// //Stretch all samples uniformly instead of repeating the last sample
+			// short lastSample = samples[^1];
+			// 
+			// for (int i = sampleBuffer.Count; i < SAMPLE_BUFFER_SIZE; i++) samples[i] = lastSample;
+
 			samples = emulator.inputOutput.DispatchingEvents ? new short[SAMPLE_BUFFER_SIZE] : previousFullSampleBuffer;
 		}
 
