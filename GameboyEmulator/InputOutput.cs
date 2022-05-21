@@ -98,8 +98,6 @@ public class InputOutput
 
 		window.SetActive();
 
-		window.SetFramerateLimit(40);
-
 		window.Closed += OnClosed;
 	}
 
