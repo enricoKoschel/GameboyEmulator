@@ -172,6 +172,10 @@ public class Interrupts
 				JoypadRequested = false;
 				emulator.cpu.ServiceInterrupt(0x60);
 				break;
+			default:
+				Logger.LogMessage($"Tried to service invalid interrupt '{interrupt}'!", Logger.LogLevel.Error, true);
+				Environment.Exit(1);
+				break;
 		}
 	}
 }
