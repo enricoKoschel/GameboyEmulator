@@ -73,9 +73,9 @@ public class Emulator
 
 		MaxFps = GAMEBOY_FPS;
 
-		memory.LoadGame();
-
 		savingEnabled = Config.GetSaveEnabledConfig();
+
+		memory.LoadGame();
 
 		//Only create save directory if saving is enabled and cartridge ram exists
 		if (savingEnabled && memoryBankController.CartridgeRamExists)
