@@ -155,11 +155,12 @@ public class Emulator
 
 		if (sleepNeeded > 0 && apu.AmountOfSamples > Apu.SAMPLE_BUFFER_SIZE)
 		{
-			TimeOnly timeBeforeSleep = TimeOnly.FromDateTime(DateTime.Now);
+			Stopwatch sleepTime = new();
+			sleepTime.Restart();
 			Thread.Sleep((int)sleepNeeded);
-			TimeOnly timeAfterSleep = TimeOnly.FromDateTime(DateTime.Now);
+			sleepTime.Stop();
 
-			timeSlept = (timeAfterSleep - timeBeforeSleep).TotalMilliseconds;
+			timeSlept = sleepTime.Elapsed.TotalMilliseconds;
 
 			//Calculate the error from sleeping too much/not enough
 			sleepErrorInMilliseconds = sleepNeeded - timeSlept;
