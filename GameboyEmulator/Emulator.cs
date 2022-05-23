@@ -153,7 +153,7 @@ public class Emulator
 
 		double timeSlept = 0;
 
-		if (sleepNeeded > 0 && apu.AmountOfSamples > Apu.SAMPLE_BUFFER_SIZE)
+		if (sleepNeeded > 0 && (apu.AmountOfSamples > Apu.SAMPLE_BUFFER_SIZE || !apu.Enabled))
 		{
 			Stopwatch sleepTime = new();
 			sleepTime.Restart();
