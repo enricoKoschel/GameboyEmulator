@@ -124,7 +124,8 @@ public class Interrupts
 				JoypadRequested = true;
 				break;
 			default:
-				throw new ArgumentOutOfRangeException(nameof(interrupt), interrupt, "Invalid interrupt requested!");
+				Logger.ControlledCrash($"Invalid interrupt '{interrupt}' requested");
+				break;
 		}
 
 		if (((byte)interrupt & InterruptEnableRegister) != 0)
@@ -173,8 +174,7 @@ public class Interrupts
 				emulator.cpu.ServiceInterrupt(0x60);
 				break;
 			default:
-				Logger.LogMessage($"Tried to service invalid interrupt '{interrupt}'!", Logger.LogLevel.Error, true);
-				Environment.Exit(1);
+				Logger.ControlledCrash($"Tried to service invalid interrupt '{interrupt}'");
 				break;
 		}
 	}

@@ -1,6 +1,4 @@
-﻿using System.IO;
-
-namespace GameboyEmulator;
+﻿namespace GameboyEmulator;
 
 public class ApuChannel3
 {
@@ -62,14 +60,26 @@ public class ApuChannel3
 
 	private bool EnableLength => Cpu.GetBit(FrequencyRegisterHi, 6);
 
-	private int CurrentVolumeShiftAmount => OutputLevel switch
+	private int CurrentVolumeShiftAmount
 	{
-		0b00 => 4,
-		0b01 => 0,
-		0b10 => 1,
-		0b11 => 2,
-		_    => throw new InvalidDataException($"{nameof(OutputLevel)} above 3 should be impossible!")
-	};
+		get
+		{
+			switch (OutputLevel)
+			{
+				case 0b00:
+					return 4;
+				case 0b01:
+					return 0;
+				case 0b10:
+					return 1;
+				case 0b11:
+					return 2;
+				default:
+					Logger.Unreachable();
+					return 0;
+			}
+		}
+	}
 
 	private bool LeftEnabled  => Cpu.GetBit(apu.SoundOutputTerminalSelectRegister, 6);
 	private bool RightEnabled => Cpu.GetBit(apu.SoundOutputTerminalSelectRegister, 2);

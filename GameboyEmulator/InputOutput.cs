@@ -103,18 +103,28 @@ public class InputOutput
 
 	public static bool IsButtonPressed(Joypad.Button button)
 	{
-		return button switch
+		switch (button)
 		{
-			Joypad.Button.Up     => Keyboard.IsKeyPressed(upButton),
-			Joypad.Button.Down   => Keyboard.IsKeyPressed(downButton),
-			Joypad.Button.Left   => Keyboard.IsKeyPressed(leftButton),
-			Joypad.Button.Right  => Keyboard.IsKeyPressed(rightButton),
-			Joypad.Button.Start  => Keyboard.IsKeyPressed(startButton),
-			Joypad.Button.Select => Keyboard.IsKeyPressed(selectButton),
-			Joypad.Button.A      => Keyboard.IsKeyPressed(aButton),
-			Joypad.Button.B      => Keyboard.IsKeyPressed(bButton),
-			_                    => throw new ArgumentOutOfRangeException(nameof(button), button, "Invalid button!")
-		};
+			case Joypad.Button.Up:
+				return Keyboard.IsKeyPressed(upButton);
+			case Joypad.Button.Down:
+				return Keyboard.IsKeyPressed(downButton);
+			case Joypad.Button.Left:
+				return Keyboard.IsKeyPressed(leftButton);
+			case Joypad.Button.Right:
+				return Keyboard.IsKeyPressed(rightButton);
+			case Joypad.Button.Start:
+				return Keyboard.IsKeyPressed(startButton);
+			case Joypad.Button.Select:
+				return Keyboard.IsKeyPressed(selectButton);
+			case Joypad.Button.A:
+				return Keyboard.IsKeyPressed(aButton);
+			case Joypad.Button.B:
+				return Keyboard.IsKeyPressed(bButton);
+			default:
+				Logger.ControlledCrash($"Invalid button '{button}'");
+				return false;
+		}
 	}
 
 	private static void InitialiseControls()
@@ -122,163 +132,129 @@ public class InputOutput
 		upButton = ConvertStringToSfmlKey(Config.GetControlConfig("UP"));
 		if (upButton == Keyboard.Key.Unknown)
 		{
-			upButton = DEFAULT_UP_BUTTON;
+			Logger.LogInvalidConfigValue("[Controls].UP", Config.GetControlConfig("UP"), DEFAULT_UP_BUTTON);
 
-			Logger.LogMessage(
-				$"Invalid value for [Controls].UP in config file. Defaulting to {upButton}.", Logger.LogLevel.Warn, true
-			);
+			upButton = DEFAULT_UP_BUTTON;
 		}
 
 		downButton = ConvertStringToSfmlKey(Config.GetControlConfig("DOWN"));
 		if (downButton == Keyboard.Key.Unknown)
 		{
-			downButton = DEFAULT_DOWN_BUTTON;
+			Logger.LogInvalidConfigValue("[Controls].DOWN", Config.GetControlConfig("DOWN"), DEFAULT_DOWN_BUTTON);
 
-			Logger.LogMessage(
-				$"Invalid value for [Controls].DOWN in config file. Defaulting to {downButton}.", Logger.LogLevel.Warn,
-				true
-			);
+			downButton = DEFAULT_DOWN_BUTTON;
 		}
 
 		leftButton = ConvertStringToSfmlKey(Config.GetControlConfig("LEFT"));
 		if (leftButton == Keyboard.Key.Unknown)
 		{
-			leftButton = DEFAULT_LEFT_BUTTON;
+			Logger.LogInvalidConfigValue("[Controls].LEFT", Config.GetControlConfig("LEFT"), DEFAULT_LEFT_BUTTON);
 
-			Logger.LogMessage(
-				$"Invalid value for [Controls].LEFT in config file. Defaulting to {leftButton}.", Logger.LogLevel.Warn,
-				true
-			);
+			leftButton = DEFAULT_LEFT_BUTTON;
 		}
 
 		rightButton = ConvertStringToSfmlKey(Config.GetControlConfig("RIGHT"));
 		if (rightButton == Keyboard.Key.Unknown)
 		{
-			rightButton = DEFAULT_RIGHT_BUTTON;
+			Logger.LogInvalidConfigValue("[Controls].RIGHT", Config.GetControlConfig("RIGHT"), DEFAULT_RIGHT_BUTTON);
 
-			Logger.LogMessage(
-				$"Invalid value for [Controls].RIGHT in config file. Defaulting to {rightButton}.",
-				Logger.LogLevel.Warn, true
-			);
+			rightButton = DEFAULT_RIGHT_BUTTON;
 		}
 
 		startButton = ConvertStringToSfmlKey(Config.GetControlConfig("START"));
 		if (startButton == Keyboard.Key.Unknown)
 		{
-			startButton = DEFAULT_START_BUTTON;
+			Logger.LogInvalidConfigValue("[Controls].START", Config.GetControlConfig("START"), DEFAULT_START_BUTTON);
 
-			Logger.LogMessage(
-				$"Invalid value for [Controls].START in config file. Defaulting to {startButton}.",
-				Logger.LogLevel.Warn, true
-			);
+			startButton = DEFAULT_START_BUTTON;
 		}
 
 		selectButton = ConvertStringToSfmlKey(Config.GetControlConfig("SELECT"));
 		if (selectButton == Keyboard.Key.Unknown)
 		{
-			selectButton = DEFAULT_SELECT_BUTTON;
+			Logger.LogInvalidConfigValue("[Controls].SELECT", Config.GetControlConfig("SELECT"), DEFAULT_SELECT_BUTTON);
 
-			Logger.LogMessage(
-				$"Invalid value for [Controls].SELECT in config file. Defaulting to {selectButton}.",
-				Logger.LogLevel.Warn, true
-			);
+			selectButton = DEFAULT_SELECT_BUTTON;
 		}
 
 		aButton = ConvertStringToSfmlKey(Config.GetControlConfig("A"));
 		if (aButton == Keyboard.Key.Unknown)
 		{
-			aButton = DEFAULT_A_BUTTON;
+			Logger.LogInvalidConfigValue("[Controls].A", Config.GetControlConfig("A"), DEFAULT_A_BUTTON);
 
-			Logger.LogMessage(
-				$"Invalid value for [Controls].A in config file. Defaulting to {aButton}.", Logger.LogLevel.Warn, true
-			);
+			aButton = DEFAULT_A_BUTTON;
 		}
 
 		bButton = ConvertStringToSfmlKey(Config.GetControlConfig("B"));
 		if (bButton == Keyboard.Key.Unknown)
 		{
-			bButton = DEFAULT_B_BUTTON;
+			Logger.LogInvalidConfigValue("[Controls].B", Config.GetControlConfig("B"), DEFAULT_B_BUTTON);
 
-			Logger.LogMessage(
-				$"Invalid value for [Controls].B in config file. Defaulting to {bButton}.", Logger.LogLevel.Warn, true
-			);
+			bButton = DEFAULT_B_BUTTON;
 		}
 
 		speedButton = ConvertStringToSfmlKey(Config.GetControlConfig("SPEED"));
 		if (speedButton == Keyboard.Key.Unknown)
 		{
-			speedButton = DEFAULT_SPEED_BUTTON;
+			Logger.LogInvalidConfigValue("[Controls].SPEED", Config.GetControlConfig("SPEED"), DEFAULT_SPEED_BUTTON);
 
-			Logger.LogMessage(
-				$"Invalid value for [Controls].SPEED in config file. Defaulting to {speedButton}.",
-				Logger.LogLevel.Warn, true
-			);
+			speedButton = DEFAULT_SPEED_BUTTON;
 		}
 
 		pauseButton = ConvertStringToSfmlKey(Config.GetControlConfig("PAUSE"));
 		if (pauseButton == Keyboard.Key.Unknown)
 		{
-			pauseButton = DEFAULT_PAUSE_BUTTON;
+			Logger.LogInvalidConfigValue("[Controls].PAUSE", Config.GetControlConfig("PAUSE"), DEFAULT_PAUSE_BUTTON);
 
-			Logger.LogMessage(
-				$"Invalid value for [Controls].PAUSE in config file. Defaulting to {pauseButton}.",
-				Logger.LogLevel.Warn, true
-			);
+			pauseButton = DEFAULT_PAUSE_BUTTON;
 		}
 
 		resetButton = ConvertStringToSfmlKey(Config.GetControlConfig("RESET"));
 		if (resetButton == Keyboard.Key.Unknown)
 		{
-			resetButton = DEFAULT_RESET_BUTTON;
+			Logger.LogInvalidConfigValue("[Controls].RESET", Config.GetControlConfig("RESET"), DEFAULT_RESET_BUTTON);
 
-			Logger.LogMessage(
-				$"Invalid value for [Controls].RESET in config file. Defaulting to {resetButton}.",
-				Logger.LogLevel.Warn, true
-			);
+			resetButton = DEFAULT_RESET_BUTTON;
 		}
 
 		audioChannel1Button = ConvertStringToSfmlKey(Config.GetControlConfig("AUDIO_CHANNEL_1"));
 		if (audioChannel1Button == Keyboard.Key.Unknown)
 		{
-			audioChannel1Button = DEFAULT_AUDIO_CHANNEL_1_BUTTON;
-
-			Logger.LogMessage(
-				$"Invalid value for [Controls].AUDIO_CHANNEL_1 in config file. Defaulting to {audioChannel1Button}.",
-				Logger.LogLevel.Warn, true
+			Logger.LogInvalidConfigValue(
+				"[Controls].AUDIO_CHANNEL_1", Config.GetControlConfig("AUDIO_CHANNEL_1"), DEFAULT_AUDIO_CHANNEL_1_BUTTON
 			);
+
+			audioChannel1Button = DEFAULT_AUDIO_CHANNEL_1_BUTTON;
 		}
 
 		audioChannel2Button = ConvertStringToSfmlKey(Config.GetControlConfig("AUDIO_CHANNEL_2"));
 		if (audioChannel2Button == Keyboard.Key.Unknown)
 		{
-			audioChannel2Button = DEFAULT_AUDIO_CHANNEL_2_BUTTON;
-
-			Logger.LogMessage(
-				$"Invalid value for [Controls].AUDIO_CHANNEL_2 in config file. Defaulting to {audioChannel2Button}.",
-				Logger.LogLevel.Warn, true
+			Logger.LogInvalidConfigValue(
+				"[Controls].AUDIO_CHANNEL_2", Config.GetControlConfig("AUDIO_CHANNEL_2"), DEFAULT_AUDIO_CHANNEL_2_BUTTON
 			);
+
+			audioChannel2Button = DEFAULT_AUDIO_CHANNEL_2_BUTTON;
 		}
 
 		audioChannel3Button = ConvertStringToSfmlKey(Config.GetControlConfig("AUDIO_CHANNEL_3"));
 		if (audioChannel3Button == Keyboard.Key.Unknown)
 		{
-			audioChannel3Button = DEFAULT_AUDIO_CHANNEL_3_BUTTON;
-
-			Logger.LogMessage(
-				$"Invalid value for [Controls].AUDIO_CHANNEL_3 in config file. Defaulting to {audioChannel3Button}.",
-				Logger.LogLevel.Warn, true
+			Logger.LogInvalidConfigValue(
+				"[Controls].AUDIO_CHANNEL_3", Config.GetControlConfig("AUDIO_CHANNEL_3"), DEFAULT_AUDIO_CHANNEL_3_BUTTON
 			);
+
+			audioChannel3Button = DEFAULT_AUDIO_CHANNEL_3_BUTTON;
 		}
 
 		audioChannel4Button = ConvertStringToSfmlKey(Config.GetControlConfig("AUDIO_CHANNEL_4"));
 		if (audioChannel4Button == Keyboard.Key.Unknown)
 		{
-			audioChannel4Button = DEFAULT_AUDIO_CHANNEL_4_BUTTON;
-
-			Logger.LogMessage(
-				$"Invalid value for [Controls].AUDIO_CHANNEL_4 in config file. Defaulting to {audioChannel4Button}.",
-				Logger.LogLevel.Warn, true
+			Logger.LogInvalidConfigValue(
+				"[Controls].AUDIO_CHANNEL_4", Config.GetControlConfig("AUDIO_CHANNEL_4"), DEFAULT_AUDIO_CHANNEL_4_BUTTON
 			);
+
+			audioChannel4Button = DEFAULT_AUDIO_CHANNEL_4_BUTTON;
 		}
 	}
 
@@ -287,45 +263,42 @@ public class InputOutput
 		blackColor = ConvertIntToSfmlColor(Config.GetColorConfig("BLACK"));
 		if (blackColor == Color.Transparent)
 		{
-			blackColor = DEFAULT_BLACK_COLOR;
-
-			Logger.LogMessage(
-				$"Invalid value for [Colors].BLACK in config file. Defaulting to {ConvertSfmlColorToInt(blackColor):X}.",
-				Logger.LogLevel.Warn, true
+			Logger.LogInvalidConfigValue(
+				"[Colors].BLACK", Config.GetColorConfig("BLACK"), ConvertSfmlColorToInt(DEFAULT_BLACK_COLOR)
 			);
+
+			blackColor = DEFAULT_BLACK_COLOR;
 		}
 
 		darkGrayColor = ConvertIntToSfmlColor(Config.GetColorConfig("DARK_GRAY"));
 		if (darkGrayColor == Color.Transparent)
 		{
-			darkGrayColor = DEFAULT_DARK_GRAY_COLOR;
-
-			Logger.LogMessage(
-				$"Invalid value for [Colors].DARK_GRAY in config file. Defaulting to {ConvertSfmlColorToInt(darkGrayColor):X}.",
-				Logger.LogLevel.Warn, true
+			Logger.LogInvalidConfigValue(
+				"[Colors].DARK_GRAY", Config.GetColorConfig("DARK_GRAY"), ConvertSfmlColorToInt(DEFAULT_DARK_GRAY_COLOR)
 			);
+
+			darkGrayColor = DEFAULT_DARK_GRAY_COLOR;
 		}
 
 		lightGrayColor = ConvertIntToSfmlColor(Config.GetColorConfig("LIGHT_GRAY"));
 		if (lightGrayColor == Color.Transparent)
 		{
-			lightGrayColor = DEFAULT_LIGHT_GRAY_COLOR;
-
-			Logger.LogMessage(
-				$"Invalid value for [Colors].LIGHT_GRAY in config file. Defaulting to {ConvertSfmlColorToInt(lightGrayColor):X}.",
-				Logger.LogLevel.Warn, true
+			Logger.LogInvalidConfigValue(
+				"[Colors].LIGHT_GRAY", Config.GetColorConfig("LIGHT_GRAY"),
+				ConvertSfmlColorToInt(DEFAULT_LIGHT_GRAY_COLOR)
 			);
+
+			lightGrayColor = DEFAULT_LIGHT_GRAY_COLOR;
 		}
 
 		whiteColor = ConvertIntToSfmlColor(Config.GetColorConfig("WHITE"));
 		if (whiteColor == Color.Transparent)
 		{
-			whiteColor = DEFAULT_WHITE_COLOR;
-
-			Logger.LogMessage(
-				$"Invalid value for [Colors].WHITE in config file. Defaulting to {ConvertSfmlColorToInt(whiteColor):X}.",
-				Logger.LogLevel.Warn, true
+			Logger.LogInvalidConfigValue(
+				"[Colors].WHITE", Config.GetColorConfig("WHITE"), ConvertSfmlColorToInt(DEFAULT_WHITE_COLOR)
 			);
+
+			whiteColor = DEFAULT_WHITE_COLOR;
 		}
 	}
 
@@ -334,14 +307,16 @@ public class InputOutput
 		return (color.R << 16) | (color.G << 8) | color.B;
 	}
 
-	private static Color ConvertIntToSfmlColor(int color)
+	private static Color ConvertIntToSfmlColor(int? color)
 	{
+		if (color is null) return Color.Transparent;
+
 		//Shifting and oring is done to set the alpha component of the colors to 0xFF
 		//This is done to make the colors fully opaque
 		return color == -1 ? Color.Transparent : new Color((uint)((color << 8) | 0xFF));
 	}
 
-	private static Keyboard.Key ConvertStringToSfmlKey(string keyString)
+	private static Keyboard.Key ConvertStringToSfmlKey(string? keyString)
 	{
 		//Only allow enum value names and not underlying integer
 		if (Int32.TryParse(keyString, out _)) return Keyboard.Key.Unknown;
@@ -440,11 +415,7 @@ public class InputOutput
 
 	public void DrawFrame()
 	{
-		if (!WindowIsOpen)
-		{
-			Logger.LogMessage("Cannot draw Screen when Window is closed!", Logger.LogLevel.Error);
-			throw new InvalidOperationException("Cannot draw Screen when Window is closed!");
-		}
+		if (!WindowIsOpen) Logger.ControlledCrash("Cannot display window if it's closed");
 
 		texture.Update(pixelBuffer);
 		window.Draw(sprite);
@@ -454,14 +425,20 @@ public class InputOutput
 
 	private static Color ConvertGameboyToSfmlColor(Ppu.Color color)
 	{
-		return color switch
+		switch (color)
 		{
-			Ppu.Color.Black     => blackColor,
-			Ppu.Color.DarkGray  => darkGrayColor,
-			Ppu.Color.LightGray => lightGrayColor,
-			Ppu.Color.White     => whiteColor,
-			_                   => throw new ArgumentOutOfRangeException(nameof(color), color, "Invalid color!")
-		};
+			case Ppu.Color.Black:
+				return blackColor;
+			case Ppu.Color.DarkGray:
+				return darkGrayColor;
+			case Ppu.Color.LightGray:
+				return lightGrayColor;
+			case Ppu.Color.White:
+				return whiteColor;
+			default:
+				Logger.ControlledCrash($"Invalid color '{color}'");
+				return Color.Transparent;
+		}
 	}
 
 	public void SetWindowTitle(string title)

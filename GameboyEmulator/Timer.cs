@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace GameboyEmulator;
+﻿namespace GameboyEmulator;
 
 public class Timer
 {
@@ -26,17 +24,26 @@ public class Timer
 		set => internalTimerControl = (byte)(value & 0b0000_0111);
 	}
 
-	private int InternalMainTimerCounterResetValue => (TimerControl & 0b0000_0011) switch
+	private int InternalMainTimerCounterResetValue
 	{
-		0 => 1024,
-		1 => 16,
-		2 => 64,
-		3 => 256,
-		_ => throw new ArgumentOutOfRangeException(
-				 nameof(TimerControl) + " & 0b0000_0011", TimerControl & 0b0000_0011,
-				 "Something has gone horribly wrong and the fabric of space time is rupturing as we speak."
-			 )
-	};
+		get
+		{
+			switch (TimerControl & 0b0000_0011)
+			{
+				case 0:
+					return 1024;
+				case 1:
+					return 16;
+				case 2:
+					return 64;
+				case 3:
+					return 256;
+				default:
+					Logger.Unreachable();
+					return 0;
+			}
+		}
+	}
 
 	private int internalDividerRegisterCounter;
 

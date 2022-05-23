@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
-using System.IO;
 
 namespace GameboyEmulator;
 
@@ -106,30 +105,17 @@ public class MemoryBankController
 	{
 		currentBankControllerType = (BankControllerType)emulator.memory.Read(0x147, true);
 		if (!Enum.IsDefined(typeof(BankControllerType), currentBankControllerType))
-		{
-			Logger.LogMessage(
-				$"Cartridge uses invalid memory bank controller with id '{currentBankControllerType}'",
-				Logger.LogLevel.Error, true
-			);
+			Logger.ControlledCrash($"Cartridge uses invalid memory bank controller '{currentBankControllerType}'");
 
-			Environment.Exit(1);
-		}
-
-		Logger.LogMessage(
-			$"Memory bank controller '{currentBankControllerType.ToString()}' was determined.", Logger.LogLevel.Info
-		);
+		Logger.LogInfo($"Memory bank controller: '{currentBankControllerType.ToString()}'");
 
 		byte numberOfRomBanksRaw = emulator.memory.Read(0x148, true);
 		if (numberOfRomBanksRaw > 0x08)
-		{
-			Logger.LogMessage("Cartridge has an invalid number of ROM banks!", Logger.LogLevel.Error, true);
-
-			Environment.Exit(1);
-		}
+			Logger.ControlledCrash("Cartridge has an invalid number of ROM banks");
 
 		numberOfRomBanks = (byte)Math.Pow(2, numberOfRomBanksRaw + 1);
 
-		Logger.LogMessage($"{numberOfRomBanks} ROM bank(s) determined.", Logger.LogLevel.Info);
+		Logger.LogInfo($"Number of ROM banks: {numberOfRomBanks}");
 
 		byte numberOfRamBanksRaw = emulator.memory.Read(0x149, true);
 		switch (numberOfRamBanksRaw)
@@ -151,13 +137,11 @@ public class MemoryBankController
 				NumberOfRamBanks = 8;
 				break;
 			default:
-				Logger.LogMessage("Cartridge has an invalid number of RAM banks!", Logger.LogLevel.Error, true);
-
-				Environment.Exit(1);
+				Logger.ControlledCrash("Cartridge has an invalid number of RAM banks");
 				break;
 		}
 
-		Logger.LogMessage($"{NumberOfRamBanks} RAM bank(s) determined.", Logger.LogLevel.Info);
+		Logger.LogInfo($"Number of RAM banks: {NumberOfRamBanks}");
 
 		currentMemoryBankingMode = MemoryBankingMode.SimpleRomBanking;
 
@@ -186,12 +170,7 @@ public class MemoryBankController
 			}
 			default:
 			{
-				Logger.LogMessage(
-					$"Memory Bank Controller '{currentBankControllerType.ToString()}' is not implemented yet!",
-					Logger.LogLevel.Error, true
-				);
-
-				Environment.Exit(1);
+				Logger.ControlledCrash($"Memory Bank Controller '{currentBankControllerType}' is not implemented yet");
 				break;
 			}
 		}
@@ -227,8 +206,8 @@ public class MemoryBankController
 					currentMemoryBankingMode = MemoryBankingMode.AdvancedRomOrRamBanking;
 					break;
 				default:
-					Logger.LogMessage("Invalid memory banking mode!", Logger.LogLevel.Error);
-					throw new InvalidDataException("Invalid memory banking mode!");
+					Logger.ControlledCrash($"Invalid memory banking mode '{currentMemoryBankingMode}'");
+					break;
 			}
 		}
 
@@ -262,13 +241,8 @@ public class MemoryBankController
 			}
 			default:
 			{
-				Logger.LogMessage(
-					$"Memory Bank Controller '{currentBankControllerType.ToString()}' is not implemented yet!",
-					Logger.LogLevel.Error, true
-				);
-
-				Environment.Exit(1);
-				return 0; //Useless return but the program does not compile without it
+				Logger.ControlledCrash($"Memory Bank Controller '{currentBankControllerType}' is not implemented yet");
+				return 0;
 			}
 		}
 	}

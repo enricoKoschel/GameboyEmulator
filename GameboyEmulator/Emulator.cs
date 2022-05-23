@@ -32,6 +32,8 @@ public class Emulator
 
 	public readonly bool savingEnabled;
 
+	private const string DEFAULT_SAVE_FILE_DIRECTORY = "./saves";
+
 	public readonly string bootRomFilePath;
 	public readonly string gameRomFilePath;
 	public readonly string saveFilePath;
@@ -57,12 +59,11 @@ public class Emulator
 		string? saveFileDirectory = Path.GetDirectoryName(Config.GetSaveLocationConfig() + "/");
 		if (String.IsNullOrWhiteSpace(saveFileDirectory))
 		{
-			saveFileDirectory = "./saves/";
-
-			Logger.LogMessage(
-				$"Invalid value for [Saving].LOCATION in config file. Defaulting to {saveFileDirectory}.",
-				Logger.LogLevel.Warn, true
+			Logger.LogInvalidConfigValue(
+				"[Saving].LOCATION", Config.GetSaveLocationConfig(), DEFAULT_SAVE_FILE_DIRECTORY
 			);
+
+			saveFileDirectory = DEFAULT_SAVE_FILE_DIRECTORY;
 		}
 
 		string saveFileName = Path.ChangeExtension(Path.GetFileName(gameRomFilePath), ".sav");

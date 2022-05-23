@@ -99,19 +99,11 @@ public class Memory
 			}
 			catch
 			{
-				Logger.LogMessage(
-					$"Boot rom '{emulator.bootRomFilePath}' could not be opened!", Logger.LogLevel.Error, true
-				);
-
-				Environment.Exit(1);
+				Logger.ControlledCrash($"Boot rom '{emulator.bootRomFilePath}' could not be opened");
 			}
 
 			if (bootRom.Length != 0x100)
-			{
-				Logger.LogMessage("Invalid boot rom selected!", Logger.LogLevel.Error, true);
-
-				Environment.Exit(1);
-			}
+				Logger.ControlledCrash($"Selected boot rom '{emulator.bootRomFilePath}' has an invalid length");
 		}
 		else
 		{
@@ -125,20 +117,12 @@ public class Memory
 		}
 		catch
 		{
-			Logger.LogMessage(
-				$"Game rom '{emulator.gameRomFilePath}' could not be opened!", Logger.LogLevel.Error, true
-			);
-
-			Environment.Exit(1);
+			Logger.ControlledCrash($"Game rom '{emulator.gameRomFilePath}' could not be opened");
 		}
 
 		//A cartridge has to be at least 0x150 bytes large to contain a full cartridge header
 		if (cartridgeRom.Length < 0x150)
-		{
-			Logger.LogMessage("Invalid game rom selected!", Logger.LogLevel.Error, true);
-
-			Environment.Exit(1);
-		}
+			Logger.ControlledCrash($"Selected game rom '{emulator.gameRomFilePath}' has an invalid length");
 
 		//Pad the cartridge size to at least 0x8000 bytes (32KB)
 		if (cartridgeRom.Length < 0x8000) Array.Resize(ref cartridgeRom, 0x8000);
@@ -154,7 +138,7 @@ public class Memory
 
 		AllocateCartridgeRam(emulator.memoryBankController.NumberOfRamBanks);
 
-		Logger.LogMessage("Game was loaded.", Logger.LogLevel.Info);
+		Logger.LogInfo("Game loaded successfully");
 	}
 
 	public void SaveCartridgeRam()
@@ -221,7 +205,7 @@ public class Memory
 	{
 		bootRomEnabled = false;
 
-		Logger.LogMessage("Boot rom was disabled.", Logger.LogLevel.Info);
+		Logger.LogInfo("Boot rom was disabled");
 	}
 
 	public byte Read(ushort address, bool noRomBanking = false)
@@ -258,7 +242,8 @@ public class Memory
 		if (address == INTERRUPT_ENABLE_REG_ADDRESS)
 			return emulator.interrupts.InterruptEnableRegister;
 
-		throw new ArgumentOutOfRangeException(nameof(address), address, "Address out of range!");
+		Logger.ControlledCrash($"Tried to access memory at invalid address: {address:X4}");
+		return 0xFF;
 	}
 
 	private byte ReadFromCartridgeRom(ushort address, bool noRomBanking)
@@ -427,7 +412,7 @@ public class Memory
 			emulator.interrupts.InterruptEnableRegister = data;
 
 		else
-			throw new ArgumentOutOfRangeException(nameof(address), address, "Address out of range!");
+			Logger.ControlledCrash($"Tried to access memory at invalid address: {address:X4}");
 	}
 
 	private void WriteToCartridgeRam(ushort address, byte data)

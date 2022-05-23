@@ -19,18 +19,20 @@ public static class Config
 		CONFIG_DATA = new IniDataParser().Parse(File.ReadAllText(CONFIG_FILE_PATH));
 	}
 
-	public static string GetControlConfig(string key)
+	public static string? GetControlConfig(string key)
 	{
 		PropertyCollection? controls      = CONFIG_DATA["Controls"];
 		string?             configuredKey = controls?[key];
 
-		return configuredKey ?? "";
+		return configuredKey;
 	}
 
-	public static int GetColorConfig(string color)
+	public static int? GetColorConfig(string color)
 	{
 		PropertyCollection? colors = CONFIG_DATA["Colors"];
 		string?             value  = colors?[color];
+
+		if (value is null) return null;
 
 		bool validInt = Int32.TryParse(value, NumberStyles.HexNumber, null, out int output);
 
@@ -52,33 +54,16 @@ public static class Config
 
 		bool validBool = Boolean.TryParse(value, out bool output);
 
-		if (!validBool)
-		{
-			Logger.LogMessage(
-				"Invalid value for [Saving].ENABLE in config file. Defaulting to true.", Logger.LogLevel.Warn, true
-			);
-		}
+		if (validBool) return output;
 
-		return !validBool || output;
+		Logger.LogInvalidConfigValue("[Saving].ENABLE", value, true);
+		return true;
 	}
 
 	public static string? GetLogLocationConfig()
 	{
 		PropertyCollection? logging = CONFIG_DATA["Logging"];
 		return logging?["LOCATION"];
-	}
-
-	public static bool? GetLogEnabledConfig()
-	{
-		PropertyCollection? logging = CONFIG_DATA["Logging"];
-		string?             value   = logging?["ENABLE"];
-
-		bool validBool = Boolean.TryParse(value, out bool output);
-
-		//Not pretty but required so the incorrect config value can be logged
-		if (!validBool) return null;
-
-		return output;
 	}
 
 	public static string GetRomConfig(string rom)
@@ -147,22 +132,20 @@ WHITE = E0F8D0
 ;Disabling saving also disables loading
 
 ;Default:
-;ENABLE = TRUE
-;LOCATION = ./saves/
+;ENABLE = true
+;LOCATION = ./saves
 
 ENABLE = true
-LOCATION = ./saves/
+LOCATION = ./saves
 
 [Logging]
 ;LOCATION can be an absolute or a relative path
 ;The path is relative to the emulator executable
 
 ;Default:
-;ENABLE = true
-;LOCATION = ./logs/
+;LOCATION = ./logs
 
-ENABLE = true
-LOCATION = ./logs/
+LOCATION = ./logs
 
 [Roms]
 ;The roms provided by the console parameters have priority over these settings
