@@ -42,22 +42,8 @@ public static class Logger
 
 		LOG_FILE.AutoFlush = true;
 
-		//Not pretty but LogMessage() can't be called here because the logger isn't initialized yet
-		void LocalLogInvalidConfigValue<T1, T2>(string configKey, T1? value, T2 defaultValue)
-		{
-			string message = value is null
-								 ? $"{configKey} could not be found in config file. Defaulting to {defaultValue}."
-								 : $"Invalid value '{value}' for {configKey} in config file. Defaulting to {defaultValue}.";
-
-			string logMessage = $"[{CurrentTime}][{LogLevelToString(LogLevel.Warn)}] {message}";
-
-			if (ENABLE_CONSOLE_LOGGING) Console.WriteLine(logMessage);
-
-			LOG_FILE.WriteLine(logMessage);
-		}
-
 		if (defaultDirectoryUsed)
-			LocalLogInvalidConfigValue("[Logging].LOCATION", Config.GetLogLocationConfig(), DEFAULT_LOG_DIRECTORY);
+			LogInvalidConfigValue("[Logging].LOCATION", Config.GetLogLocationConfig(), DEFAULT_LOG_DIRECTORY);
 	}
 
 	private static void LogMessage(string message, LogLevel loglevel, bool logToConsole = false)
