@@ -262,15 +262,13 @@ public class Memory
 
 	private byte ReadFromCartridgeRam(ushort address)
 	{
-		if (emulator.memoryBankController.CartridgeRamExists && emulator.memoryBankController.IsRamEnabled)
-		{
-			return cartridgeRam[
-				emulator.memoryBankController.ConvertAddressInRamBank(
-					(ushort)(address - CARTRIDGE_RAM_BASE_ADDRESS)
-				)];
-		}
+		if (!emulator.memoryBankController.CartridgeRamExists ||
+			!emulator.memoryBankController.IsRamEnabled) return 0xFF;
 
-		return 0xFF;
+		uint addressWithBanking =
+			emulator.memoryBankController.ConvertAddressInRamBank((ushort)(address - CARTRIDGE_RAM_BASE_ADDRESS));
+
+		return cartridgeRam[addressWithBanking];
 	}
 
 	private byte ReadFromIoPorts(ushort address)
