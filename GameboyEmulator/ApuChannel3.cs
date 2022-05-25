@@ -172,15 +172,25 @@ public class ApuChannel3
 		Playing = false;
 	}
 
-	private byte GetWaveRamSample(int index)
+	private sbyte GetWaveRamSample(int index)
 	{
 		byte samplePair = waveRam[index / 2];
 
 		int numberOfSample = index % 2;
 
-		if (numberOfSample == 0) return (byte)((samplePair & 0b1111_0000) >> 4);
+		byte sample;
+		if (numberOfSample == 0)
+		{
+			sample =   (byte)((samplePair & 0b1111_0000) >> 4);
+			sample >>= CurrentVolumeShiftAmount;
 
-		return (byte)(samplePair & 0b0000_1111);
+			return (sbyte)(sample - 8);
+		}
+
+		sample =   (byte)(samplePair & 0b0000_1111);
+		sample >>= CurrentVolumeShiftAmount;
+
+		return (sbyte)(sample - 8);
 	}
 
 	public byte GetWaveRamSamplePair(int index)
@@ -203,7 +213,7 @@ public class ApuChannel3
 
 		double volume = apu.LeftChannelVolume * Apu.VOLUME_MULTIPLIER;
 
-		return (short)((GetWaveRamSample(waveRamPosition) >> CurrentVolumeShiftAmount) * volume);
+		return (short)(GetWaveRamSample(waveRamPosition) * volume);
 	}
 
 	public short GetCurrentAmplitudeRight()
@@ -212,6 +222,8 @@ public class ApuChannel3
 
 		double volume = apu.RightChannelVolume * Apu.VOLUME_MULTIPLIER;
 
-		return (short)((GetWaveRamSample(waveRamPosition) >> CurrentVolumeShiftAmount) * volume);
+		//Console.WriteLine($"{(short)(GetWaveRamSample(waveRamPosition) * volume)}");
+
+		return (short)(GetWaveRamSample(waveRamPosition) * volume);
 	}
 }

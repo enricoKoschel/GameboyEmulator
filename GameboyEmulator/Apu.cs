@@ -39,12 +39,12 @@ public class Apu : SoundStream
 		10 - 50%   (____----____----____----)
 		11 - 75%   (______--______--______--)
 	*/
-	public static readonly byte[,] WAVE_DUTY_TABLE =
+	public static readonly sbyte[,] WAVE_DUTY_TABLE =
 	{
-		{ 0, 1, 1, 1, 1, 1, 1, 1 },
-		{ 0, 0, 1, 1, 1, 1, 1, 1 },
-		{ 0, 0, 0, 0, 1, 1, 1, 1 },
-		{ 0, 0, 0, 0, 0, 0, 1, 1 }
+		{ -1, 1, 1, 1, 1, 1, 1, 1 },
+		{ -1, -1, 1, 1, 1, 1, 1, 1 },
+		{ -1, -1, -1, -1, 1, 1, 1, 1 },
+		{ -1, -1, -1, -1, -1, -1, 1, 1 }
 	};
 
 	private const int SAMPLE_RATE                        = 48000;
@@ -54,7 +54,7 @@ public class Apu : SoundStream
 	public const int SAMPLE_BUFFER_SIZE =
 		(int)(SAMPLE_RATE * CHANNEL_COUNT * (SAMPLE_BUFFER_SIZE_IN_MILLISECONDS / 1000f));
 
-	public const int VOLUME_MULTIPLIER = 50;
+	public const int VOLUME_MULTIPLIER = 25;
 
 	private int internalMainApuCounter;
 
