@@ -35,8 +35,8 @@ public class Interrupts
 	public byte InterruptEnableRegister
 	{
 		//Unused bits are 1
-		get => (byte)((internalInterruptEnableRegister & 0b0001_1111) | 0b1110_0000);
-		set => internalInterruptEnableRegister = (byte)((value & 0b0001_1111) | 0b1110_0000);
+		get => (byte)(internalInterruptEnableRegister | 0b1110_0000);
+		set => internalInterruptEnableRegister = (byte)(value | 0b1110_0000);
 	}
 
 	private byte internalInterruptFlagRegister;
@@ -44,8 +44,8 @@ public class Interrupts
 	public byte InterruptFlagRegister
 	{
 		//Unused bits are 1
-		get => (byte)((internalInterruptFlagRegister & 0b0001_1111) | 0b1110_0000);
-		set => internalInterruptFlagRegister = (byte)((value & 0b0001_1111) | 0b1110_0000);
+		get => (byte)(internalInterruptFlagRegister | 0b1110_0000);
+		set => internalInterruptFlagRegister = (byte)(value | 0b1110_0000);
 	}
 
 	private bool VBlankEnabled => Cpu.GetBit(InterruptEnableRegister, 0);

@@ -16,7 +16,6 @@
   - Implement all checks at startup (checksums, logo, etc.)
   - Somehow dont block while events get handled
   - Improve resetting the emulator (dont create all modules every time)
-  - Return 1 for all unused bits
 - Memory
   - Maybe change cartridge ram to be a memory mapped file
 - Logger

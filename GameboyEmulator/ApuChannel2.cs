@@ -7,7 +7,7 @@ public class ApuChannel2
 	//NR21
 	public byte SoundLengthWavePatternRegister
 	{
-		get => internalSoundLengthWavePatternRegister;
+		get => (byte)(internalSoundLengthWavePatternRegister | 0b0011_1111);
 		set
 		{
 			internalSoundLengthWavePatternRegister = value;
@@ -26,7 +26,7 @@ public class ApuChannel2
 	//NR24
 	public byte FrequencyRegisterHi
 	{
-		get => (byte)(internalFrequencyRegisterHi & 0b1100_0111);
+		get => (byte)(internalFrequencyRegisterHi | 0b1011_1111);
 		set
 		{
 			internalFrequencyRegisterHi = (byte)(value & 0b1100_0111);
@@ -34,19 +34,20 @@ public class ApuChannel2
 		}
 	}
 
-	private byte SoundLength     => (byte)(SoundLengthWavePatternRegister & 0b0011_1111);
-	private byte WavePatternDuty => (byte)((SoundLengthWavePatternRegister & 0b1100_0000) >> 6);
+	private byte SoundLength     => (byte)(internalSoundLengthWavePatternRegister & 0b0011_1111);
+	private byte WavePatternDuty => (byte)((internalSoundLengthWavePatternRegister & 0b1100_0000) >> 6);
 
 	private byte InitialVolume           => (byte)((VolumeEnvelopeRegister & 0b1111_0000) >> 4);
 	private bool VolumeEnvelopeDirection => Cpu.GetBit(VolumeEnvelopeRegister, 3);
 	private byte VolumeSweepPeriod       => (byte)(VolumeEnvelopeRegister & 0b0000_0111);
 
-	private bool Trigger => Cpu.GetBit(FrequencyRegisterHi, 7);
+	private bool Trigger => Cpu.GetBit(internalFrequencyRegisterHi, 7);
 
-	private bool EnableLength => Cpu.GetBit(FrequencyRegisterHi, 6);
+	private bool EnableLength => Cpu.GetBit(internalFrequencyRegisterHi, 6);
 
-	//Only the lower 3 bits of FrequencyRegisterHi are used
-	private ushort FrequencyRegister => (ushort)(Cpu.MakeWord(FrequencyRegisterHi, FrequencyRegisterLo) & 0x7FF);
+	//Only the lower 3 bits of internalFrequencyRegisterHi are used
+	private ushort FrequencyRegister =>
+		(ushort)(Cpu.MakeWord(internalFrequencyRegisterHi, FrequencyRegisterLo) & 0x7FF);
 
 	private bool LeftEnabled  => Cpu.GetBit(apu.SoundOutputTerminalSelectRegister, 5);
 	private bool RightEnabled => Cpu.GetBit(apu.SoundOutputTerminalSelectRegister, 1);
@@ -116,14 +117,12 @@ public class ApuChannel2
 	public void Reset()
 	{
 		internalSoundLengthWavePatternRegister = 0;
-		SoundLengthWavePatternRegister         = 0;
 
 		VolumeEnvelopeRegister = 0;
 
 		FrequencyRegisterLo = 0;
 
 		internalFrequencyRegisterHi = 0;
-		FrequencyRegisterHi         = 0;
 
 		frequencyTimer = 0;
 

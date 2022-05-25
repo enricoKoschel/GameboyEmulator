@@ -27,7 +27,7 @@ public class ApuChannel4
 	//NR44
 	public byte CounterConsecutiveRegister
 	{
-		get => (byte)(internalCounterConsecutiveRegister & 0b1100_0000);
+		get => (byte)(internalCounterConsecutiveRegister | 0b1011_1111);
 		set => internalCounterConsecutiveRegister = (byte)(value & 0b1100_0000);
 	}
 
@@ -41,9 +41,9 @@ public class ApuChannel4
 
 	private byte DividingRatio => (byte)(PolynomialCounterRegister & 0b0000_0111);
 
-	private bool Trigger => Cpu.GetBit(CounterConsecutiveRegister, 7);
+	private bool Trigger => Cpu.GetBit(internalCounterConsecutiveRegister, 7);
 
-	private bool EnableLength => Cpu.GetBit(CounterConsecutiveRegister, 6);
+	private bool EnableLength => Cpu.GetBit(internalCounterConsecutiveRegister, 6);
 
 	private bool LeftEnabled  => Cpu.GetBit(apu.SoundOutputTerminalSelectRegister, 7);
 	private bool RightEnabled => Cpu.GetBit(apu.SoundOutputTerminalSelectRegister, 3);

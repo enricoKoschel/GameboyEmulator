@@ -7,7 +7,7 @@ public class ApuChannel3
 	//NR30
 	public byte SoundOnOffRegister
 	{
-		get => (byte)((internalSoundOnOffRegister ? 1 : 0) << 7);
+		get => (byte)(internalSoundOnOffRegister ? 0b1000_0000 : 0b0000_0000);
 		set => internalSoundOnOffRegister = (value & 0b1000_0000) != 0;
 	}
 
@@ -41,7 +41,7 @@ public class ApuChannel3
 	//NR34
 	public byte FrequencyRegisterHi
 	{
-		get => (byte)(internalFrequencyRegisterHi & 0b1100_0111);
+		get => (byte)(internalFrequencyRegisterHi | 0b1011_1111);
 		set
 		{
 			internalFrequencyRegisterHi = (byte)(value & 0b1100_0111);
@@ -49,16 +49,15 @@ public class ApuChannel3
 		}
 	}
 
-	//Only the lower 3 bits of FrequencyRegisterHi are used
-	private ushort FrequencyRegister => (ushort)(Cpu.MakeWord(FrequencyRegisterHi, FrequencyRegisterLo) & 0x7FF);
-
-	private bool SoundOnOff => Cpu.GetBit(SoundOnOffRegister, 7);
+	//Only the lower 3 bits of internalFrequencyRegisterHi are used
+	private ushort FrequencyRegister =>
+		(ushort)(Cpu.MakeWord(internalFrequencyRegisterHi, FrequencyRegisterLo) & 0x7FF);
 
 	private byte OutputLevel => (byte)((SelectOutputLevelRegister & 0b0110_0000) >> 5);
 
-	private bool Trigger => Cpu.GetBit(FrequencyRegisterHi, 7);
+	private bool Trigger => Cpu.GetBit(internalFrequencyRegisterHi, 7);
 
-	private bool EnableLength => Cpu.GetBit(FrequencyRegisterHi, 6);
+	private bool EnableLength => Cpu.GetBit(internalFrequencyRegisterHi, 6);
 
 	private int CurrentVolumeShiftAmount
 	{
@@ -140,24 +139,20 @@ public class ApuChannel3
 
 	private void CheckDacEnabled()
 	{
-		if (!SoundOnOff) Playing = false;
+		if (!internalSoundOnOffRegister) Playing = false;
 	}
 
 	public void Reset()
 	{
 		internalSoundOnOffRegister = false;
-		SoundOnOffRegister         = 0;
 
 		internalSoundLengthRegister = 0;
-		SoundLengthRegister         = 0;
 
 		internalSelectOutputLevelRegister = 0;
-		SelectOutputLevelRegister         = 0;
 
 		FrequencyRegisterLo = 0;
 
 		internalFrequencyRegisterHi = 0;
-		FrequencyRegisterHi         = 0;
 	}
 
 	private void TickFrameSequencer()

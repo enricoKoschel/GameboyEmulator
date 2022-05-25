@@ -20,8 +20,8 @@ public class Timer
 
 	public byte TimerControl
 	{
-		get => (byte)(internalTimerControl & 0b0000_0111);
-		set => internalTimerControl = (byte)(value & 0b0000_0111);
+		get => (byte)(internalTimerControl | 0b1111_1000);
+		set => internalTimerControl = (byte)(value | 0b1111_1000);
 	}
 
 	private int InternalMainTimerCounterResetValue

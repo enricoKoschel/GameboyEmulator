@@ -7,8 +7,8 @@ public class ApuChannel1
 	//NR10
 	public byte FrequencySweepRegister
 	{
-		get => (byte)(internalFrequencySweepRegister & 0b0111_1111);
-		set => internalFrequencySweepRegister = (byte)(value & 0b0111_1111);
+		get => (byte)(internalFrequencySweepRegister | 0b1000_0000);
+		set => internalFrequencySweepRegister = (byte)(value | 0b1000_0000);
 	}
 
 	private byte internalSoundLengthWavePatternRegister;
@@ -16,7 +16,7 @@ public class ApuChannel1
 	//NR11
 	public byte SoundLengthWavePatternRegister
 	{
-		get => internalSoundLengthWavePatternRegister;
+		get => (byte)(internalSoundLengthWavePatternRegister | 0b0011_1111);
 		set
 		{
 			internalSoundLengthWavePatternRegister = value;
@@ -35,7 +35,7 @@ public class ApuChannel1
 	//NR14
 	public byte FrequencyRegisterHi
 	{
-		get => (byte)(internalFrequencyRegisterHi & 0b1100_0111);
+		get => (byte)(internalFrequencyRegisterHi | 0b1011_1111);
 		set
 		{
 			internalFrequencyRegisterHi = (byte)(value & 0b1100_0111);
@@ -43,8 +43,8 @@ public class ApuChannel1
 		}
 	}
 
-	private byte SoundLength     => (byte)(SoundLengthWavePatternRegister & 0b0011_1111);
-	private byte WavePatternDuty => (byte)((SoundLengthWavePatternRegister & 0b1100_0000) >> 6);
+	private byte SoundLength     => (byte)(internalSoundLengthWavePatternRegister & 0b0011_1111);
+	private byte WavePatternDuty => (byte)((internalSoundLengthWavePatternRegister & 0b1100_0000) >> 6);
 
 	private byte InitialVolume           => (byte)((VolumeEnvelopeRegister & 0b1111_0000) >> 4);
 	private bool VolumeEnvelopeDirection => Cpu.GetBit(VolumeEnvelopeRegister, 3);
@@ -54,18 +54,18 @@ public class ApuChannel1
 	private bool FrequencySweepDirection   => Cpu.GetBit(FrequencySweepRegister, 3);
 	private byte FrequencySweepShiftAmount => (byte)(FrequencySweepRegister & 0b0000_0111);
 
-	private bool Trigger => Cpu.GetBit(FrequencyRegisterHi, 7);
+	private bool Trigger => Cpu.GetBit(internalFrequencyRegisterHi, 7);
 
-	private bool EnableLength => Cpu.GetBit(FrequencyRegisterHi, 6);
+	private bool EnableLength => Cpu.GetBit(internalFrequencyRegisterHi, 6);
 
-	//Only the lower 3 bits of FrequencyRegisterHi are used
+	//Only the lower 3 bits of internalFrequencyRegisterHi are used
 	private ushort FrequencyRegister
 	{
-		get => (ushort)(Cpu.MakeWord(FrequencyRegisterHi, FrequencyRegisterLo) & 0x7FF);
+		get => (ushort)(Cpu.MakeWord(internalFrequencyRegisterHi, FrequencyRegisterLo) & 0x7FF);
 		set
 		{
-			FrequencyRegisterHi =
-				(byte)((FrequencyRegisterHi & 0b1111_1000) | (Cpu.GetHiByte(value) & 0b0000_0111));
+			internalFrequencyRegisterHi =
+				(byte)((internalFrequencyRegisterHi & 0b1111_1000) | (Cpu.GetHiByte(value) & 0b0000_0111));
 
 			FrequencyRegisterLo = Cpu.GetLoByte(value);
 		}
@@ -150,17 +150,14 @@ public class ApuChannel1
 	public void Reset()
 	{
 		internalFrequencySweepRegister = 0;
-		FrequencySweepRegister         = 0;
 
 		internalSoundLengthWavePatternRegister = 0;
-		SoundLengthWavePatternRegister         = 0;
 
 		VolumeEnvelopeRegister = 0;
 
 		FrequencyRegisterLo = 0;
 
 		internalFrequencyRegisterHi = 0;
-		FrequencyRegisterHi         = 0;
 
 		frequencyTimer = 0;
 
