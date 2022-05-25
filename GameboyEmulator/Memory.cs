@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 
 namespace GameboyEmulator;
@@ -62,14 +63,17 @@ public class Memory
 
 	private bool bootRomEnabled;
 
-	private DateTime lastTimeRamWasSaved     = DateTime.Now;
-	private bool     ramChangedSinceLastSave = true;
+	private readonly Stopwatch timeSinceLastRamSave;
+	private          bool      ramChangedSinceLastSave = true;
 
 	private readonly Emulator emulator;
 
 	public Memory(Emulator emulator)
 	{
 		this.emulator = emulator;
+
+		timeSinceLastRamSave = new Stopwatch();
+		timeSinceLastRamSave.Start();
 
 		videoRam         = new byte[0x2000];
 		workRam          = new byte[0x2000];
@@ -146,9 +150,10 @@ public class Memory
 		if (!ramChangedSinceLastSave || !emulator.memoryBankController.CartridgeRamExists ||
 			!emulator.savingEnabled) return;
 
-		if (DateTime.Now < lastTimeRamWasSaved.AddSeconds(1)) return;
+		if (timeSinceLastRamSave.Elapsed.TotalSeconds < 5) return;
 
-		lastTimeRamWasSaved     = DateTime.Now;
+		timeSinceLastRamSave.Restart();
+
 		ramChangedSinceLastSave = false;
 
 		File.WriteAllBytes(emulator.saveFilePath, cartridgeRam);
@@ -420,10 +425,10 @@ public class Memory
 		if (!emulator.memoryBankController.CartridgeRamExists ||
 			!emulator.memoryBankController.IsRamEnabled) return;
 
-		cartridgeRam[
-			emulator.memoryBankController.ConvertAddressInRamBank(
-				(ushort)(address - CARTRIDGE_RAM_BASE_ADDRESS)
-			)] = data;
+		uint addressWithBanking =
+			emulator.memoryBankController.ConvertAddressInRamBank((ushort)(address - CARTRIDGE_RAM_BASE_ADDRESS));
+
+		cartridgeRam[addressWithBanking] = data;
 
 		ramChangedSinceLastSave = true;
 	}
