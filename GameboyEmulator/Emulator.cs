@@ -113,6 +113,7 @@ public class Emulator
 	{
 		while (IsRunning && isPaused)
 		{
+			UpdateWindowTitle();
 			inputOutput.Update();
 			apu.ClearSampleBuffer();
 			Thread.Sleep(16);
@@ -180,10 +181,11 @@ public class Emulator
 			return;
 		}
 
-		UpdateWindowTitle(speed);
+		CalculateSpeedAverage(speed);
+		UpdateWindowTitle();
 	}
 
-	private void UpdateWindowTitle(int speed)
+	private void CalculateSpeedAverage(int speed)
 	{
 		if (Math.Abs(speed - SpeedAverage) > 150)
 		{
@@ -208,7 +210,10 @@ public class Emulator
 
 			SpeedAverage /= NUMBER_OF_SPEEDS_TO_AVERAGE;
 		}
+	}
 
+	private void UpdateWindowTitle()
+	{
 		string gameFileName  = Path.GetFileName(gameRomFilePath);
 		string speedOrPaused = isPaused ? "Paused" : $"Speed: {SpeedAverage}%";
 
