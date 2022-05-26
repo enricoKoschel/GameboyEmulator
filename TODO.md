@@ -8,13 +8,15 @@
   - Maybe use Blip-Buf to emulate audio
   - Apply smoothing/drop off to square waves and add high pass filter
 - Core
+  - **_Sync to audio instead of video_**
   - **_Add the ability to resize the window (change scale)_**
   - **_Scale window according to screen size (or have screen scale in config)_**
   - **_Implement GUI_**
   - **_Implement save states/rewind_**
   - Implement all checks at startup (checksums, logo, etc.)
+  - Add support for the Gameboy Color (CGB)
   - Somehow dont block while events get handled
-  - Improve resetting the emulator (dont create all modules every time)
+- Improve resetting the emulator (dont create all modules every time)
 - Memory
   - Maybe change cartridge ram to be a memory mapped file
 - Logger
