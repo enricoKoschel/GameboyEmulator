@@ -6,7 +6,7 @@
   - Pass all audio test roms
   - Implement VIn (Audio from cartridge)
   - Maybe use Blip-Buf to emulate audio
-  - Apply smoothing to square waves
+  - Apply smoothing/drop off to square waves and add high pass filter
 - Core
   - **_Add the ability to resize the window (change scale)_**
   - **_Scale window according to screen size (or have screen scale in config)_**
