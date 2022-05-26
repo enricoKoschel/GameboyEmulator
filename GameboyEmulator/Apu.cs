@@ -119,23 +119,11 @@ public class Apu : SoundStream
 
 		internalMainApuCounter += SAMPLE_RATE * cycles;
 
-		//TODO drop samples when the speed is higher than 100%
-		//if (emulator.SpeedAverage > 200)
-		//{
-		//	internalMainApuCounter *= 2;
-		//}
-		//else if (emulator.SpeedAverage > 400)
-		//{
-		//	internalMainApuCounter *= 4;
-		//}
-		//else if (emulator.SpeedAverage > 800)
-		//{
-		//	internalMainApuCounter *= 8;
-		//}
-
 		if (internalMainApuCounter < Emulator.GAMEBOY_CLOCK_SPEED) return;
 
 		internalMainApuCounter -= Emulator.GAMEBOY_CLOCK_SPEED;
+
+		if (AmountOfSamples >= SAMPLE_BUFFER_SIZE && emulator.MaxFps == 0) return;
 
 		short leftSample  = 0;
 		short rightSample = 0;

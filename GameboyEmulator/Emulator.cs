@@ -28,7 +28,7 @@ public class Emulator
 
 	private const    int   NUMBER_OF_SPEEDS_TO_AVERAGE = 60;
 	private readonly int[] speedHistory;
-	public           int   SpeedAverage { get; private set; } = 100;
+	private          int   speedAverage = 100;
 
 	public readonly bool savingEnabled;
 
@@ -187,9 +187,9 @@ public class Emulator
 
 	private void CalculateSpeedAverage(int speed)
 	{
-		if (Math.Abs(speed - SpeedAverage) > 150)
+		if (Math.Abs(speed - speedAverage) > 150)
 		{
-			SpeedAverage = speed;
+			speedAverage = speed;
 			Array.Fill(speedHistory, speed);
 		}
 		else
@@ -197,7 +197,7 @@ public class Emulator
 			//Very inefficient way to average the emulator speed
 			for (int i = 0; i < NUMBER_OF_SPEEDS_TO_AVERAGE; i++)
 			{
-				SpeedAverage += speedHistory[i];
+				speedAverage += speedHistory[i];
 
 				if (i + 1 < NUMBER_OF_SPEEDS_TO_AVERAGE)
 				{
@@ -208,14 +208,14 @@ public class Emulator
 				speedHistory[i] = speed;
 			}
 
-			SpeedAverage /= NUMBER_OF_SPEEDS_TO_AVERAGE;
+			speedAverage /= NUMBER_OF_SPEEDS_TO_AVERAGE;
 		}
 	}
 
 	private void UpdateWindowTitle()
 	{
 		string gameFileName  = Path.GetFileName(gameRomFilePath);
-		string speedOrPaused = isPaused ? "Paused" : $"Speed: {SpeedAverage}%";
+		string speedOrPaused = isPaused ? "Paused" : $"Speed: {speedAverage}%";
 
 		string windowTitle = $"{gameFileName} | {speedOrPaused}";
 
