@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading;
 using SFML.Audio;
 using SFML.System;
@@ -64,8 +65,8 @@ public class Apu : SoundStream
 	public readonly ApuChannel4 channel4;
 
 	private readonly List<short> sampleBuffer;
-	private          short[]     previousFullSampleBuffer;
-	private readonly Mutex       sampleBufferMutex;
+
+	private readonly Mutex sampleBufferMutex;
 
 	private readonly Emulator emulator;
 
@@ -78,9 +79,8 @@ public class Apu : SoundStream
 		channel3 = new ApuChannel3(this);
 		channel4 = new ApuChannel4(this);
 
-		sampleBuffer             = new List<short>(SAMPLE_BUFFER_SIZE);
-		previousFullSampleBuffer = new short[SAMPLE_BUFFER_SIZE];
-		sampleBufferMutex        = new Mutex();
+		sampleBuffer      = new List<short>(SAMPLE_BUFFER_SIZE);
+		sampleBufferMutex = new Mutex();
 
 		Initialize(CHANNEL_COUNT, SAMPLE_RATE);
 		Play();
@@ -164,35 +164,21 @@ public class Apu : SoundStream
 
 		if (sampleBuffer.Count >= SAMPLE_BUFFER_SIZE)
 		{
-			samples                  = sampleBuffer.GetRange(0, SAMPLE_BUFFER_SIZE).ToArray();
-			previousFullSampleBuffer = samples;
+			samples = sampleBuffer.GetRange(0, SAMPLE_BUFFER_SIZE).ToArray();
 
 			sampleBuffer.RemoveRange(0, SAMPLE_BUFFER_SIZE);
 		}
 		else
 		{
-			//TODO Stretch samples when the buffer does not have enough
-			// //Dispatching events (i.e. moving the window) causes emulator to freeze so play silence
-			// if (emulator.inputOutput.DispatchingEvents)
-			// {
-			// 	samples = new short[SAMPLE_BUFFER_SIZE];
-			// 	sampleBufferMutex.ReleaseMutex();
-			// 
-			// 	return true;
-			// }
-			// 
-			// //If the buffer is not full stretch the last sample to fill the buffer
-			// samples = new short[SAMPLE_BUFFER_SIZE];
-			// Array.Copy(samples, sampleBuffer.ToArray(), sampleBuffer.Count);
-			// 
-			// sampleBuffer.Clear();
-			// 
-			// //Stretch all samples uniformly instead of repeating the last sample
-			// short lastSample = samples[^1];
-			// 
-			// for (int i = sampleBuffer.Count; i < SAMPLE_BUFFER_SIZE; i++) samples[i] = lastSample;
-
-			samples = emulator.inputOutput.DispatchingEvents ? new short[SAMPLE_BUFFER_SIZE] : previousFullSampleBuffer;
+			//Dispatching events (i.e. moving the window) causes emulator to freeze so play silence
+			if (emulator.inputOutput.DispatchingEvents || sampleBuffer.Count == 0)
+				samples = new short[SAMPLE_BUFFER_SIZE];
+			else
+			{
+				//Repeat full part of the buffer
+				samples = new short[SAMPLE_BUFFER_SIZE];
+				for (int i = 0; i < samples.Length; i++) samples[i] = sampleBuffer[i % sampleBuffer.Count];
+			}
 		}
 
 		sampleBufferMutex.ReleaseMutex();
@@ -210,8 +196,6 @@ public class Apu : SoundStream
 		sampleBufferMutex.WaitOne();
 		sampleBuffer.Clear();
 		sampleBufferMutex.ReleaseMutex();
-
-		previousFullSampleBuffer = new short[SAMPLE_BUFFER_SIZE];
 	}
 
 	private void Reset()
