@@ -1,7 +1,6 @@
 # TODO
 
 - APU
-  - **_Implement channel 4_**
   - **_Play sound with adjusted speed when speed changes by changing what gets written into the sample list_**
   - Implement obscure behaviour/hardware bugs for all channels
   - Pass all audio test roms
@@ -37,5 +36,6 @@
   - Buggy games
     - mario.gb (coin collect sound doesnt stop when the next one starts)
     - donkeykong.gb (weird lines in select screen and at the bottom of the screen)
+    - kirby.gb (white noise when kirby is sucking is too loud)
   - Broken games
     - frogger.gb (pretty much unplayable, some sprites missing/corrupted, annoying sound)

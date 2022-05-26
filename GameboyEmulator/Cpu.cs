@@ -2182,7 +2182,15 @@ public class Cpu
 	public static bool GetBit(byte data, int bit)
 	{
 		if (bit is > 7 or < 0)
-			Logger.ControlledCrash($"Tried to access access Bit {bit} of a Byte");
+			Logger.ControlledCrash($"Tried to access Bit {bit} of a Byte");
+
+		return ToBool((data >> bit) & 1);
+	}
+
+	public static bool GetBit(ushort data, int bit)
+	{
+		if (bit is > 15 or < 0)
+			Logger.ControlledCrash($"Tried to access Bit {bit} of a Word");
 
 		return ToBool((data >> bit) & 1);
 	}
@@ -2190,7 +2198,7 @@ public class Cpu
 	public static byte SetBit(byte data, int bit, bool state)
 	{
 		if (bit is > 7 or < 0)
-			Logger.ControlledCrash($"Tried to access access Bit {bit} of a Byte");
+			Logger.ControlledCrash($"Tried to access Bit {bit} of a Byte");
 
 		byte mask = (byte)(1 << bit);
 
@@ -2198,6 +2206,21 @@ public class Cpu
 			data |= mask;
 		else
 			data &= (byte)~mask;
+
+		return data;
+	}
+
+	public static ushort SetBit(ushort data, int bit, bool state)
+	{
+		if (bit is > 15 or < 0)
+			Logger.ControlledCrash($"Tried to access Bit {bit} of a Word");
+
+		ushort mask = (ushort)(1 << bit);
+
+		if (state)
+			data |= mask;
+		else
+			data &= (ushort)~mask;
 
 		return data;
 	}

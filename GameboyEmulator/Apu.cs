@@ -20,7 +20,7 @@ public class Apu : SoundStream
 	public bool Channel1Enabled { get; set; } = true;
 	public bool Channel2Enabled { get; set; } = true;
 	public bool Channel3Enabled { get; set; } = true;
-	public bool Channel4Enabled { get; set; }
+	public bool Channel4Enabled { get; set; } = true;
 
 	//NR52
 	public byte SoundOnOffRegister
