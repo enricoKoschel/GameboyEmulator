@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace GameboyEmulator;
+﻿namespace GameboyEmulator;
 
 public class Cpu
 {
@@ -134,9 +132,9 @@ public class Cpu
 		//If cpu is halted, return without executing an opcode
 		if (haltMode == HaltMode.Halted) return 4;
 
-		HandleHaltBug();
-
 		byte opcode = Load8BitImmediate();
+
+		HandleHaltBug();
 
 		switch (opcode)
 		{
@@ -204,10 +202,8 @@ public class Cpu
 				return 4;
 			//STOP
 			case 0x10:
-				Logger.LogMessage("STOP Opcode not implemented yet", Logger.LogLevel.Error, true);
-
-				Environment.Exit(1);
-				return 0; //Useless return but the program does not compile without it
+				Logger.ControlledCrash("STOP opcode not implemented yet");
+				return 0;
 			//LD DE,nn
 			case 0x11:
 				DeRegister = Load16BitImmediate();
@@ -1105,13 +1101,8 @@ public class Cpu
 
 			//Invalid Opcode
 			default:
-				Logger.LogMessage(
-					$"Invalid Opcode 0x{opcode:X} encountered at 0x{programCounter - 1:X}!", Logger.LogLevel.Error,
-					true
-				);
-
-				Environment.Exit(1);
-				return 0; //Useless return but the program does not compile without it
+				Logger.ControlledCrash($"Invalid opcode 0x{opcode:X} encountered at PC 0x{programCounter - 1:X}");
+				return 0;
 		}
 	}
 
@@ -2190,19 +2181,24 @@ public class Cpu
 	//Bit-wise functions
 	public static bool GetBit(byte data, int bit)
 	{
-		if (bit is >= 0 and <= 7) return ToBool((data >> bit) & 1);
+		if (bit is > 7 or < 0)
+			Logger.ControlledCrash($"Tried to access Bit {bit} of a Byte");
 
-		Logger.LogMessage($"Cannot access Bit {bit} of a Byte!", Logger.LogLevel.Error);
-		throw new IndexOutOfRangeException($"Cannot access Bit {bit} of a Byte!");
+		return ToBool((data >> bit) & 1);
+	}
+
+	public static bool GetBit(ushort data, int bit)
+	{
+		if (bit is > 15 or < 0)
+			Logger.ControlledCrash($"Tried to access Bit {bit} of a Word");
+
+		return ToBool((data >> bit) & 1);
 	}
 
 	public static byte SetBit(byte data, int bit, bool state)
 	{
 		if (bit is > 7 or < 0)
-		{
-			Logger.LogMessage($"Cannot access Bit {bit} of a Byte!", Logger.LogLevel.Error);
-			throw new IndexOutOfRangeException($"Cannot access Bit {bit} of a Byte!");
-		}
+			Logger.ControlledCrash($"Tried to access Bit {bit} of a Byte");
 
 		byte mask = (byte)(1 << bit);
 
@@ -2210,6 +2206,21 @@ public class Cpu
 			data |= mask;
 		else
 			data &= (byte)~mask;
+
+		return data;
+	}
+
+	public static ushort SetBit(ushort data, int bit, bool state)
+	{
+		if (bit is > 15 or < 0)
+			Logger.ControlledCrash($"Tried to access Bit {bit} of a Word");
+
+		ushort mask = (ushort)(1 << bit);
+
+		if (state)
+			data |= mask;
+		else
+			data &= (ushort)~mask;
 
 		return data;
 	}

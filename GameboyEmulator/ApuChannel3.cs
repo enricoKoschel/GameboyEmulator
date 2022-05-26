@@ -1,6 +1,4 @@
-﻿using System.IO;
-
-namespace GameboyEmulator;
+﻿namespace GameboyEmulator;
 
 public class ApuChannel3
 {
@@ -9,7 +7,7 @@ public class ApuChannel3
 	//NR30
 	public byte SoundOnOffRegister
 	{
-		get => (byte)((internalSoundOnOffRegister ? 1 : 0) << 7);
+		get => (byte)(internalSoundOnOffRegister ? 0b1000_0000 : 0b0000_0000);
 		set => internalSoundOnOffRegister = (value & 0b1000_0000) != 0;
 	}
 
@@ -43,7 +41,7 @@ public class ApuChannel3
 	//NR34
 	public byte FrequencyRegisterHi
 	{
-		get => (byte)(internalFrequencyRegisterHi & 0b1100_0111);
+		get => (byte)(internalFrequencyRegisterHi | 0b1011_1111);
 		set
 		{
 			internalFrequencyRegisterHi = (byte)(value & 0b1100_0111);
@@ -51,25 +49,36 @@ public class ApuChannel3
 		}
 	}
 
-	//Only the lower 3 bits of FrequencyRegisterHi are used
-	private ushort FrequencyRegister => (ushort)(Cpu.MakeWord(FrequencyRegisterHi, FrequencyRegisterLo) & 0x7FF);
-
-	private bool SoundOnOff => Cpu.GetBit(SoundOnOffRegister, 7);
+	//Only the lower 3 bits of internalFrequencyRegisterHi are used
+	private ushort FrequencyRegister =>
+		(ushort)(Cpu.MakeWord(internalFrequencyRegisterHi, FrequencyRegisterLo) & 0x7FF);
 
 	private byte OutputLevel => (byte)((SelectOutputLevelRegister & 0b0110_0000) >> 5);
 
-	private bool Trigger => Cpu.GetBit(FrequencyRegisterHi, 7);
+	private bool Trigger => Cpu.GetBit(internalFrequencyRegisterHi, 7);
 
-	private bool EnableLength => Cpu.GetBit(FrequencyRegisterHi, 6);
+	private bool EnableLength => Cpu.GetBit(internalFrequencyRegisterHi, 6);
 
-	private int CurrentVolumeShiftAmount => OutputLevel switch
+	private int CurrentVolumeShiftAmount
 	{
-		0b00 => 4,
-		0b01 => 0,
-		0b10 => 1,
-		0b11 => 2,
-		_    => throw new InvalidDataException($"{nameof(OutputLevel)} above 3 should be impossible!")
-	};
+		get
+		{
+			switch (OutputLevel)
+			{
+				case 0b00:
+					return 4;
+				case 0b01:
+					return 0;
+				case 0b10:
+					return 1;
+				case 0b11:
+					return 2;
+				default:
+					Logger.Unreachable();
+					return 0;
+			}
+		}
+	}
 
 	private bool LeftEnabled  => Cpu.GetBit(apu.SoundOutputTerminalSelectRegister, 6);
 	private bool RightEnabled => Cpu.GetBit(apu.SoundOutputTerminalSelectRegister, 2);
@@ -130,24 +139,20 @@ public class ApuChannel3
 
 	private void CheckDacEnabled()
 	{
-		if (!SoundOnOff) Playing = false;
+		if (!internalSoundOnOffRegister) Playing = false;
 	}
 
 	public void Reset()
 	{
 		internalSoundOnOffRegister = false;
-		SoundOnOffRegister         = 0;
 
 		internalSoundLengthRegister = 0;
-		SoundLengthRegister         = 0;
 
 		internalSelectOutputLevelRegister = 0;
-		SelectOutputLevelRegister         = 0;
 
 		FrequencyRegisterLo = 0;
 
 		internalFrequencyRegisterHi = 0;
-		FrequencyRegisterHi         = 0;
 	}
 
 	private void TickFrameSequencer()
@@ -167,15 +172,25 @@ public class ApuChannel3
 		Playing = false;
 	}
 
-	private byte GetWaveRamSample(int index)
+	private sbyte GetWaveRamSample(int index)
 	{
 		byte samplePair = waveRam[index / 2];
 
 		int numberOfSample = index % 2;
 
-		if (numberOfSample == 0) return (byte)((samplePair & 0b1111_0000) >> 4);
+		byte sample;
+		if (numberOfSample == 0)
+		{
+			sample =   (byte)((samplePair & 0b1111_0000) >> 4);
+			sample >>= CurrentVolumeShiftAmount;
 
-		return (byte)(samplePair & 0b0000_1111);
+			return (sbyte)(sample - 8);
+		}
+
+		sample =   (byte)(samplePair & 0b0000_1111);
+		sample >>= CurrentVolumeShiftAmount;
+
+		return (sbyte)(sample - 8);
 	}
 
 	public byte GetWaveRamSamplePair(int index)
@@ -198,7 +213,7 @@ public class ApuChannel3
 
 		double volume = apu.LeftChannelVolume * Apu.VOLUME_MULTIPLIER;
 
-		return (short)((GetWaveRamSample(waveRamPosition) >> CurrentVolumeShiftAmount) * volume);
+		return (short)(GetWaveRamSample(waveRamPosition) * volume);
 	}
 
 	public short GetCurrentAmplitudeRight()
@@ -207,6 +222,8 @@ public class ApuChannel3
 
 		double volume = apu.RightChannelVolume * Apu.VOLUME_MULTIPLIER;
 
-		return (short)((GetWaveRamSample(waveRamPosition) >> CurrentVolumeShiftAmount) * volume);
+		//Console.WriteLine($"{(short)(GetWaveRamSample(waveRamPosition) * volume)}");
+
+		return (short)(GetWaveRamSample(waveRamPosition) * volume);
 	}
 }

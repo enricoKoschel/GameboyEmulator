@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 
 namespace GameboyEmulator;
@@ -62,14 +63,17 @@ public class Memory
 
 	private bool bootRomEnabled;
 
-	private DateTime lastTimeRamWasSaved     = DateTime.Now;
-	private bool     ramChangedSinceLastSave = true;
+	private readonly Stopwatch timeSinceLastRamSave;
+	private          bool      ramChangedSinceLastSave = true;
 
 	private readonly Emulator emulator;
 
 	public Memory(Emulator emulator)
 	{
 		this.emulator = emulator;
+
+		timeSinceLastRamSave = new Stopwatch();
+		timeSinceLastRamSave.Start();
 
 		videoRam         = new byte[0x2000];
 		workRam          = new byte[0x2000];
@@ -99,19 +103,11 @@ public class Memory
 			}
 			catch
 			{
-				Logger.LogMessage(
-					$"Boot rom '{emulator.bootRomFilePath}' could not be opened!", Logger.LogLevel.Error, true
-				);
-
-				Environment.Exit(1);
+				Logger.ControlledCrash($"Boot rom '{emulator.bootRomFilePath}' could not be opened");
 			}
 
 			if (bootRom.Length != 0x100)
-			{
-				Logger.LogMessage("Invalid boot rom selected!", Logger.LogLevel.Error, true);
-
-				Environment.Exit(1);
-			}
+				Logger.ControlledCrash($"Selected boot rom '{emulator.bootRomFilePath}' has an invalid length");
 		}
 		else
 		{
@@ -125,20 +121,12 @@ public class Memory
 		}
 		catch
 		{
-			Logger.LogMessage(
-				$"Game rom '{emulator.gameRomFilePath}' could not be opened!", Logger.LogLevel.Error, true
-			);
-
-			Environment.Exit(1);
+			Logger.ControlledCrash($"Game rom '{emulator.gameRomFilePath}' could not be opened");
 		}
 
 		//A cartridge has to be at least 0x150 bytes large to contain a full cartridge header
 		if (cartridgeRom.Length < 0x150)
-		{
-			Logger.LogMessage("Invalid game rom selected!", Logger.LogLevel.Error, true);
-
-			Environment.Exit(1);
-		}
+			Logger.ControlledCrash($"Selected game rom '{emulator.gameRomFilePath}' has an invalid length");
 
 		//Pad the cartridge size to at least 0x8000 bytes (32KB)
 		if (cartridgeRom.Length < 0x8000) Array.Resize(ref cartridgeRom, 0x8000);
@@ -154,7 +142,7 @@ public class Memory
 
 		AllocateCartridgeRam(emulator.memoryBankController.NumberOfRamBanks);
 
-		Logger.LogMessage("Game was loaded.", Logger.LogLevel.Info);
+		Logger.LogInfo("Game loaded successfully");
 	}
 
 	public void SaveCartridgeRam()
@@ -162,9 +150,10 @@ public class Memory
 		if (!ramChangedSinceLastSave || !emulator.memoryBankController.CartridgeRamExists ||
 			!emulator.savingEnabled) return;
 
-		if (DateTime.Now < lastTimeRamWasSaved.AddSeconds(1)) return;
+		if (timeSinceLastRamSave.Elapsed.TotalSeconds < 5) return;
 
-		lastTimeRamWasSaved     = DateTime.Now;
+		timeSinceLastRamSave.Restart();
+
 		ramChangedSinceLastSave = false;
 
 		File.WriteAllBytes(emulator.saveFilePath, cartridgeRam);
@@ -221,7 +210,7 @@ public class Memory
 	{
 		bootRomEnabled = false;
 
-		Logger.LogMessage("Boot rom was disabled.", Logger.LogLevel.Info);
+		Logger.LogInfo("Boot rom was disabled");
 	}
 
 	public byte Read(ushort address, bool noRomBanking = false)
@@ -258,7 +247,8 @@ public class Memory
 		if (address == INTERRUPT_ENABLE_REG_ADDRESS)
 			return emulator.interrupts.InterruptEnableRegister;
 
-		throw new ArgumentOutOfRangeException(nameof(address), address, "Address out of range!");
+		Logger.ControlledCrash($"Tried to access memory at invalid address: {address:X4}");
+		return 0xFF;
 	}
 
 	private byte ReadFromCartridgeRom(ushort address, bool noRomBanking)
@@ -272,15 +262,13 @@ public class Memory
 
 	private byte ReadFromCartridgeRam(ushort address)
 	{
-		if (emulator.memoryBankController.CartridgeRamExists && emulator.memoryBankController.IsRamEnabled)
-		{
-			return cartridgeRam[
-				emulator.memoryBankController.ConvertAddressInRamBank(
-					(ushort)(address - CARTRIDGE_RAM_BASE_ADDRESS)
-				)];
-		}
+		if (!emulator.memoryBankController.CartridgeRamExists ||
+			!emulator.memoryBankController.IsRamEnabled) return 0xFF;
 
-		return 0xFF;
+		uint addressWithBanking =
+			emulator.memoryBankController.ConvertAddressInRamBank((ushort)(address - CARTRIDGE_RAM_BASE_ADDRESS));
+
+		return cartridgeRam[addressWithBanking];
 	}
 
 	private byte ReadFromIoPorts(ushort address)
@@ -307,37 +295,37 @@ public class Memory
 			case 0x0F:
 				return emulator.interrupts.InterruptFlagRegister;
 			case 0x10:
-				return (byte)(emulator.apu.channel1.FrequencySweepRegister | 0b1000_0000);
+				return emulator.apu.channel1.FrequencySweepRegister;
 			case 0x11:
-				return (byte)(emulator.apu.channel1.SoundLengthWavePatternRegister | 0b0011_1111);
+				return emulator.apu.channel1.SoundLengthWavePatternRegister;
 			case 0x12:
 				return emulator.apu.channel1.VolumeEnvelopeRegister;
 			case 0x13:
 				//Write only
 				return 0xFF;
 			case 0x14:
-				return (byte)(emulator.apu.channel1.FrequencyRegisterHi | 0b1011_1111);
+				return emulator.apu.channel1.FrequencyRegisterHi;
 			case 0x16:
-				return (byte)(emulator.apu.channel2.SoundLengthWavePatternRegister | 0b0011_1111);
+				return emulator.apu.channel2.SoundLengthWavePatternRegister;
 			case 0x17:
 				return emulator.apu.channel2.VolumeEnvelopeRegister;
 			case 0x18:
 				//Write only
 				return 0xFF;
 			case 0x19:
-				return (byte)(emulator.apu.channel2.FrequencyRegisterHi | 0b1011_1111);
+				return emulator.apu.channel2.FrequencyRegisterHi;
 			case 0x1A:
-				return (byte)(emulator.apu.channel3.SoundOnOffRegister | 0b0111_1111);
+				return emulator.apu.channel3.SoundOnOffRegister;
 			case 0x1B:
 				//Write only
 				return 0xFF;
 			case 0x1C:
-				return (byte)(emulator.apu.channel3.SelectOutputLevelRegister | 0b1001_1111);
+				return emulator.apu.channel3.SelectOutputLevelRegister;
 			case 0x1D:
 				//Write only
 				return 0xFF;
 			case 0x1E:
-				return (byte)(emulator.apu.channel3.FrequencyRegisterHi | 0b1011_1111);
+				return emulator.apu.channel3.FrequencyRegisterHi;
 			case 0x20:
 				//Write only
 				return 0xFF;
@@ -346,13 +334,13 @@ public class Memory
 			case 0x22:
 				return emulator.apu.channel4.PolynomialCounterRegister;
 			case 0x23:
-				return (byte)(emulator.apu.channel4.CounterConsecutiveRegister | 0b1011_1111);
+				return emulator.apu.channel4.CounterConsecutiveRegister;
 			case 0x24:
 				return emulator.apu.ChannelControlRegister;
 			case 0x25:
 				return emulator.apu.SoundOutputTerminalSelectRegister;
 			case 0x26:
-				return (byte)(emulator.apu.SoundOnOffRegister | 0b0111_0000);
+				return emulator.apu.SoundOnOffRegister;
 			case 0x40:
 				return emulator.ppu.LcdControlRegister;
 			case 0x41:
@@ -382,7 +370,7 @@ public class Memory
 				return 0xFF;
 			case 0x50:
 				//Reading from 0xFF50 returns 1 for bits 7-1 and the boot rom state for bit 0
-				return (byte)(0b1111_1110 | (bootRomEnabled ? 0 : 1));
+				return Cpu.MakeByte(true, true, true, true, true, true, true, !bootRomEnabled);
 			default:
 				//Unused IO ports return 0xFF
 				return 0xFF;
@@ -427,7 +415,7 @@ public class Memory
 			emulator.interrupts.InterruptEnableRegister = data;
 
 		else
-			throw new ArgumentOutOfRangeException(nameof(address), address, "Address out of range!");
+			Logger.ControlledCrash($"Tried to access memory at invalid address: {address:X4}");
 	}
 
 	private void WriteToCartridgeRam(ushort address, byte data)
@@ -435,10 +423,10 @@ public class Memory
 		if (!emulator.memoryBankController.CartridgeRamExists ||
 			!emulator.memoryBankController.IsRamEnabled) return;
 
-		cartridgeRam[
-			emulator.memoryBankController.ConvertAddressInRamBank(
-				(ushort)(address - CARTRIDGE_RAM_BASE_ADDRESS)
-			)] = data;
+		uint addressWithBanking =
+			emulator.memoryBankController.ConvertAddressInRamBank((ushort)(address - CARTRIDGE_RAM_BASE_ADDRESS));
+
+		cartridgeRam[addressWithBanking] = data;
 
 		ramChangedSinceLastSave = true;
 	}
@@ -575,7 +563,7 @@ public class Memory
 				break;
 			case 0x50:
 				//Writing to this address disables the boot rom
-				if (bootRomEnabled && (data & 0b0000_0001) == 1) DisableBootRom();
+				if (bootRomEnabled && Cpu.GetBit(data, 0)) DisableBootRom();
 				break;
 		}
 	}

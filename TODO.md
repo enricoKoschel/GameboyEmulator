@@ -1,21 +1,21 @@
 # TODO
 
 - APU
-  - **_Implement channel 4_**
-  - **_Play sound with adjusted speed when speed changes by changing what gets written into the sample list_**
+  - **_Generate samples asynchronously_**
   - Implement obscure behaviour/hardware bugs for all channels
   - Pass all audio test roms
   - Implement VIn (Audio from cartridge)
   - Maybe use Blip-Buf to emulate audio
-  - Apply smoothing to square waves
+  - Apply smoothing/drop off to square waves and add high pass filter
 - Core
   - **_Add the ability to resize the window (change scale)_**
   - **_Scale window according to screen size (or have screen scale in config)_**
   - **_Implement GUI_**
   - **_Implement save states/rewind_**
   - Implement all checks at startup (checksums, logo, etc.)
+  - Add support for the Gameboy Color (CGB)
   - Somehow dont block while events get handled
-  - Improve resetting the emulator (dont create all modules every time)
+- Improve resetting the emulator (dont create all modules every time)
 - Memory
   - Maybe change cartridge ram to be a memory mapped file
 - Logger
@@ -37,5 +37,6 @@
   - Buggy games
     - mario.gb (coin collect sound doesnt stop when the next one starts)
     - donkeykong.gb (weird lines in select screen and at the bottom of the screen)
+    - kirby.gb (white noise when kirby is sucking is too loud)
   - Broken games
     - frogger.gb (pretty much unplayable, some sprites missing/corrupted, annoying sound)

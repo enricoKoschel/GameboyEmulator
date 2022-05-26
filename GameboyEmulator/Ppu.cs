@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace GameboyEmulator;
 
@@ -39,11 +38,8 @@ public class Ppu
 	{
 		set
 		{
-			if (value > 0x3)
-			{
-				Logger.LogMessage("LCD Mode cannot be larger than 3!", Logger.LogLevel.Error);
-				throw new ArgumentOutOfRangeException(nameof(value), "LCD Mode cannot be larger than 3!");
-			}
+			if (value > 3)
+				Logger.ControlledCrash($"Invalid LCD mode '{value}'");
 
 			LcdStatusRegister &= 0b1111_1100;
 			LcdStatusRegister |= value;

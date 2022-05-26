@@ -1,106 +1,109 @@
 ﻿using System;
+using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 
 namespace GameboyEmulator;
 
 public static class Logger
 {
-	public enum LogLevel
+	private enum LogLevel
 	{
 		Info,
 		Warn,
 		Error
 	}
 
-	private static readonly StreamWriter? LOG_FILE;
+	private static readonly StreamWriter LOG_FILE;
 
 	private static string CurrentTime              => DateTime.Now.ToString("HH:mm:ss.fff");
 	private static string CurrentTimeFileFormatted => DateTime.Now.ToString("yyyy-MM-dd__HH_mm_ss");
 
-	private static readonly string? LOG_DIRECTORY_PATH;
-	private static readonly bool    LOGGING_ENABLED;
-	private const           bool    ENABLE_CONSOLE_LOGGING = true;
+	private const string DEFAULT_LOG_DIRECTORY  = "./logs";
+	private const bool   ENABLE_CONSOLE_LOGGING = true;
+
+	private static readonly string LOG_DIRECTORY;
 
 	static Logger()
 	{
-		bool? loggingEnabledConfig = Config.GetLogEnabledConfig();
-
-		bool enableConfigWasInvalid = false;
-		if (!loggingEnabledConfig.HasValue)
-		{
-			LOGGING_ENABLED        = true;
-			enableConfigWasInvalid = true;
-		}
-		else if (!loggingEnabledConfig.Value)
-		{
-			LOGGING_ENABLED = false;
-			return;
-		}
-		else LOGGING_ENABLED = true;
-
-		LOG_DIRECTORY_PATH = Path.GetDirectoryName(Config.GetLogLocationConfig() + "/");
+		string? logDirectory = Path.GetDirectoryName(Config.GetLogLocationConfig() + "/");
 
 		bool defaultDirectoryUsed = false;
-		if (String.IsNullOrWhiteSpace(LOG_DIRECTORY_PATH))
+		if (String.IsNullOrWhiteSpace(logDirectory))
 		{
-			LOG_DIRECTORY_PATH   = "./logs";
+			LOG_DIRECTORY        = DEFAULT_LOG_DIRECTORY;
 			defaultDirectoryUsed = true;
 		}
+		else LOG_DIRECTORY = logDirectory;
 
-		LOG_DIRECTORY_PATH += "/";
+		LOG_DIRECTORY += "/";
 
 		LOG_FILE = CreateLogFile();
 
-		//LOG_FILE cannot be null when logging is enabled
-		LOG_FILE!.AutoFlush = true;
-
-		//Not pretty but we can't call LogMessage() here because the logger isn't initialized yet
-		void LocalLogMessage(string message, LogLevel loglevel, bool logToConsole = false)
-		{
-			string logMessage = $"[{CurrentTime}][{LogLevelToString(loglevel)}] {message}";
-
-			if (logToConsole && ENABLE_CONSOLE_LOGGING) Console.WriteLine(logMessage);
-
-			//LOG_FILE cannot be null when logging is enabled
-			LOG_FILE!.WriteLine(logMessage);
-		}
-
-		if (enableConfigWasInvalid)
-		{
-			LocalLogMessage(
-				"Invalid value for [Logging].ENABLED in config file. Defaulting to true.", LogLevel.Warn, true
-			);
-		}
+		LOG_FILE.AutoFlush = true;
 
 		if (defaultDirectoryUsed)
-		{
-			LocalLogMessage(
-				$"Invalid value for [Logging].LOCATION in config file. Defaulting to {LOG_DIRECTORY_PATH}.",
-				LogLevel.Warn, true
-			);
-		}
+			LogInvalidConfigValue("[Logging].LOCATION", Config.GetLogLocationConfig(), DEFAULT_LOG_DIRECTORY);
 	}
 
-	public static void LogMessage(string message, LogLevel loglevel, bool logToConsole = false)
+	private static void LogMessage(string message, LogLevel loglevel, bool logToConsole = false)
 	{
-		if (!LOGGING_ENABLED) return;
-
 		string logMessage = $"[{CurrentTime}][{LogLevelToString(loglevel)}] {message}";
 
 		if (logToConsole && ENABLE_CONSOLE_LOGGING) Console.WriteLine(logMessage);
 
-		//LOG_FILE cannot be null when logging is enabled
-		LOG_FILE!.WriteLine(logMessage);
+		LOG_FILE.WriteLine(logMessage);
 	}
 
-	private static StreamWriter? CreateLogFile()
+	public static void LogError(string message, bool logToConsole = false)
 	{
-		if (!LOGGING_ENABLED) return null;
+		LogMessage(message, LogLevel.Error, logToConsole);
+	}
 
-		//LOG_DIRECTORY_PATH cannot be null when logging is enabled
-		Directory.CreateDirectory(LOG_DIRECTORY_PATH!);
+	public static void LogWarn(string message, bool logToConsole = false)
+	{
+		LogMessage(message, LogLevel.Warn, logToConsole);
+	}
 
-		string logFilePath = $"{LOG_DIRECTORY_PATH}{CurrentTimeFileFormatted}-{{0}}.txt";
+	public static void LogInfo(string message, bool logToConsole = false)
+	{
+		LogMessage(message, LogLevel.Info, logToConsole);
+	}
+
+	public static void LogInvalidConfigValue<T1, T2>(string configKey, T1? value, T2 defaultValue)
+	{
+		LogWarn(
+			value is null
+				? $"{configKey} could not be found in config file. Defaulting to {defaultValue}."
+				: $"Invalid value '{value}' for {configKey} in config file. Defaulting to {defaultValue}.",
+			true
+		);
+	}
+
+	[DoesNotReturn]
+	public static void ControlledCrash(string message, int skipFrames = 0)
+	{
+		LogError($"{message}\n{new StackTrace(skipFrames + 1)}", true);
+		Environment.Exit(1);
+	}
+
+	public static void ControlledCrash(Exception e)
+	{
+		LogError($"{e.Message}\n{e.StackTrace}", true);
+		Environment.Exit(1);
+	}
+
+	[DoesNotReturn]
+	public static void Unreachable()
+	{
+		ControlledCrash("Unreachable code reached", 1);
+	}
+
+	private static StreamWriter CreateLogFile()
+	{
+		Directory.CreateDirectory(LOG_DIRECTORY);
+
+		string logFilePath = $"{LOG_DIRECTORY}{CurrentTimeFileFormatted}-{{0}}.txt";
 		int    fileNumber  = 1;
 
 		while (File.Exists(String.Format(logFilePath, fileNumber))) fileNumber++;
@@ -112,12 +115,17 @@ public static class Logger
 
 	private static string LogLevelToString(LogLevel logLevel)
 	{
-		return logLevel switch
+		switch (logLevel)
 		{
-			LogLevel.Info  => "Info",
-			LogLevel.Warn  => "Warn",
-			LogLevel.Error => "Error",
-			_              => throw new ArgumentOutOfRangeException(nameof(logLevel), logLevel, "Invalid Log Level")
-		};
+			case LogLevel.Info:
+				return "Info";
+			case LogLevel.Warn:
+				return "Warn";
+			case LogLevel.Error:
+				return "Error";
+			default:
+				ControlledCrash($"Invalid log level {logLevel}");
+				return "";
+		}
 	}
 }

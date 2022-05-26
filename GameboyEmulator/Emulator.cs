@@ -19,8 +19,7 @@ public class Emulator
 
 	public const int GAMEBOY_CLOCK_SPEED = 4194304;
 
-	//Clock speed/70224 is the exact fps of the Gameboy
-	public const double GAMEBOY_FPS = GAMEBOY_CLOCK_SPEED / 70224.0;
+	public const double GAMEBOY_FPS = (float)GAMEBOY_CLOCK_SPEED / Cpu.MAX_CYCLES_PER_FRAME;
 
 	public  double MaxFps                  { get; set; }
 	private double MinMillisecondsPerFrame => MaxFps != 0 ? 1000 / MaxFps : 0;
@@ -32,6 +31,8 @@ public class Emulator
 	private          int   speedAverage = 100;
 
 	public readonly bool savingEnabled;
+
+	private const string DEFAULT_SAVE_FILE_DIRECTORY = "./saves";
 
 	public readonly string bootRomFilePath;
 	public readonly string gameRomFilePath;
@@ -58,24 +59,24 @@ public class Emulator
 		string? saveFileDirectory = Path.GetDirectoryName(Config.GetSaveLocationConfig() + "/");
 		if (String.IsNullOrWhiteSpace(saveFileDirectory))
 		{
-			saveFileDirectory = "./saves/";
-
-			Logger.LogMessage(
-				$"Invalid value for [Saving].LOCATION in config file. Defaulting to {saveFileDirectory}.",
-				Logger.LogLevel.Warn, true
+			Logger.LogInvalidConfigValue(
+				"[Saving].LOCATION", Config.GetSaveLocationConfig(), DEFAULT_SAVE_FILE_DIRECTORY
 			);
+
+			saveFileDirectory = DEFAULT_SAVE_FILE_DIRECTORY;
 		}
 
 		string saveFileName = Path.ChangeExtension(Path.GetFileName(gameRomFilePath), ".sav");
 		saveFilePath = $"{saveFileDirectory}/{saveFileName}";
 
 		speedHistory = new int[NUMBER_OF_SPEEDS_TO_AVERAGE];
+		Array.Fill(speedHistory, 100);
 
 		MaxFps = GAMEBOY_FPS;
 
-		memory.LoadGame();
-
 		savingEnabled = Config.GetSaveEnabledConfig();
+
+		memory.LoadGame();
 
 		//Only create save directory if saving is enabled and cartridge ram exists
 		if (savingEnabled && memoryBankController.CartridgeRamExists)
@@ -112,6 +113,7 @@ public class Emulator
 	{
 		while (IsRunning && isPaused)
 		{
+			UpdateWindowTitle();
 			inputOutput.Update();
 			apu.ClearSampleBuffer();
 			Thread.Sleep(16);
@@ -152,55 +154,71 @@ public class Emulator
 
 		double timeSlept = 0;
 
-		if (sleepNeeded > 0 && apu.AmountOfSamples > Apu.SAMPLE_BUFFER_SIZE)
+		if (sleepNeeded > 0 && (apu.AmountOfSamples > Apu.SAMPLE_BUFFER_SIZE || !apu.Enabled))
 		{
-			TimeOnly timeBeforeSleep = TimeOnly.FromDateTime(DateTime.Now);
+			Stopwatch sleepTime = new();
+			sleepTime.Restart();
 			Thread.Sleep((int)sleepNeeded);
-			TimeOnly timeAfterSleep = TimeOnly.FromDateTime(DateTime.Now);
+			sleepTime.Stop();
 
-			timeSlept = (timeAfterSleep - timeBeforeSleep).TotalMilliseconds;
+			timeSlept = sleepTime.Elapsed.TotalMilliseconds;
 
 			//Calculate the error from sleeping too much/not enough
 			sleepErrorInMilliseconds = sleepNeeded - timeSlept;
 		}
 		else sleepErrorInMilliseconds = 0;
 
-		UpdateWindowTitle(elapsedMilliseconds + timeSlept);
-	}
+		double totalElapsedTime = elapsedMilliseconds + timeSlept;
 
-	private void UpdateWindowTitle(double elapsedTime)
-	{
 		//One frame on the Gameboy takes about 16.74 milliseconds to render
-		//Dividing 1674 by the frame time gives us the emulation speed out of 100%
-		int speed = Convert.ToInt32(1674 / Math.Max(elapsedTime, 1));
+		//Dividing 1674 by the frame time calculates the emulation speed out of 100%
+		int speed = Convert.ToInt32(1674 / Math.Max(totalElapsedTime, Double.MinValue));
 
-		if (Math.Abs(speed - speedHistory[NUMBER_OF_SPEEDS_TO_AVERAGE - 1]) > 100)
+		//Catch single frames where the speed is very low or very high
+		if (Math.Abs(speed - speedHistory[^1]) > 50)
 		{
-			//If the speed is significantly different from the previous one, dont consider it
-			speedHistory[NUMBER_OF_SPEEDS_TO_AVERAGE - 1] = speed;
+			speedHistory[^1] = speed;
 			return;
 		}
 
-		//Very inefficient way to average the emulator speed
-		for (int i = 0; i < NUMBER_OF_SPEEDS_TO_AVERAGE; i++)
-		{
-			speedAverage += speedHistory[i];
+		CalculateSpeedAverage(speed);
+		UpdateWindowTitle();
+	}
 
-			if (i + 1 < NUMBER_OF_SPEEDS_TO_AVERAGE)
+	private void CalculateSpeedAverage(int speed)
+	{
+		if (Math.Abs(speed - speedAverage) > 150)
+		{
+			speedAverage = speed;
+			Array.Fill(speedHistory, speed);
+		}
+		else
+		{
+			//Very inefficient way to average the emulator speed
+			for (int i = 0; i < NUMBER_OF_SPEEDS_TO_AVERAGE; i++)
 			{
-				speedHistory[i] = speedHistory[i + 1];
-				continue;
+				speedAverage += speedHistory[i];
+
+				if (i + 1 < NUMBER_OF_SPEEDS_TO_AVERAGE)
+				{
+					speedHistory[i] = speedHistory[i + 1];
+					continue;
+				}
+
+				speedHistory[i] = speed;
 			}
 
-			speedHistory[i] = speed;
+			speedAverage /= NUMBER_OF_SPEEDS_TO_AVERAGE;
 		}
+	}
 
-		speedAverage /= NUMBER_OF_SPEEDS_TO_AVERAGE;
+	private void UpdateWindowTitle()
+	{
+		string gameFileName  = Path.GetFileName(gameRomFilePath);
+		string speedOrPaused = isPaused ? "Paused" : $"Speed: {speedAverage}%";
 
-		inputOutput.SetWindowTitle(
-			isPaused
-				? $"{Path.GetFileName(gameRomFilePath)} | paused"
-				: $"{Path.GetFileName(gameRomFilePath)} | Speed: {speedAverage}%"
-		);
+		string windowTitle = $"{gameFileName} | {speedOrPaused}";
+
+		inputOutput.SetWindowTitle(windowTitle);
 	}
 }
