@@ -1,14 +1,13 @@
 # TODO
 
 - APU
-  - **_Play sound with adjusted speed when speed changes by changing what gets written into the sample list_**
+  - **_Generate samples asynchronously_**
   - Implement obscure behaviour/hardware bugs for all channels
   - Pass all audio test roms
   - Implement VIn (Audio from cartridge)
   - Maybe use Blip-Buf to emulate audio
   - Apply smoothing/drop off to square waves and add high pass filter
 - Core
-  - **_Sync to audio instead of video_**
   - **_Add the ability to resize the window (change scale)_**
   - **_Scale window according to screen size (or have screen scale in config)_**
   - **_Implement GUI_**
