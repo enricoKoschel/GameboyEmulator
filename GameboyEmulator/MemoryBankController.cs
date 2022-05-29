@@ -75,6 +75,14 @@ public class MemoryBankController
 			case MbcBase.BankControllerType.Mbc1RamBattery:
 				mbc = new Mbc1(numberOfRomBanks, numberOfRamBanks, type);
 				break;
+			case MbcBase.BankControllerType.Mbc5:
+			case MbcBase.BankControllerType.Mbc5Ram:
+			case MbcBase.BankControllerType.Mbc5Rumble:
+			case MbcBase.BankControllerType.Mbc5RamBattery:
+			case MbcBase.BankControllerType.Mbc5RumbleRam:
+			case MbcBase.BankControllerType.Mbc5RumbleRamBattery:
+				mbc = new Mbc5(numberOfRomBanks, numberOfRamBanks, type);
+				break;
 			default:
 				Logger.ControlledCrash($"Memory Bank Controller '{type}' is not implemented yet");
 				break;

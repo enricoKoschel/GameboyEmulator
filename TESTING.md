@@ -190,16 +190,16 @@
 
 #### MBC5
 
-| Test      | State                        |
-|-----------|------------------------------|
-| rom_512kb | ❌ (MBC5 not implemented yet) |
-| rom_1Mb   | ❌ (MBC5 not implemented yet) |
-| rom_2Mb   | ❌ (MBC5 not implemented yet) |
-| rom_4Mb   | ❌ (MBC5 not implemented yet) |
-| rom_8Mb   | ❌ (MBC5 not implemented yet) |
-| rom_16Mb  | ❌ (MBC5 not implemented yet) |
-| rom_32Mb  | ❌ (MBC5 not implemented yet) |
-| rom_64Mb  | ❌ (MBC5 not implemented yet) |
+| Test      | State |
+|-----------|-------|
+| rom_512kb | ✅     |
+| rom_1Mb   | ✅     |
+| rom_2Mb   | ✅     |
+| rom_4Mb   | ✅     |
+| rom_8Mb   | ✅     |
+| rom_16Mb  | ✅     |
+| rom_32Mb  | ✅     |
+| rom_64Mb  | ✅     |
 
 ### madness
 
