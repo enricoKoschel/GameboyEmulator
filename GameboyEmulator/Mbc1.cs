@@ -8,19 +8,15 @@ public sealed class Mbc1 : MbcBase
 		Advanced = 1
 	}
 
-	public Mbc1(byte numberOfRomBanks, byte numberOfRamBanks, bool hasRam, bool hasBattery)
+	public Mbc1(byte numberOfRomBanks, byte numberOfRamBanks, BankControllerType type)
 	{
-		Type = hasRam switch
-		{
-			true when hasBattery => BankControllerType.Mbc1RamBattery,
-			true                 => BankControllerType.Mbc1Ram,
-			_                    => BankControllerType.Mbc1
-		};
+		Type = type;
+
+		HasRam     = type is BankControllerType.Mbc1Ram or BankControllerType.Mbc1RamBattery;
+		HasBattery = type is BankControllerType.Mbc1RamBattery;
 
 		NumberOfRomBanks = numberOfRomBanks;
 		NumberOfRamBanks = numberOfRamBanks;
-		HasRam           = hasRam;
-		HasBattery       = hasBattery;
 
 		currentBankingMode = BankingMode.Simple;
 
