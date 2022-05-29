@@ -66,10 +66,10 @@ public abstract class MbcBase
 
 	protected BankControllerType Type { get; init; }
 
-	public abstract bool HasRam           { get; }
-	public abstract bool HasBattery       { get; }
-	public abstract byte NumberOfRomBanks { get; }
-	public abstract byte NumberOfRamBanks { get; }
+	public abstract bool   HasRam           { get; }
+	public abstract bool   HasBattery       { get; }
+	public abstract ushort NumberOfRomBanks { get; }
+	public abstract byte   NumberOfRamBanks { get; }
 
 	public abstract bool RamEnabled { get; protected set; }
 

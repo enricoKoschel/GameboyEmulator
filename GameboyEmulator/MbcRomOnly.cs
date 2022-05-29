@@ -2,7 +2,7 @@
 
 public sealed class MbcRomOnly : MbcBase
 {
-	public MbcRomOnly(byte numberOfRomBanks, byte numberOfRamBanks)
+	public MbcRomOnly(ushort numberOfRomBanks, byte numberOfRamBanks)
 	{
 		Type = BankControllerType.RomOnly;
 
@@ -25,9 +25,9 @@ public sealed class MbcRomOnly : MbcBase
 
 	public override bool HasRam => false;
 
-	public override bool HasBattery       => false;
-	public override byte NumberOfRomBanks => 2;
-	public override byte NumberOfRamBanks => 0;
+	public override bool   HasBattery       => false;
+	public override ushort NumberOfRomBanks => 2;
+	public override byte   NumberOfRamBanks => 0;
 
 	public override bool RamEnabled { get; protected set; }
 

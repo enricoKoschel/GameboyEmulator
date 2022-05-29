@@ -34,7 +34,7 @@ public class MemoryBankController
 		if (numberOfRomBanksRaw > 0x08)
 			Logger.ControlledCrash("Cartridge has an invalid number of ROM banks");
 
-		byte numberOfRomBanks = (byte)Math.Pow(2, numberOfRomBanksRaw + 1);
+		ushort numberOfRomBanks = (ushort)Math.Pow(2, numberOfRomBanksRaw + 1);
 
 		Logger.LogInfo($"Number of ROM banks: {numberOfRomBanks}");
 

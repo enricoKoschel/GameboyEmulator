@@ -8,9 +8,23 @@ public sealed class Mbc1 : MbcBase
 		Advanced = 1
 	}
 
-	public Mbc1(byte numberOfRomBanks, byte numberOfRamBanks, BankControllerType type)
+	public Mbc1(ushort numberOfRomBanks, byte numberOfRamBanks, BankControllerType type)
 	{
 		Type = type;
+
+		if (numberOfRomBanks > 128)
+		{
+			Logger.ControlledCrash(
+				$"Memory Bank Controller '{Type}' only supports up to 128 ROM banks, but {numberOfRomBanks} were requested"
+			);
+		}
+
+		if (numberOfRamBanks > 4)
+		{
+			Logger.ControlledCrash(
+				$"Memory Bank Controller '{Type}' only supports up to 4 RAM banks, but {numberOfRamBanks} were requested"
+			);
+		}
 
 		HasRam     = type is BankControllerType.Mbc1Ram or BankControllerType.Mbc1RamBattery;
 		HasBattery = type is BankControllerType.Mbc1RamBattery;
@@ -29,10 +43,10 @@ public sealed class Mbc1 : MbcBase
 	private byte        currentRomBankUpper;
 	private byte        currentRomBankLower;
 
-	public override bool HasRam           { get; }
-	public override bool HasBattery       { get; }
-	public override byte NumberOfRomBanks { get; }
-	public override byte NumberOfRamBanks { get; }
+	public override bool   HasRam           { get; }
+	public override bool   HasBattery       { get; }
+	public override ushort NumberOfRomBanks { get; }
+	public override byte   NumberOfRamBanks { get; }
 
 	private byte CurrentRomBank
 	{
