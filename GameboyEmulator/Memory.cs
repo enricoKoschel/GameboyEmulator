@@ -82,13 +82,13 @@ public class Memory
 		highRam          = new byte[0x7F];
 	}
 
-	private void AllocateCartridgeRam(byte numberOfRamBanks)
+	private void AllocateCartridgeRam()
 	{
-		if (numberOfRamBanks == 0) return;
+		if (!emulator.memoryBankController.HasRam) return;
 
 		//If a save file exists, load it into cartridge ram and resize ram to the actual size
 		LoadCartridgeRam();
-		Array.Resize(ref cartridgeRam, numberOfRamBanks * 0x2000);
+		Array.Resize(ref cartridgeRam, emulator.memoryBankController.NumberOfRamBanks * 0x2000);
 	}
 
 	public void LoadGame()
@@ -140,14 +140,14 @@ public class Memory
 		//Detect current Memorybanking Mode
 		emulator.memoryBankController.InitialiseBanking();
 
-		AllocateCartridgeRam(emulator.memoryBankController.NumberOfRamBanks);
+		AllocateCartridgeRam();
 
 		Logger.LogInfo("Game loaded successfully");
 	}
 
 	public void SaveCartridgeRam()
 	{
-		if (!ramChangedSinceLastSave || !emulator.memoryBankController.CartridgeRamExists ||
+		if (!ramChangedSinceLastSave || !emulator.memoryBankController.HasRam ||
 			!emulator.savingEnabled) return;
 
 		if (timeSinceLastRamSave.Elapsed.TotalSeconds < 5) return;
@@ -257,16 +257,16 @@ public class Memory
 
 		return noRomBanking
 				   ? cartridgeRom[address]
-				   : cartridgeRom[emulator.memoryBankController.ConvertAddressInRomBank(address)];
+				   : cartridgeRom[emulator.memoryBankController.ConvertRomAddress(address)];
 	}
 
 	private byte ReadFromCartridgeRam(ushort address)
 	{
-		if (!emulator.memoryBankController.CartridgeRamExists ||
-			!emulator.memoryBankController.IsRamEnabled) return 0xFF;
+		if (!emulator.memoryBankController.HasRam ||
+			!emulator.memoryBankController.RamEnabled) return 0xFF;
 
 		uint addressWithBanking =
-			emulator.memoryBankController.ConvertAddressInRamBank((ushort)(address - CARTRIDGE_RAM_BASE_ADDRESS));
+			emulator.memoryBankController.ConvertRamAddress((ushort)(address - CARTRIDGE_RAM_BASE_ADDRESS));
 
 		return cartridgeRam[addressWithBanking];
 	}
@@ -420,11 +420,11 @@ public class Memory
 
 	private void WriteToCartridgeRam(ushort address, byte data)
 	{
-		if (!emulator.memoryBankController.CartridgeRamExists ||
-			!emulator.memoryBankController.IsRamEnabled) return;
+		if (!emulator.memoryBankController.HasRam ||
+			!emulator.memoryBankController.RamEnabled) return;
 
 		uint addressWithBanking =
-			emulator.memoryBankController.ConvertAddressInRamBank((ushort)(address - CARTRIDGE_RAM_BASE_ADDRESS));
+			emulator.memoryBankController.ConvertRamAddress((ushort)(address - CARTRIDGE_RAM_BASE_ADDRESS));
 
 		cartridgeRam[addressWithBanking] = data;
 

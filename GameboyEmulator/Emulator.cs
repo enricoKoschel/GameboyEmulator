@@ -79,7 +79,7 @@ public class Emulator
 		memory.LoadGame();
 
 		//Only create save directory if saving is enabled and cartridge ram exists
-		if (savingEnabled && memoryBankController.CartridgeRamExists)
+		if (savingEnabled && memoryBankController.HasRam)
 			Directory.CreateDirectory(saveFileDirectory);
 	}
 

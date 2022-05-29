@@ -22,8 +22,7 @@
   - Change log file to be a memory mapped file
   - Implement full logging of all opcodes, modules, etc. with configurable log levels
 - MBC
-  - **_Implement other memory bank controllers (especially mbc3)_**
-  - Refactor to use inheritance/polymorphism
+  - **_Implement other memory bank controllers (especially mbc3 and mbc5)_**
 - Config
   - Add audio master enable to config file
 - Controls
