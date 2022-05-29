@@ -142,7 +142,7 @@ public class Memory
 
 		AllocateCartridgeRam();
 
-		Logger.LogInfo("Game loaded successfully");
+		Logger.LogInfo($"Loaded '{emulator.gameRomFilePath}' successfully");
 	}
 
 	public void SaveCartridgeRam()
