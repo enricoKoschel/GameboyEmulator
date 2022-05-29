@@ -147,7 +147,7 @@ public class Memory
 
 	public void SaveCartridgeRam()
 	{
-		if (!ramChangedSinceLastSave || !emulator.memoryBankController.HasRam ||
+		if (!ramChangedSinceLastSave || !emulator.memoryBankController.ShouldSaveToFile ||
 			!emulator.savingEnabled) return;
 
 		if (timeSinceLastRamSave.Elapsed.TotalSeconds < 5) return;
@@ -262,8 +262,7 @@ public class Memory
 
 	private byte ReadFromCartridgeRam(ushort address)
 	{
-		if (!emulator.memoryBankController.HasRam ||
-			!emulator.memoryBankController.RamEnabled) return 0xFF;
+		if (!emulator.memoryBankController.RamAccessible) return 0xFF;
 
 		uint addressWithBanking =
 			emulator.memoryBankController.ConvertRamAddress((ushort)(address - CARTRIDGE_RAM_BASE_ADDRESS));
@@ -420,8 +419,7 @@ public class Memory
 
 	private void WriteToCartridgeRam(ushort address, byte data)
 	{
-		if (!emulator.memoryBankController.HasRam ||
-			!emulator.memoryBankController.RamEnabled) return;
+		if (!emulator.memoryBankController.RamAccessible) return;
 
 		uint addressWithBanking =
 			emulator.memoryBankController.ConvertRamAddress((ushort)(address - CARTRIDGE_RAM_BASE_ADDRESS));

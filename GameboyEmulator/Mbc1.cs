@@ -10,6 +10,13 @@ public sealed class Mbc1 : MbcBase
 
 	public Mbc1(byte numberOfRomBanks, byte numberOfRamBanks, bool hasRam, bool hasBattery)
 	{
+		Type = hasRam switch
+		{
+			true when hasBattery => BankControllerType.Mbc1RamBattery,
+			true                 => BankControllerType.Mbc1Ram,
+			_                    => BankControllerType.Mbc1
+		};
+
 		NumberOfRomBanks = numberOfRomBanks;
 		NumberOfRamBanks = numberOfRamBanks;
 		HasRam           = hasRam;
@@ -31,17 +38,17 @@ public sealed class Mbc1 : MbcBase
 	public override byte NumberOfRomBanks { get; }
 	public override byte NumberOfRamBanks { get; }
 
-	public override byte CurrentRomBank
+	private byte CurrentRomBank
 	{
 		get => (byte)(((currentRomBankUpper & 0b0000_0011) << 5) | (currentRomBankLower & 0b0001_1111));
-		protected set
+		init
 		{
 			currentRomBankLower = (byte)(value & 0b0001_1111);
 			currentRomBankUpper = (byte)((value & 0b0110_0000) >> 5);
 		}
 	}
 
-	public override byte CurrentRamBank { get; protected set; }
+	private         byte CurrentRamBank { get; set; }
 	public override bool RamEnabled     { get; protected set; }
 
 	public override void HandleBanking(ushort address, byte data)

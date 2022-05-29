@@ -15,8 +15,10 @@ public class MemoryBankController
 		mbc = null!;
 	}
 
-	public bool HasRam     => mbc.HasRam;
-	public bool RamEnabled => mbc.RamEnabled;
+	public bool HasRam           => mbc.HasRam;
+	public bool RamEnabled       => mbc.RamEnabled;
+	public bool RamAccessible    => HasRam && RamEnabled;
+	public bool ShouldSaveToFile => HasRam && mbc.HasBattery;
 
 	public byte NumberOfRamBanks => mbc.NumberOfRamBanks;
 

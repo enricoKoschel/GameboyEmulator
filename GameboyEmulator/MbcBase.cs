@@ -5,7 +5,7 @@ namespace GameboyEmulator;
 public abstract class MbcBase
 {
 	//Suppress warnings for not yet implemented mappers
-	[SuppressMessage("ReSharper", "UnusedMember.Local")]
+	[SuppressMessage("ReSharper", "UnusedMember.Global")]
 	public enum BankControllerType
 	{
 		//A list of games and their corresponding mappers can be found here: https://gbhwdb.gekkio.fi/cartridges/
@@ -64,16 +64,14 @@ public abstract class MbcBase
 		Huc1RamBattery = 0xFF
 	}
 
-	public BankControllerType Type { get; protected init; }
+	protected BankControllerType Type { get; init; }
 
-	public abstract bool HasRam           { get; } //=> NumberOfRamBanks > 0
+	public abstract bool HasRam           { get; }
 	public abstract bool HasBattery       { get; }
 	public abstract byte NumberOfRomBanks { get; }
 	public abstract byte NumberOfRamBanks { get; }
 
-	public abstract byte CurrentRomBank { get; protected set; }
-	public abstract byte CurrentRamBank { get; protected set; }
-	public abstract bool RamEnabled     { get; protected set; }
+	public abstract bool RamEnabled { get; protected set; }
 
 	public abstract void HandleBanking(ushort address, byte data);
 

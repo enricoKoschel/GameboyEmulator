@@ -20,9 +20,7 @@ public sealed class MbcRomOnly : MbcBase
 			);
 		}
 
-		CurrentRomBank = 1;
-		CurrentRamBank = 0;
-		RamEnabled     = false;
+		RamEnabled = false;
 	}
 
 	public override bool HasRam => false;
@@ -31,9 +29,7 @@ public sealed class MbcRomOnly : MbcBase
 	public override byte NumberOfRomBanks => 2;
 	public override byte NumberOfRamBanks => 0;
 
-	public override byte CurrentRomBank { get; protected set; }
-	public override byte CurrentRamBank { get; protected set; }
-	public override bool RamEnabled     { get; protected set; }
+	public override bool RamEnabled { get; protected set; }
 
 	public override void HandleBanking(ushort address, byte data)
 	{
