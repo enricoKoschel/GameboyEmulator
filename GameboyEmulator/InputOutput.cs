@@ -29,7 +29,9 @@ public class InputOutput
 	private const Keyboard.Key DEFAULT_SELECT_BUTTON          = Keyboard.Key.Space;
 	private const Keyboard.Key DEFAULT_A_BUTTON               = Keyboard.Key.S;
 	private const Keyboard.Key DEFAULT_B_BUTTON               = Keyboard.Key.A;
-	private const Keyboard.Key DEFAULT_SPEED_BUTTON           = Keyboard.Key.LShift;
+	private const Keyboard.Key DEFAULT_SPEED_DOWN_BUTTON      = Keyboard.Key.F1;
+	private const Keyboard.Key DEFAULT_SPEED_UP_BUTTON        = Keyboard.Key.F2;
+	private const Keyboard.Key DEFAULT_SPEED_RESET_BUTTON     = Keyboard.Key.F3;
 	private const Keyboard.Key DEFAULT_PAUSE_BUTTON           = Keyboard.Key.LControl;
 	private const Keyboard.Key DEFAULT_RESET_BUTTON           = Keyboard.Key.Escape;
 	private const Keyboard.Key DEFAULT_AUDIO_CHANNEL_1_BUTTON = Keyboard.Key.F5;
@@ -45,7 +47,9 @@ public class InputOutput
 	private static Keyboard.Key selectButton;
 	private static Keyboard.Key aButton;
 	private static Keyboard.Key bButton;
-	private static Keyboard.Key speedButton;
+	private static Keyboard.Key speedDownButton;
+	private static Keyboard.Key speedUpButton;
+	private static Keyboard.Key speedResetButton;
 	private static Keyboard.Key pauseButton;
 	private static Keyboard.Key resetButton;
 	private static Keyboard.Key audioChannel1Button;
@@ -70,7 +74,6 @@ public class InputOutput
 
 	private readonly bool[,] zBuffer;
 
-	private bool speedButtonWasPressed;
 	private bool pauseButtonWasPressed;
 	private bool audioChannel1ButtonWasPressed;
 	private bool audioChannel2ButtonWasPressed;
@@ -193,12 +196,34 @@ public class InputOutput
 			bButton = DEFAULT_B_BUTTON;
 		}
 
-		speedButton = ConvertStringToSfmlKey(Config.GetControlConfig("SPEED"));
-		if (speedButton == Keyboard.Key.Unknown)
+		speedDownButton = ConvertStringToSfmlKey(Config.GetControlConfig("SPEED_DOWN"));
+		if (speedDownButton == Keyboard.Key.Unknown)
 		{
-			Logger.LogInvalidConfigValue("[Controls].SPEED", Config.GetControlConfig("SPEED"), DEFAULT_SPEED_BUTTON);
+			Logger.LogInvalidConfigValue(
+				"[Controls].SPEED_DOWN", Config.GetControlConfig("SPEED_DOWN"), DEFAULT_SPEED_DOWN_BUTTON
+			);
 
-			speedButton = DEFAULT_SPEED_BUTTON;
+			speedDownButton = DEFAULT_SPEED_DOWN_BUTTON;
+		}
+
+		speedUpButton = ConvertStringToSfmlKey(Config.GetControlConfig("SPEED_UP"));
+		if (speedUpButton == Keyboard.Key.Unknown)
+		{
+			Logger.LogInvalidConfigValue(
+				"[Controls].SPEED_UP", Config.GetControlConfig("SPEED_UP"), DEFAULT_SPEED_UP_BUTTON
+			);
+
+			speedUpButton = DEFAULT_SPEED_UP_BUTTON;
+		}
+
+		speedResetButton = ConvertStringToSfmlKey(Config.GetControlConfig("SPEED_RESET"));
+		if (speedResetButton == Keyboard.Key.Unknown)
+		{
+			Logger.LogInvalidConfigValue(
+				"[Controls].SPEED_RESET", Config.GetControlConfig("SPEED_RESET"), DEFAULT_SPEED_RESET_BUTTON
+			);
+
+			speedResetButton = DEFAULT_SPEED_RESET_BUTTON;
 		}
 
 		pauseButton = ConvertStringToSfmlKey(Config.GetControlConfig("PAUSE"));
@@ -337,16 +362,12 @@ public class InputOutput
 	{
 		if (!WindowHasFocus) return;
 
-		//Check for speed button
-		if (!speedButtonWasPressed && Keyboard.IsKeyPressed(speedButton))
+		//Check for speed buttons
+		if (Keyboard.IsKeyPressed(speedUpButton)) emulator.MaxSpeed        += 1;
+		else if (Keyboard.IsKeyPressed(speedDownButton)) emulator.MaxSpeed -= 1;
+		else if (Keyboard.IsKeyPressed(speedResetButton))
 		{
-			speedButtonWasPressed = true;
-			emulator.MaxFps       = 0;
-		}
-		else if (speedButtonWasPressed && !Keyboard.IsKeyPressed(speedButton))
-		{
-			speedButtonWasPressed = false;
-			emulator.MaxFps       = Emulator.GAMEBOY_FPS;
+			emulator.MaxSpeed = 100;
 			emulator.apu.ClearSampleBuffer();
 		}
 

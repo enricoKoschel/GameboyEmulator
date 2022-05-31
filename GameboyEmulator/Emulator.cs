@@ -21,7 +21,8 @@ public class Emulator
 
 	public const double GAMEBOY_FPS = (float)GAMEBOY_CLOCK_SPEED / Cpu.MAX_CYCLES_PER_FRAME;
 
-	public  double MaxFps                  { get; set; }
+	public  int    MaxSpeed                { get; set; }
+	public  double MaxFps                  => GAMEBOY_FPS * (MaxSpeed / 100.0);
 	private double MinMillisecondsPerFrame => MaxFps != 0 ? 1000 / MaxFps : 0;
 
 	private double sleepErrorInMilliseconds;
@@ -72,7 +73,7 @@ public class Emulator
 		speedHistory = new int[NUMBER_OF_SPEEDS_TO_AVERAGE];
 		Array.Fill(speedHistory, 100);
 
-		MaxFps = GAMEBOY_FPS;
+		MaxSpeed = 100;
 
 		savingEnabled = Config.GetSaveEnabledConfig();
 
@@ -98,7 +99,7 @@ public class Emulator
 		inputOutput          = new InputOutput(this);
 		apu                  = new Apu(this);
 
-		MaxFps   = GAMEBOY_FPS;
+		MaxSpeed = 100;
 		isPaused = false;
 
 		memory.LoadGame();
@@ -150,6 +151,7 @@ public class Emulator
 
 	private void LimitSpeed(double elapsedMilliseconds)
 	{
+		Console.WriteLine(MinMillisecondsPerFrame);
 		double sleepNeeded = MinMillisecondsPerFrame - elapsedMilliseconds - sleepErrorInMilliseconds;
 
 		double timeSlept = 0;

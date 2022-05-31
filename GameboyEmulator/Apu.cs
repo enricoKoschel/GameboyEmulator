@@ -122,7 +122,7 @@ public class Apu : SoundStream
 
 		internalMainApuCounter -= Emulator.GAMEBOY_CLOCK_SPEED;
 
-		if (AmountOfSamples >= SAMPLE_BUFFER_SIZE && emulator.MaxFps == 0) return;
+		if (AmountOfSamples >= SAMPLE_BUFFER_SIZE) return;
 
 		short leftSample  = 0;
 		short rightSample = 0;
