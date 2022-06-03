@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using SFML.Graphics;
 using SFML.System;
 using SFML.Window;
@@ -74,11 +75,13 @@ public class InputOutput
 
 	private readonly bool[,] zBuffer;
 
-	private bool pauseButtonWasPressed;
-	private bool audioChannel1ButtonWasPressed;
-	private bool audioChannel2ButtonWasPressed;
-	private bool audioChannel3ButtonWasPressed;
-	private bool audioChannel4ButtonWasPressed;
+	private Stopwatch speedUpButtonTimer;
+	private Stopwatch speedDownButtonTimer;
+	private bool      pauseButtonWasPressed;
+	private bool      audioChannel1ButtonWasPressed;
+	private bool      audioChannel2ButtonWasPressed;
+	private bool      audioChannel3ButtonWasPressed;
+	private bool      audioChannel4ButtonWasPressed;
 
 	private readonly Emulator emulator;
 
@@ -95,6 +98,11 @@ public class InputOutput
 		sprite.Scale = new Vector2f(SCALE, SCALE);
 
 		zBuffer = new bool[GAME_WIDTH, GAME_HEIGHT];
+
+		speedUpButtonTimer   = new Stopwatch();
+		speedDownButtonTimer = new Stopwatch();
+		speedUpButtonTimer.Start();
+		speedDownButtonTimer.Start();
 
 		InitialiseControls();
 		InitialiseColors();
@@ -363,8 +371,30 @@ public class InputOutput
 		if (!WindowHasFocus) return;
 
 		//Check for speed buttons
-		if (Keyboard.IsKeyPressed(speedUpButton)) emulator.MaxSpeed        += 1;
-		else if (Keyboard.IsKeyPressed(speedDownButton)) emulator.MaxSpeed -= 1;
+		if (Keyboard.IsKeyPressed(speedUpButton)
+		 && speedUpButtonTimer.Elapsed.TotalMilliseconds > 40)
+		{
+			if (emulator.MaxSpeed >= Int32.MaxValue)
+			{
+				emulator.MaxSpeed = Int32.MaxValue;
+				return;
+			}
+
+			emulator.MaxSpeed += 1;
+			speedUpButtonTimer.Restart();
+		}
+		else if (Keyboard.IsKeyPressed(speedDownButton)
+			  && speedDownButtonTimer.Elapsed.TotalMilliseconds > 40)
+		{
+			if (emulator.MaxSpeed <= 1)
+			{
+				emulator.MaxSpeed = 1;
+				return;
+			}
+
+			emulator.MaxSpeed -= 1;
+			speedDownButtonTimer.Restart();
+		}
 		else if (Keyboard.IsKeyPressed(speedResetButton))
 		{
 			emulator.MaxSpeed = 100;

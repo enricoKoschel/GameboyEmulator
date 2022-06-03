@@ -151,12 +151,11 @@ public class Emulator
 
 	private void LimitSpeed(double elapsedMilliseconds)
 	{
-		Console.WriteLine(MinMillisecondsPerFrame);
 		double sleepNeeded = MinMillisecondsPerFrame - elapsedMilliseconds - sleepErrorInMilliseconds;
 
 		double timeSlept = 0;
 
-		if (sleepNeeded > 0 && (apu.AmountOfSamples > Apu.SAMPLE_BUFFER_SIZE || !apu.Enabled))
+		if (sleepNeeded > 0 /* && (apu.AmountOfSamples > Apu.SAMPLE_BUFFER_SIZE || !apu.Enabled)*/)
 		{
 			Stopwatch sleepTime = new();
 			sleepTime.Restart();
@@ -217,7 +216,7 @@ public class Emulator
 	private void UpdateWindowTitle()
 	{
 		string gameFileName  = Path.GetFileName(gameRomFilePath);
-		string speedOrPaused = isPaused ? "Paused" : $"Speed: {speedAverage}%";
+		string speedOrPaused = isPaused ? "Paused" : $"Speed: {speedAverage}% ({MaxSpeed}%)";
 
 		string windowTitle = $"{gameFileName} | {speedOrPaused}";
 
