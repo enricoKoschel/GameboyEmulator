@@ -140,199 +140,50 @@ public class InputOutput
 
 	private static void InitialiseControls()
 	{
-		upButton = ConvertStringToSfmlKey(Config.GetControlConfig("UP"));
-		if (upButton == Keyboard.Key.Unknown)
-		{
-			Logger.LogInvalidConfigValue("[Controls].UP", Config.GetControlConfig("UP"), DEFAULT_UP_BUTTON);
+		upButton = ConvertStringToSfmlKeyOrDefault("UP", DEFAULT_UP_BUTTON);
 
-			upButton = DEFAULT_UP_BUTTON;
-		}
+		downButton = ConvertStringToSfmlKeyOrDefault("DOWN", DEFAULT_DOWN_BUTTON);
 
-		downButton = ConvertStringToSfmlKey(Config.GetControlConfig("DOWN"));
-		if (downButton == Keyboard.Key.Unknown)
-		{
-			Logger.LogInvalidConfigValue("[Controls].DOWN", Config.GetControlConfig("DOWN"), DEFAULT_DOWN_BUTTON);
+		leftButton = ConvertStringToSfmlKeyOrDefault("LEFT", DEFAULT_LEFT_BUTTON);
 
-			downButton = DEFAULT_DOWN_BUTTON;
-		}
+		rightButton = ConvertStringToSfmlKeyOrDefault("RIGHT", DEFAULT_RIGHT_BUTTON);
 
-		leftButton = ConvertStringToSfmlKey(Config.GetControlConfig("LEFT"));
-		if (leftButton == Keyboard.Key.Unknown)
-		{
-			Logger.LogInvalidConfigValue("[Controls].LEFT", Config.GetControlConfig("LEFT"), DEFAULT_LEFT_BUTTON);
+		startButton = ConvertStringToSfmlKeyOrDefault("START", DEFAULT_START_BUTTON);
 
-			leftButton = DEFAULT_LEFT_BUTTON;
-		}
+		selectButton = ConvertStringToSfmlKeyOrDefault("SELECT", DEFAULT_SELECT_BUTTON);
 
-		rightButton = ConvertStringToSfmlKey(Config.GetControlConfig("RIGHT"));
-		if (rightButton == Keyboard.Key.Unknown)
-		{
-			Logger.LogInvalidConfigValue("[Controls].RIGHT", Config.GetControlConfig("RIGHT"), DEFAULT_RIGHT_BUTTON);
+		aButton = ConvertStringToSfmlKeyOrDefault("A", DEFAULT_A_BUTTON);
 
-			rightButton = DEFAULT_RIGHT_BUTTON;
-		}
+		bButton = ConvertStringToSfmlKeyOrDefault("B", DEFAULT_B_BUTTON);
 
-		startButton = ConvertStringToSfmlKey(Config.GetControlConfig("START"));
-		if (startButton == Keyboard.Key.Unknown)
-		{
-			Logger.LogInvalidConfigValue("[Controls].START", Config.GetControlConfig("START"), DEFAULT_START_BUTTON);
+		speedDownButton = ConvertStringToSfmlKeyOrDefault("SPEED_DOWN", DEFAULT_SPEED_DOWN_BUTTON);
 
-			startButton = DEFAULT_START_BUTTON;
-		}
+		speedUpButton = ConvertStringToSfmlKeyOrDefault("SPEED_UP", DEFAULT_SPEED_UP_BUTTON);
 
-		selectButton = ConvertStringToSfmlKey(Config.GetControlConfig("SELECT"));
-		if (selectButton == Keyboard.Key.Unknown)
-		{
-			Logger.LogInvalidConfigValue("[Controls].SELECT", Config.GetControlConfig("SELECT"), DEFAULT_SELECT_BUTTON);
+		speedResetButton = ConvertStringToSfmlKeyOrDefault("SPEED_RESET", DEFAULT_SPEED_RESET_BUTTON);
 
-			selectButton = DEFAULT_SELECT_BUTTON;
-		}
+		pauseButton = ConvertStringToSfmlKeyOrDefault("PAUSE", DEFAULT_PAUSE_BUTTON);
 
-		aButton = ConvertStringToSfmlKey(Config.GetControlConfig("A"));
-		if (aButton == Keyboard.Key.Unknown)
-		{
-			Logger.LogInvalidConfigValue("[Controls].A", Config.GetControlConfig("A"), DEFAULT_A_BUTTON);
+		resetButton = ConvertStringToSfmlKeyOrDefault("RESET", DEFAULT_RESET_BUTTON);
 
-			aButton = DEFAULT_A_BUTTON;
-		}
+		audioChannel1Button = ConvertStringToSfmlKeyOrDefault("AUDIO_CHANNEL_1", DEFAULT_AUDIO_CHANNEL_1_BUTTON);
 
-		bButton = ConvertStringToSfmlKey(Config.GetControlConfig("B"));
-		if (bButton == Keyboard.Key.Unknown)
-		{
-			Logger.LogInvalidConfigValue("[Controls].B", Config.GetControlConfig("B"), DEFAULT_B_BUTTON);
+		audioChannel2Button = ConvertStringToSfmlKeyOrDefault("AUDIO_CHANNEL_2", DEFAULT_AUDIO_CHANNEL_2_BUTTON);
 
-			bButton = DEFAULT_B_BUTTON;
-		}
+		audioChannel3Button = ConvertStringToSfmlKeyOrDefault("AUDIO_CHANNEL_3", DEFAULT_AUDIO_CHANNEL_3_BUTTON);
 
-		speedDownButton = ConvertStringToSfmlKey(Config.GetControlConfig("SPEED_DOWN"));
-		if (speedDownButton == Keyboard.Key.Unknown)
-		{
-			Logger.LogInvalidConfigValue(
-				"[Controls].SPEED_DOWN", Config.GetControlConfig("SPEED_DOWN"), DEFAULT_SPEED_DOWN_BUTTON
-			);
-
-			speedDownButton = DEFAULT_SPEED_DOWN_BUTTON;
-		}
-
-		speedUpButton = ConvertStringToSfmlKey(Config.GetControlConfig("SPEED_UP"));
-		if (speedUpButton == Keyboard.Key.Unknown)
-		{
-			Logger.LogInvalidConfigValue(
-				"[Controls].SPEED_UP", Config.GetControlConfig("SPEED_UP"), DEFAULT_SPEED_UP_BUTTON
-			);
-
-			speedUpButton = DEFAULT_SPEED_UP_BUTTON;
-		}
-
-		speedResetButton = ConvertStringToSfmlKey(Config.GetControlConfig("SPEED_RESET"));
-		if (speedResetButton == Keyboard.Key.Unknown)
-		{
-			Logger.LogInvalidConfigValue(
-				"[Controls].SPEED_RESET", Config.GetControlConfig("SPEED_RESET"), DEFAULT_SPEED_RESET_BUTTON
-			);
-
-			speedResetButton = DEFAULT_SPEED_RESET_BUTTON;
-		}
-
-		pauseButton = ConvertStringToSfmlKey(Config.GetControlConfig("PAUSE"));
-		if (pauseButton == Keyboard.Key.Unknown)
-		{
-			Logger.LogInvalidConfigValue("[Controls].PAUSE", Config.GetControlConfig("PAUSE"), DEFAULT_PAUSE_BUTTON);
-
-			pauseButton = DEFAULT_PAUSE_BUTTON;
-		}
-
-		resetButton = ConvertStringToSfmlKey(Config.GetControlConfig("RESET"));
-		if (resetButton == Keyboard.Key.Unknown)
-		{
-			Logger.LogInvalidConfigValue("[Controls].RESET", Config.GetControlConfig("RESET"), DEFAULT_RESET_BUTTON);
-
-			resetButton = DEFAULT_RESET_BUTTON;
-		}
-
-		audioChannel1Button = ConvertStringToSfmlKey(Config.GetControlConfig("AUDIO_CHANNEL_1"));
-		if (audioChannel1Button == Keyboard.Key.Unknown)
-		{
-			Logger.LogInvalidConfigValue(
-				"[Controls].AUDIO_CHANNEL_1", Config.GetControlConfig("AUDIO_CHANNEL_1"), DEFAULT_AUDIO_CHANNEL_1_BUTTON
-			);
-
-			audioChannel1Button = DEFAULT_AUDIO_CHANNEL_1_BUTTON;
-		}
-
-		audioChannel2Button = ConvertStringToSfmlKey(Config.GetControlConfig("AUDIO_CHANNEL_2"));
-		if (audioChannel2Button == Keyboard.Key.Unknown)
-		{
-			Logger.LogInvalidConfigValue(
-				"[Controls].AUDIO_CHANNEL_2", Config.GetControlConfig("AUDIO_CHANNEL_2"), DEFAULT_AUDIO_CHANNEL_2_BUTTON
-			);
-
-			audioChannel2Button = DEFAULT_AUDIO_CHANNEL_2_BUTTON;
-		}
-
-		audioChannel3Button = ConvertStringToSfmlKey(Config.GetControlConfig("AUDIO_CHANNEL_3"));
-		if (audioChannel3Button == Keyboard.Key.Unknown)
-		{
-			Logger.LogInvalidConfigValue(
-				"[Controls].AUDIO_CHANNEL_3", Config.GetControlConfig("AUDIO_CHANNEL_3"), DEFAULT_AUDIO_CHANNEL_3_BUTTON
-			);
-
-			audioChannel3Button = DEFAULT_AUDIO_CHANNEL_3_BUTTON;
-		}
-
-		audioChannel4Button = ConvertStringToSfmlKey(Config.GetControlConfig("AUDIO_CHANNEL_4"));
-		if (audioChannel4Button == Keyboard.Key.Unknown)
-		{
-			Logger.LogInvalidConfigValue(
-				"[Controls].AUDIO_CHANNEL_4", Config.GetControlConfig("AUDIO_CHANNEL_4"), DEFAULT_AUDIO_CHANNEL_4_BUTTON
-			);
-
-			audioChannel4Button = DEFAULT_AUDIO_CHANNEL_4_BUTTON;
-		}
+		audioChannel4Button = ConvertStringToSfmlKeyOrDefault("AUDIO_CHANNEL_4", DEFAULT_AUDIO_CHANNEL_4_BUTTON);
 	}
 
 	private static void InitialiseColors()
 	{
-		blackColor = ConvertIntToSfmlColor(Config.GetColorConfig("BLACK"));
-		if (blackColor == Color.Transparent)
-		{
-			Logger.LogInvalidConfigValue(
-				"[Colors].BLACK", Config.GetColorConfig("BLACK"), ConvertSfmlColorToInt(DEFAULT_BLACK_COLOR)
-			);
+		blackColor = ConvertIntToSfmlColorOrDefault("BLACK", DEFAULT_BLACK_COLOR);
 
-			blackColor = DEFAULT_BLACK_COLOR;
-		}
+		darkGrayColor = ConvertIntToSfmlColorOrDefault("DARK_GRAY", DEFAULT_DARK_GRAY_COLOR);
 
-		darkGrayColor = ConvertIntToSfmlColor(Config.GetColorConfig("DARK_GRAY"));
-		if (darkGrayColor == Color.Transparent)
-		{
-			Logger.LogInvalidConfigValue(
-				"[Colors].DARK_GRAY", Config.GetColorConfig("DARK_GRAY"), ConvertSfmlColorToInt(DEFAULT_DARK_GRAY_COLOR)
-			);
+		lightGrayColor = ConvertIntToSfmlColorOrDefault("LIGHT_GRAY", DEFAULT_LIGHT_GRAY_COLOR);
 
-			darkGrayColor = DEFAULT_DARK_GRAY_COLOR;
-		}
-
-		lightGrayColor = ConvertIntToSfmlColor(Config.GetColorConfig("LIGHT_GRAY"));
-		if (lightGrayColor == Color.Transparent)
-		{
-			Logger.LogInvalidConfigValue(
-				"[Colors].LIGHT_GRAY", Config.GetColorConfig("LIGHT_GRAY"),
-				ConvertSfmlColorToInt(DEFAULT_LIGHT_GRAY_COLOR)
-			);
-
-			lightGrayColor = DEFAULT_LIGHT_GRAY_COLOR;
-		}
-
-		whiteColor = ConvertIntToSfmlColor(Config.GetColorConfig("WHITE"));
-		if (whiteColor == Color.Transparent)
-		{
-			Logger.LogInvalidConfigValue(
-				"[Colors].WHITE", Config.GetColorConfig("WHITE"), ConvertSfmlColorToInt(DEFAULT_WHITE_COLOR)
-			);
-
-			whiteColor = DEFAULT_WHITE_COLOR;
-		}
+		whiteColor = ConvertIntToSfmlColorOrDefault("WHITE", DEFAULT_WHITE_COLOR);
 	}
 
 	private static int ConvertSfmlColorToInt(Color color)
@@ -340,21 +191,26 @@ public class InputOutput
 		return (color.R << 16) | (color.G << 8) | color.B;
 	}
 
-	private static Color ConvertIntToSfmlColor(int? color)
+	private static Color ConvertIntToSfmlColorOrDefault(string colorName, Color defaultColor)
 	{
-		if (color is null) return Color.Transparent;
+		int? color = Config.GetColorConfig(colorName);
 
-		//Shifting and oring is done to set the alpha component of the colors to 0xFF
-		//This is done to make the colors fully opaque
-		return color == -1 ? Color.Transparent : new Color((uint)((color << 8) | 0xFF));
+		//Shifting and oring is done to set the alpha component of the colors to 0xFF, making them fully opaque
+		if (color is not (null or -1)) return new Color((uint)((color << 8) | 0xFF));
+
+		Logger.LogInvalidConfigValue($"[Colors].{colorName}", color, ConvertSfmlColorToInt(defaultColor));
+		return defaultColor;
 	}
 
-	private static Keyboard.Key ConvertStringToSfmlKey(string? keyString)
+	private static Keyboard.Key ConvertStringToSfmlKeyOrDefault(string keyName, Keyboard.Key defaultKey)
 	{
-		//Only allow enum value names and not underlying integer
-		if (Int32.TryParse(keyString, out _)) return Keyboard.Key.Unknown;
+		string? keyString = Config.GetControlConfig(keyName);
 
-		return Enum.TryParse(keyString, true, out Keyboard.Key key) ? key : Keyboard.Key.Unknown;
+		//Only allow enum value names and not underlying integer
+		if (!Int32.TryParse(keyString, out _) && Enum.TryParse(keyString, true, out Keyboard.Key key)) return key;
+
+		Logger.LogInvalidConfigValue($"[Controls].{keyName}", keyString, defaultKey);
+		return defaultKey;
 	}
 
 	public void Update()
