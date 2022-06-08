@@ -51,7 +51,7 @@ public class Apu : SoundStream
 	private const int SAMPLE_BUFFER_SIZE_IN_MILLISECONDS = 50;
 	private const int CHANNEL_COUNT                      = 2;
 
-	public const int SAMPLE_BUFFER_SIZE =
+	private const int SAMPLE_BUFFER_SIZE =
 		(int)(SAMPLE_RATE * CHANNEL_COUNT * (SAMPLE_BUFFER_SIZE_IN_MILLISECONDS / 1000f));
 
 	public const int VOLUME_MULTIPLIER = 25;
@@ -85,7 +85,7 @@ public class Apu : SoundStream
 		Play();
 	}
 
-	public int AmountOfSamples => sampleBuffer.Count;
+	private int AmountOfSamples => sampleBuffer.Count;
 
 	public bool ShouldTickFrameSequencer { get; private set; }
 
