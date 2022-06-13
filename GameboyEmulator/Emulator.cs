@@ -21,7 +21,7 @@ public class Emulator
 
 	public const double GAMEBOY_FPS = (float)GAMEBOY_CLOCK_SPEED / Cpu.MAX_CYCLES_PER_FRAME;
 
-	public  double MaxFps                  { get; set; }
+	public  double MaxFps                  { get; set; } = GAMEBOY_FPS;
 	private double MinMillisecondsPerFrame => MaxFps != 0 ? 1000 / MaxFps : 0;
 
 	private double sleepErrorInMilliseconds;
@@ -72,8 +72,6 @@ public class Emulator
 		speedHistory = new int[NUMBER_OF_SPEEDS_TO_AVERAGE];
 		Array.Fill(speedHistory, 100);
 
-		MaxFps = GAMEBOY_FPS;
-
 		savingEnabled = Config.GetSaveEnabledConfig();
 
 		memory.LoadGame();
@@ -98,7 +96,8 @@ public class Emulator
 		inputOutput          = new InputOutput(this);
 		apu                  = new Apu(this);
 
-		MaxFps   = GAMEBOY_FPS;
+		MaxFps = GAMEBOY_FPS;
+
 		isPaused = false;
 
 		memory.LoadGame();
@@ -130,7 +129,6 @@ public class Emulator
 			int cycles = cpu.ExecuteOpcode();
 			cyclesThisFrame += cycles;
 
-			//Interrupts only get enabled when requested beforehand by the corresponding instruction
 			interrupts.CheckEnable();
 
 			ppu.Update(cycles);

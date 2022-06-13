@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Threading;
 using SFML.Audio;
 using SFML.System;
 
@@ -56,6 +55,18 @@ public class Apu : SoundStream
 
 	public const int VOLUME_MULTIPLIER = 25;
 
+	public int AmountOfSamples
+	{
+		get
+		{
+			lock (sampleBuffer)
+			{
+				return sampleBuffer.Count;
+			}
+		}
+	}
+
+
 	private int internalMainApuCounter;
 
 	public readonly ApuChannel1 channel1;
@@ -64,8 +75,6 @@ public class Apu : SoundStream
 	public readonly ApuChannel4 channel4;
 
 	private readonly List<short> sampleBuffer;
-
-	private readonly Mutex sampleBufferMutex;
 
 	private readonly Emulator emulator;
 
@@ -78,14 +87,11 @@ public class Apu : SoundStream
 		channel3 = new ApuChannel3(this);
 		channel4 = new ApuChannel4(this);
 
-		sampleBuffer      = new List<short>(SAMPLE_BUFFER_SIZE);
-		sampleBufferMutex = new Mutex();
+		sampleBuffer = new List<short>(SAMPLE_BUFFER_SIZE);
 
 		Initialize(CHANNEL_COUNT, SAMPLE_RATE);
 		Play();
 	}
-
-	public int AmountOfSamples => sampleBuffer.Count;
 
 	public bool ShouldTickFrameSequencer { get; private set; }
 
@@ -122,7 +128,10 @@ public class Apu : SoundStream
 
 		internalMainApuCounter -= Emulator.GAMEBOY_CLOCK_SPEED;
 
-		if (AmountOfSamples >= SAMPLE_BUFFER_SIZE && emulator.MaxFps == 0) return;
+		lock (sampleBuffer)
+		{
+			if (sampleBuffer.Count >= SAMPLE_BUFFER_SIZE && emulator.MaxFps == 0) return;
+		}
 
 		short leftSample  = 0;
 		short rightSample = 0;
@@ -151,36 +160,36 @@ public class Apu : SoundStream
 			rightSample += channel4.GetCurrentAmplitudeRight();
 		}
 
-		sampleBufferMutex.WaitOne();
-		sampleBuffer.Add(leftSample);
-		sampleBuffer.Add(rightSample);
-		sampleBufferMutex.ReleaseMutex();
+		lock (sampleBuffer)
+		{
+			sampleBuffer.Add(leftSample);
+			sampleBuffer.Add(rightSample);
+		}
 	}
 
 	protected override bool OnGetData(out short[] samples)
 	{
-		sampleBufferMutex.WaitOne();
-
-		if (sampleBuffer.Count >= SAMPLE_BUFFER_SIZE)
+		lock (sampleBuffer)
 		{
-			samples = sampleBuffer.GetRange(0, SAMPLE_BUFFER_SIZE).ToArray();
+			if (sampleBuffer.Count >= SAMPLE_BUFFER_SIZE)
+			{
+				samples = sampleBuffer.GetRange(0, SAMPLE_BUFFER_SIZE).ToArray();
 
-			sampleBuffer.RemoveRange(0, SAMPLE_BUFFER_SIZE);
-		}
-		else
-		{
-			//Dispatching events (i.e. moving the window) causes emulator to freeze so play silence
-			if (emulator.inputOutput.DispatchingEvents || sampleBuffer.Count == 0)
-				samples = new short[SAMPLE_BUFFER_SIZE];
+				sampleBuffer.RemoveRange(0, SAMPLE_BUFFER_SIZE);
+			}
 			else
 			{
-				//Repeat full part of the buffer
-				samples = new short[SAMPLE_BUFFER_SIZE];
-				for (int i = 0; i < samples.Length; i++) samples[i] = sampleBuffer[i % sampleBuffer.Count];
+				//Dispatching events (i.e. moving the window) causes emulator to freeze so play silence
+				if (emulator.inputOutput.DispatchingEvents || sampleBuffer.Count == 0)
+					samples = new short[SAMPLE_BUFFER_SIZE];
+				else
+				{
+					//Repeat full part of the buffer
+					samples = new short[SAMPLE_BUFFER_SIZE];
+					for (int i = 0; i < samples.Length; i++) samples[i] = sampleBuffer[i % sampleBuffer.Count];
+				}
 			}
 		}
-
-		sampleBufferMutex.ReleaseMutex();
 
 		return true;
 	}
@@ -192,9 +201,10 @@ public class Apu : SoundStream
 
 	public void ClearSampleBuffer()
 	{
-		sampleBufferMutex.WaitOne();
-		sampleBuffer.Clear();
-		sampleBufferMutex.ReleaseMutex();
+		lock (sampleBuffer)
+		{
+			sampleBuffer.Clear();
+		}
 	}
 
 	private void Reset()

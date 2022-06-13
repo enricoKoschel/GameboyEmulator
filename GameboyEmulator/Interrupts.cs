@@ -96,7 +96,8 @@ public class Interrupts
 
 	public void CheckEnable()
 	{
-		//When interrupts are enabled, there is a delay of one cycle until they are actually enabled
+		//Interrupts only get enabled when requested beforehand by the corresponding instruction
+		//When enabling is requested, there is a delay of one cycle until they are actually enabled
 		switch (enableInterruptsStatus)
 		{
 			case EnableInterruptsStatus.NextCycle:
