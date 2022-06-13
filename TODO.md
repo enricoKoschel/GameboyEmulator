@@ -15,6 +15,7 @@
   - Implement all checks at startup (checksums, logo, etc.)
   - Add support for the Gameboy Color (CGB)
   - Somehow dont block while events get handled
+  - Add ability to set emulator speed to any value
 - Improve resetting the emulator (dont create all modules every time)
 - Memory
   - Maybe change cartridge ram to be a memory mapped file
@@ -27,7 +28,7 @@
   - Add audio master enable to config file
 - Controls
   - **_Implement controller support_**
-  - Ask for confirmation on reset
+  - Ask for confirmation on reset (hold ESC)
 - CPU
   - Implement STOP opcode
   - Refactor opcode decoding to use blocks of similar opcodes instead of a big switch statement
