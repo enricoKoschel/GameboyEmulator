@@ -50,10 +50,22 @@ public class Apu : SoundStream
 	private const int SAMPLE_BUFFER_SIZE_IN_MILLISECONDS = 50;
 	private const int CHANNEL_COUNT                      = 2;
 
-	private const int SAMPLE_BUFFER_SIZE =
+	public const int SAMPLE_BUFFER_SIZE =
 		(int)(SAMPLE_RATE * CHANNEL_COUNT * (SAMPLE_BUFFER_SIZE_IN_MILLISECONDS / 1000f));
 
 	public const int VOLUME_MULTIPLIER = 25;
+
+	public int AmountOfSamples
+	{
+		get
+		{
+			lock (sampleBuffer)
+			{
+				return sampleBuffer.Count;
+			}
+		}
+	}
+
 
 	private int internalMainApuCounter;
 
@@ -118,7 +130,7 @@ public class Apu : SoundStream
 
 		lock (sampleBuffer)
 		{
-			if (sampleBuffer.Count >= SAMPLE_BUFFER_SIZE) return;
+			if (sampleBuffer.Count >= SAMPLE_BUFFER_SIZE && emulator.MaxFps == 0) return;
 		}
 
 		short leftSample  = 0;

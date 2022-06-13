@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 using SFML.Graphics;
 using SFML.System;
 using SFML.Window;
@@ -30,9 +29,7 @@ public class InputOutput
 	private const Keyboard.Key DEFAULT_SELECT_BUTTON          = Keyboard.Key.Space;
 	private const Keyboard.Key DEFAULT_A_BUTTON               = Keyboard.Key.S;
 	private const Keyboard.Key DEFAULT_B_BUTTON               = Keyboard.Key.A;
-	private const Keyboard.Key DEFAULT_SPEED_DOWN_BUTTON      = Keyboard.Key.F1;
-	private const Keyboard.Key DEFAULT_SPEED_UP_BUTTON        = Keyboard.Key.F2;
-	private const Keyboard.Key DEFAULT_SPEED_RESET_BUTTON     = Keyboard.Key.F3;
+	private const Keyboard.Key DEFAULT_SPEED_BUTTON           = Keyboard.Key.LShift;
 	private const Keyboard.Key DEFAULT_PAUSE_BUTTON           = Keyboard.Key.LControl;
 	private const Keyboard.Key DEFAULT_RESET_BUTTON           = Keyboard.Key.Escape;
 	private const Keyboard.Key DEFAULT_AUDIO_CHANNEL_1_BUTTON = Keyboard.Key.F5;
@@ -48,9 +45,7 @@ public class InputOutput
 	private static Keyboard.Key selectButton;
 	private static Keyboard.Key aButton;
 	private static Keyboard.Key bButton;
-	private static Keyboard.Key speedDownButton;
-	private static Keyboard.Key speedUpButton;
-	private static Keyboard.Key speedResetButton;
+	private static Keyboard.Key speedButton;
 	private static Keyboard.Key pauseButton;
 	private static Keyboard.Key resetButton;
 	private static Keyboard.Key audioChannel1Button;
@@ -75,13 +70,12 @@ public class InputOutput
 
 	private readonly bool[,] zBuffer;
 
-	private Stopwatch speedUpButtonTimer;
-	private Stopwatch speedDownButtonTimer;
-	private bool      pauseButtonWasPressed;
-	private bool      audioChannel1ButtonWasPressed;
-	private bool      audioChannel2ButtonWasPressed;
-	private bool      audioChannel3ButtonWasPressed;
-	private bool      audioChannel4ButtonWasPressed;
+	private bool speedButtonWasPressed;
+	private bool pauseButtonWasPressed;
+	private bool audioChannel1ButtonWasPressed;
+	private bool audioChannel2ButtonWasPressed;
+	private bool audioChannel3ButtonWasPressed;
+	private bool audioChannel4ButtonWasPressed;
 
 	private readonly Emulator emulator;
 
@@ -98,11 +92,6 @@ public class InputOutput
 		sprite.Scale = new Vector2f(SCALE, SCALE);
 
 		zBuffer = new bool[GAME_WIDTH, GAME_HEIGHT];
-
-		speedUpButtonTimer   = new Stopwatch();
-		speedDownButtonTimer = new Stopwatch();
-		speedUpButtonTimer.Start();
-		speedDownButtonTimer.Start();
 
 		InitialiseControls();
 		InitialiseColors();
@@ -156,11 +145,7 @@ public class InputOutput
 
 		bButton = ConvertStringToSfmlKeyOrDefault("B", DEFAULT_B_BUTTON);
 
-		speedDownButton = ConvertStringToSfmlKeyOrDefault("SPEED_DOWN", DEFAULT_SPEED_DOWN_BUTTON);
-
-		speedUpButton = ConvertStringToSfmlKeyOrDefault("SPEED_UP", DEFAULT_SPEED_UP_BUTTON);
-
-		speedResetButton = ConvertStringToSfmlKeyOrDefault("SPEED_RESET", DEFAULT_SPEED_RESET_BUTTON);
+		speedButton = ConvertStringToSfmlKeyOrDefault("SPEED", DEFAULT_SPEED_BUTTON);
 
 		pauseButton = ConvertStringToSfmlKeyOrDefault("PAUSE", DEFAULT_PAUSE_BUTTON);
 
@@ -226,36 +211,13 @@ public class InputOutput
 	{
 		if (!WindowHasFocus) return;
 
-		//Check for speed buttons
-		if (Keyboard.IsKeyPressed(speedUpButton)
-		 && speedUpButtonTimer.Elapsed.TotalMilliseconds > 40)
+		//Check for speed button
+		if (Keyboard.IsKeyPressed(speedButton) && !speedButtonWasPressed)
 		{
-			if (emulator.MaxSpeed >= Int32.MaxValue)
-			{
-				emulator.MaxSpeed = Int32.MaxValue;
-				return;
-			}
-
-			emulator.MaxSpeed += 1;
-			speedUpButtonTimer.Restart();
+			speedButtonWasPressed = true;
+			emulator.MaxFps       = emulator.MaxFps == 0 ? Emulator.GAMEBOY_FPS : 0;
 		}
-		else if (Keyboard.IsKeyPressed(speedDownButton)
-			  && speedDownButtonTimer.Elapsed.TotalMilliseconds > 40)
-		{
-			if (emulator.MaxSpeed <= 1)
-			{
-				emulator.MaxSpeed = 1;
-				return;
-			}
-
-			emulator.MaxSpeed -= 1;
-			speedDownButtonTimer.Restart();
-		}
-		else if (Keyboard.IsKeyPressed(speedResetButton))
-		{
-			emulator.MaxSpeed = 100;
-			emulator.apu.ClearSampleBuffer();
-		}
+		else if (!Keyboard.IsKeyPressed(speedButton)) speedButtonWasPressed = false;
 
 		//Check for pause button
 		if (Keyboard.IsKeyPressed(pauseButton) && !pauseButtonWasPressed)

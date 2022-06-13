@@ -19,10 +19,9 @@ public class Emulator
 
 	public const int GAMEBOY_CLOCK_SPEED = 4194304;
 
-	private const double GAMEBOY_FPS = (float)GAMEBOY_CLOCK_SPEED / Cpu.MAX_CYCLES_PER_FRAME;
+	public const double GAMEBOY_FPS = (float)GAMEBOY_CLOCK_SPEED / Cpu.MAX_CYCLES_PER_FRAME;
 
-	public  int    MaxSpeed                { get; set; }
-	private double MaxFps                  => GAMEBOY_FPS * (MaxSpeed / 100.0);
+	public  double MaxFps                  { get; set; } = GAMEBOY_FPS;
 	private double MinMillisecondsPerFrame => MaxFps != 0 ? 1000 / MaxFps : 0;
 
 	private double sleepErrorInMilliseconds;
@@ -73,8 +72,6 @@ public class Emulator
 		speedHistory = new int[NUMBER_OF_SPEEDS_TO_AVERAGE];
 		Array.Fill(speedHistory, 100);
 
-		MaxSpeed = 100;
-
 		savingEnabled = Config.GetSaveEnabledConfig();
 
 		memory.LoadGame();
@@ -99,7 +96,8 @@ public class Emulator
 		inputOutput          = new InputOutput(this);
 		apu                  = new Apu(this);
 
-		MaxSpeed = 100;
+		MaxFps = GAMEBOY_FPS;
+
 		isPaused = false;
 
 		memory.LoadGame();
@@ -154,7 +152,7 @@ public class Emulator
 
 		double timeSlept = 0;
 
-		if (sleepNeeded > 0 /* && (apu.AmountOfSamples > Apu.SAMPLE_BUFFER_SIZE || !apu.Enabled)*/)
+		if (sleepNeeded > 0 && (apu.AmountOfSamples > Apu.SAMPLE_BUFFER_SIZE || !apu.Enabled))
 		{
 			Stopwatch sleepTime = new();
 			sleepTime.Restart();
@@ -215,7 +213,7 @@ public class Emulator
 	private void UpdateWindowTitle()
 	{
 		string gameFileName  = Path.GetFileName(gameRomFilePath);
-		string speedOrPaused = isPaused ? "Paused" : $"Speed: {speedAverage}% ({MaxSpeed}%)";
+		string speedOrPaused = isPaused ? "Paused" : $"Speed: {speedAverage}%";
 
 		string windowTitle = $"{gameFileName} | {speedOrPaused}";
 
