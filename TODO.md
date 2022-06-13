@@ -28,7 +28,6 @@
   - Add audio master enable to config file
 - Controls
   - **_Implement controller support_**
-  - Ask for confirmation on reset (hold ESC)
 - CPU
   - Implement STOP opcode
   - Refactor opcode decoding to use blocks of similar opcodes instead of a big switch statement

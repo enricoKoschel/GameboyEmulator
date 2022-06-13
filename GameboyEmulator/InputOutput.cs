@@ -37,6 +37,8 @@ public class InputOutput
 	private const Keyboard.Key DEFAULT_AUDIO_CHANNEL_3_BUTTON = Keyboard.Key.F7;
 	private const Keyboard.Key DEFAULT_AUDIO_CHANNEL_4_BUTTON = Keyboard.Key.F8;
 
+	private const int BASE_RESET_TIMER_DELAY = 50;
+
 	private static Keyboard.Key upButton;
 	private static Keyboard.Key downButton;
 	private static Keyboard.Key leftButton;
@@ -69,6 +71,10 @@ public class InputOutput
 	private readonly Sprite  sprite;
 
 	private readonly bool[,] zBuffer;
+
+	private int ResetTimerDelay => BASE_RESET_TIMER_DELAY * emulator.SpeedAverage / 100;
+
+	private int resetTimer;
 
 	private bool speedButtonWasPressed;
 	private bool pauseButtonWasPressed;
@@ -228,7 +234,15 @@ public class InputOutput
 		else if (!Keyboard.IsKeyPressed(pauseButton)) pauseButtonWasPressed = false;
 
 		//Check for reset button
-		if (Keyboard.IsKeyPressed(resetButton)) emulator.Reset();
+		if (Keyboard.IsKeyPressed(resetButton))
+		{
+			if (resetTimer++ > ResetTimerDelay)
+			{
+				resetTimer = 0;
+				emulator.Reset();
+			}
+		}
+		else resetTimer = 0;
 
 		//Check for audio channel buttons
 		if (Keyboard.IsKeyPressed(audioChannel1Button) && !audioChannel1ButtonWasPressed)
