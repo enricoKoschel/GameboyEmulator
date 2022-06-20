@@ -167,9 +167,7 @@ public class Ppu
 
 		CoincidenceFlag = true;
 
-		if (!CoincidenceInterruptEnabled) return;
-
-		if (coincidenceRequested) return;
+		if (!CoincidenceInterruptEnabled || coincidenceRequested) return;
 
 		emulator.interrupts.Request(Interrupts.InterruptType.LcdStat);
 		coincidenceRequested = true;
