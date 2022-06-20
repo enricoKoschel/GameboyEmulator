@@ -47,10 +47,14 @@ static class Program
 				return;
 			}
 
-			if (extra.Count > 0)
+			switch (extra.Count)
 			{
-				PrintArgumentError($"Unknown option '{extra.ToArray()[0]}'.");
-				return;
+				case 1:
+					PrintArgumentError($"Unknown option '{extra[0]}'.");
+					return;
+				case > 1:
+					PrintArgumentError($"Unknown options '{String.Join("', '", extra)}'.");
+					return;
 			}
 
 			gameRomFilePath ??= Config.GetRomConfig("GAME");
