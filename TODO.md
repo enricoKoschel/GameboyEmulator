@@ -37,5 +37,6 @@
     - mario.gb (coin collect sound doesnt stop when the next one starts)
     - donkeykong.gb (weird lines in select screen and at the bottom of the screen)
     - kirby.gb (white noise when kirby is sucking is too loud)
+    - pokemonrot.gb (save file gets corrupted)
   - Broken games
     - frogger.gb (pretty much unplayable, some sprites missing/corrupted, annoying sound)
