@@ -41,18 +41,23 @@ sorry for the inconvenience.
 
 The default controls are as follows
 
-| Gameboy  | Keyboard     |
-|----------|--------------|
-| Up       | Up arrow     |
-| Down     | Down arrow   |
-| Left     | Left arrow   |
-| Right    | Right arrow  |
-| Start    | Enter        |
-| Select   | Space        |
-| A        | S key        |
-| B        | A key        |
-| Speed    | Shift        |
-| Pause    | Left control |
+| Key                   | Button                 |
+|-----------------------|------------------------|
+| <kbd>↑</kbd>          | Up                     |
+| <kbd>↓</kbd>          | Down                   |
+| <kbd>←</kbd>          | Left                   |
+| <kbd>→</kbd>          | Right                  |
+| <kbd>Enter</kbd>      | Start                  |
+| <kbd>Space</kbd>      | Select                 |
+| <kbd>S</kbd>          | A                      |
+| <kbd>A</kbd>          | B                      |
+| <kbd>LShift</kbd>     | Turbo                  |
+| <kbd>LCtrl</kbd>      | Pause                  |
+| <kbd>Esc (hold)</kbd> | Reset                  |
+| <kbd>F5</kbd>         | Toggle Audio Channel 1 |
+| <kbd>F6</kbd>         | Toggle Audio Channel 2 |
+| <kbd>F7</kbd>         | Toggle Audio Channel 3 |
+| <kbd>F8</kbd>         | Toggle Audio Channel 4 |
 
 These controls can be changed inside the ***settings.ini*** file, which gets created in the same directory as the
 executable after the first launch.
