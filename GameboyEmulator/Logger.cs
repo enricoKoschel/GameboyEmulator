@@ -87,6 +87,7 @@ public static class Logger
 		Environment.Exit(1);
 	}
 
+	[DoesNotReturn]
 	public static void ControlledCrash(Exception e)
 	{
 		LogError($"{e.Message}\n{e.StackTrace}", true);
