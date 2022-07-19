@@ -94,7 +94,7 @@ public class Interrupts
 
 	public EnableInterruptsStatus enableInterruptsStatus = EnableInterruptsStatus.None;
 
-	public void CheckEnable()
+	private void CheckEnable()
 	{
 		//Interrupts only get enabled when requested beforehand by the corresponding instruction
 		//When enabling is requested, there is a delay of one cycle until they are actually enabled
@@ -144,8 +144,10 @@ public class Interrupts
 		}
 	}
 
-	public void Update()
+	public void Check()
 	{
+		CheckEnable();
+
 		if (!InterruptMasterEnable || InterruptFlagRegister == 0 || InterruptEnableRegister == 0) return;
 
 		//Ordered in decreasing Priority so that highest Priority always gets executed

@@ -129,12 +129,11 @@ public class Emulator
 			int cycles = cpu.ExecuteOpcode();
 			cyclesThisFrame += cycles;
 
-			interrupts.CheckEnable();
-
 			ppu.Update(cycles);
 			timer.Update(cycles);
 			apu.Update(cycles);
-			interrupts.Update();
+
+			interrupts.Check();
 		}
 
 		joypad.CaptureInput();
