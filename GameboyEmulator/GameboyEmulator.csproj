@@ -14,9 +14,9 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="ini-parser-netcore" Version="3.0.0"/>
-        <PackageReference Include="Mono.Options" Version="6.12.0.148"/>
-        <PackageReference Include="SFML.Net" Version="2.5.0"/>
+        <PackageReference Include="ini-parser" Version="2.5.2" />
+        <PackageReference Include="Mono.Options" Version="6.12.0.148" />
+        <PackageReference Include="SFML.Net" Version="2.5.0" />
     </ItemGroup>
 
     <ItemGroup>

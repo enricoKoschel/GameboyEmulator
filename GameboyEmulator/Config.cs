@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Globalization;
 using System.IO;
-using IniParser;
+using IniParser.Exceptions;
 using IniParser.Model;
+using IniParser.Model.Configuration;
+using IniParser.Parser;
 
 namespace GameboyEmulator;
 
@@ -16,21 +18,34 @@ public static class Config
 	{
 		if (!File.Exists(CONFIG_FILE_PATH)) CreateDefaultConfigFile();
 
-		CONFIG_DATA = new IniDataParser().Parse(File.ReadAllText(CONFIG_FILE_PATH));
+		try
+		{
+			IniParserConfiguration config = new()
+			{
+				SkipInvalidLines = true,
+				CaseInsensitive  = true
+			};
+
+			CONFIG_DATA = new IniDataParser(config).Parse(File.ReadAllText(CONFIG_FILE_PATH));
+		}
+		catch (ParsingException e)
+		{
+			Logger.ControlledCrash(e);
+		}
 	}
 
 	public static string? GetControlConfig(string key)
 	{
-		PropertyCollection? controls      = CONFIG_DATA["Controls"];
-		string?             configuredKey = controls?[key];
+		KeyDataCollection? controls      = CONFIG_DATA["Controls"];
+		string?            configuredKey = controls?[key];
 
 		return configuredKey;
 	}
 
 	public static int? GetColorConfig(string color)
 	{
-		PropertyCollection? colors = CONFIG_DATA["Colors"];
-		string?             value  = colors?[color];
+		KeyDataCollection? colors = CONFIG_DATA["Colors"];
+		string?            value  = colors?[color];
 
 		if (value is null) return null;
 
@@ -43,14 +58,14 @@ public static class Config
 
 	public static string? GetSaveLocationConfig()
 	{
-		PropertyCollection? saving = CONFIG_DATA["Saving"];
+		KeyDataCollection? saving = CONFIG_DATA["Saving"];
 		return saving?["LOCATION"];
 	}
 
 	public static bool GetSaveEnabledConfig()
 	{
-		PropertyCollection? saving = CONFIG_DATA["Saving"];
-		string?             value  = saving?["ENABLE"];
+		KeyDataCollection? saving = CONFIG_DATA["Saving"];
+		string?            value  = saving?["ENABLE"];
 
 		bool validBool = Boolean.TryParse(value, out bool output);
 
@@ -62,14 +77,14 @@ public static class Config
 
 	public static string? GetLogLocationConfig()
 	{
-		PropertyCollection? logging = CONFIG_DATA["Logging"];
+		KeyDataCollection? logging = CONFIG_DATA["Logging"];
 		return logging?["LOCATION"];
 	}
 
 	public static string GetRomConfig(string rom)
 	{
-		PropertyCollection? roms  = CONFIG_DATA["Roms"];
-		string?             value = roms?[rom];
+		KeyDataCollection? roms  = CONFIG_DATA["Roms"];
+		string?            value = roms?[rom];
 
 		return value ?? "";
 	}
