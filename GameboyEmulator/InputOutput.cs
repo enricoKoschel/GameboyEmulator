@@ -186,10 +186,14 @@ public class InputOutput
 	{
 		int? color = Config.GetColorConfig(colorName);
 
-		//Shifting and oring is done to set the alpha component of the colors to 0xFF, making them fully opaque
+		//Shifting and ORing is done to set the alpha component of the colors to 0xFF, making them fully opaque
 		if (color is not (null or -1)) return new Color((uint)((color << 8) | 0xFF));
 
-		Logger.LogInvalidConfigValue($"[Colors].{colorName}", color, ConvertSfmlColorToInt(defaultColor));
+		string? colorString = color is null ? null : $"#{color:X6}";
+		Logger.LogInvalidConfigValue(
+			$"[Colors].{colorName}", colorString, $"#{ConvertSfmlColorToInt(defaultColor):X6}"
+		);
+
 		return defaultColor;
 	}
 

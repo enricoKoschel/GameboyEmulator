@@ -74,8 +74,8 @@ public static class Logger
 	{
 		LogWarn(
 			value is null
-				? $"{configKey} could not be found in config file. Defaulting to {defaultValue}."
-				: $"Invalid value '{value}' for {configKey} in config file. Defaulting to {defaultValue}.",
+				? $"{configKey} could not be found in config file. Defaulting to '{defaultValue}'."
+				: $"Invalid value '{value}' for {configKey} in config file. Defaulting to '{defaultValue}'.",
 			true
 		);
 	}
