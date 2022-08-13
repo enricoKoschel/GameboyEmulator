@@ -62,7 +62,7 @@ public sealed class Mbc5 : MbcBase
 	public override void HandleBanking(ushort address, byte data)
 	{
 		if (HasRam && Memory.IsInRange(address, 0x0000, 0x1FFF))
-			RamEnabled = (data & 0x0F) == 0xA;
+			RamEnabled = data == 0x0A;
 		else if (Memory.IsInRange(address, 0x2000, 0x2FFF))
 			currentRomBankLower = data;
 		else if (Memory.IsInRange(address, 0x3000, 0x3FFF))
