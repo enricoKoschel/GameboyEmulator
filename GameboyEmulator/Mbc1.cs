@@ -91,7 +91,7 @@ public sealed class Mbc1 : MbcBase
 					currentBankingMode = BankingMode.Advanced;
 					break;
 				default:
-					Logger.ControlledCrash($"Invalid memory banking mode '{currentBankingMode}'");
+					Logger.ControlledCrash($"Invalid memory banking mode '{(BankingMode)data}'");
 					break;
 			}
 		}
